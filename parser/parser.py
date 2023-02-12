@@ -1,51 +1,7 @@
 from fractions import Fraction
 from dataclasses import dataclass
 from tokenizing.token_scanning import *
-
-@dataclass
-class NumLiteral:
-    value: Fraction
-
-@dataclass
-class BoolLiteral:
-    value: bool
-
-@dataclass
-class StrLiteral:
-    value: str
-
-@dataclass
-class Identifier:
-    name: str
-
-@dataclass
-class BinOp:
-    left: 'AST'
-    op: str
-    right: 'AST'
-
-@dataclass
-class UnOp:
-    op: str
-    right: 'AST'
-
-@dataclass
-class Group:
-    expr: 'AST'
-
-@dataclass
-class IfElse:
-    condition: 'AST'
-    iftrue: 'AST'
-    iffalse: 'AST'
-
-@dataclass
-class While:
-    condition: 'AST'
-    body: 'AST'
-
-
-AST = NumLiteral | BoolLiteral | BinOp | IfElse | While | Identifier | Group
+from datatypes.datatypes import *
 
 @dataclass
 class Parser:
@@ -60,7 +16,7 @@ class Parser:
         while(self.__match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)):
             __op = self.__prev().text
             __right = self.__comparison()
-            __expr = BinOp(__expr, __op, __right)
+            __expr = BinOp( __op, __expr, __right)
 
         return __expr
 
@@ -70,7 +26,7 @@ class Parser:
         TokenType.LESS, TokenType.LESS_EQUAL)):
             __op = self.__prev().text
             __right = self.__add()
-            __expr = BinOp(__expr, __op, __right)
+            __expr = BinOp( __op, __expr, __right)
 
         return __expr
 
@@ -79,7 +35,7 @@ class Parser:
         while(self.__match(TokenType.MINUS, TokenType.PLUS)):
             __op = self.__prev().text
             __right = self.__multiply()
-            __expr = BinOp(__expr, __op, __right)
+            __expr = BinOp( __op, __expr, __right)
 
         return __expr
 
@@ -88,7 +44,7 @@ class Parser:
         while(self.__match(TokenType.SLASH, TokenType.STAR)):
             __op = self.__prev().text
             __right = self.__unary()
-            __expr = BinOp(__expr, __op, __right)
+            __expr = BinOp( __op, __expr, __right)
 
         return __expr
 
@@ -115,7 +71,7 @@ class Parser:
         if(self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
             self.__consume(TokenType.RIGHT_PAREN, "')' expected after expression.")
-            return Group(__expr)
+            return __expr
 
     def __match(self, *types):
         for type in types:
@@ -151,7 +107,14 @@ class Parser:
             print(msg)
 
     def parse(self):
-        return self.__expression()
+        parsedExpr = Seq([])
+        while self.__peek().ttype != TokenType.EOF:
+            parsedExpr.things.append(self.__expression())
+            if self.__peek().ttype == TokenType.SEMICOLON:
+                self.__advance()
+            else:
+                raise Exception("Expected ';' after expression")
+        return parsedExpr
 
         
 
