@@ -2,7 +2,7 @@ import sys
 import fileinput
 from errors.error import*
 from tokenizing.token_scanning import *
-
+from parser.parser import *
 
 def main():
     # Here we will start our program
@@ -38,8 +38,9 @@ def open_prompt():
 def run(code: str, error: DinoError):
     scanned_code = Scanner(code, error)
     token_list = scanned_code.generate_tokens()
-    for token in token_list:
-        token.print_token()
+    parser = Parser(token_list)
+    expression = parser.parse()
+    print(expression)
 
 
 main()
