@@ -15,9 +15,9 @@ class BoolLiteral:
 
 @dataclass
 class BinOp:
-    operator: str
-    left: "AST"
-    right: "AST"
+    left: 'AST'
+    op: str
+    right: 'AST'
 
 @dataclass
 class Identifier:
@@ -25,12 +25,13 @@ class Identifier:
 
 @dataclass
 class UnOp:
-    operator: str
-    right: "AST"
+    op: str
+    right: 'AST'
 
 @dataclass
 class Variable:
     name: str
+    value: 'AST'
 
 @dataclass
 class Let:
@@ -40,9 +41,9 @@ class Let:
 
 @dataclass
 class If:
-    var: "AST"
-    e1: "AST"
-    e2: "AST"
+    condition: 'AST'
+    ifPart: 'AST'
+    elsePart: 'AST'
 
 @dataclass
 class StrLiteral:
@@ -54,10 +55,14 @@ class Loop:
     body: 'AST'
 
 @dataclass
+class Expression:
+    expr: 'AST'
+
+@dataclass
 class Seq:
     things: List['AST']
 
 
-AST = NumLiteral | BinOp | UnOp | Variable | Identifier | Let | BoolLiteral | If | Loop | StrLiteral | Seq | None
+AST = NumLiteral | BinOp | UnOp | Variable | Identifier | Let | BoolLiteral | If | Loop | StrLiteral | Expression | Seq | None
 
 Value = Fraction | bool | int | str | None

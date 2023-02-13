@@ -21,21 +21,21 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}):
             return value
         case BoolLiteral(value):
             return value
-        case BinOp("+", left, right):
+        case BinOp(left, "+", right):
             return evaluate(left, environment) + evaluate(right, environment)
-        case BinOp("-", left, right):
+        case BinOp(left, "-", right):
             return evaluate(left, environment) - evaluate(right, environment)
-        case BinOp("*", left, right):
+        case BinOp(left, "*", right):
             return evaluate(left, environment) * evaluate(right, environment)
-        case BinOp("/", left, right):
+        case BinOp(left, "/", right):
             return Fraction(evaluate(left, environment), evaluate(right, environment))
-        case BinOp(">", left, right):
+        case BinOp(left, ">", right):
             return evaluate(left, environment) > evaluate(right, environment)
-        case BinOp("<", left, right):
+        case BinOp(left, "<", right):
             return evaluate(left, environment) < evaluate(right, environment)
-        case BinOp("!=", left, right):
+        case BinOp("left, !=", right):
             return evaluate(left, environment) != evaluate(right, environment)
-        case BinOp("==", left, right):
+        case BinOp("left, ==", right):
             return evaluate(left, environment) == evaluate(right, environment)
         case UnOp("!", right):
             return not evaluate(right, environment)
