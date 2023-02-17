@@ -1,5 +1,6 @@
 from fractions import Fraction
 from typing import Mapping
+from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 
 class InvalidProgram(Exception):
@@ -21,23 +22,27 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}):
             return value
         case BoolLiteral(value):
             return value
-        case BinOp(left, "+", right):
+        case BinOp(left, TokenType.PLUS, right):
             return evaluate(left, environment) + evaluate(right, environment)
-        case BinOp(left, "-", right):
+        case BinOp(left, TokenType.MINUS, right):
             return evaluate(left, environment) - evaluate(right, environment)
-        case BinOp(left, "*", right):
+        case BinOp(left, TokenType.STAR, right):
             return evaluate(left, environment) * evaluate(right, environment)
-        case BinOp(left, "/", right):
+        case BinOp(left, TokenType.SLASH, right):
             return Fraction(evaluate(left, environment), evaluate(right, environment))
-        case BinOp(left, ">", right):
+        case BinOp(left, TokenType.GREATER, right):
             return evaluate(left, environment) > evaluate(right, environment)
-        case BinOp(left, "<", right):
+        case BinOp(left, TokenType.LESS, right):
             return evaluate(left, environment) < evaluate(right, environment)
-        case BinOp("left, !=", right):
+        case BinOp(left, TokenType.LESS_EQUAL, right):
+            return evaluate(left, environment) <= evaluate(right, environment)
+        case BinOp(left, TokenType.GREATER_EQUAL, right):
+            return evaluate(left, environment) >= evaluate(right, environment)
+        case BinOp(left, TokenType.BANG_EQUAL, right):
             return evaluate(left, environment) != evaluate(right, environment)
-        case BinOp("left, ==", right):
+        case BinOp(left , TokenType.EQUAL_EQUAL, right):
             return evaluate(left, environment) == evaluate(right, environment)
-        case UnOp("!", right):
+        case UnOp(TokenType.BANG, right):
             return not evaluate(right, environment)
         case UnOp("++", right):
             return evaluate(right, environment) + 1
