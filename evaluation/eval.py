@@ -1,64 +1,12 @@
-from dataclasses import dataclass
 from fractions import Fraction
-from typing import Union, Mapping
-
-
-@dataclass
-class NumLiteral:
-    value: Fraction
-
-    def __init__(self, *args):
-        self.value = Fraction(*args)
-
-
-@dataclass
-class BoolLiteral:
-    value: bool
-
-
-@dataclass
-class BinOp:
-    operator: str
-    left: "AST"
-    right: "AST"
-
-
-@dataclass
-class UnOp:
-    operator: str
-    right: "AST"
-
-
-@dataclass
-class Variable:
-    name: str
-
-
-@dataclass
-class Let:
-    var: "AST"
-    e1: "AST"
-    e2: "AST"
-
-
-@dataclass
-class If:
-    var: "AST"
-    e1: "AST"
-    e2: "AST"
-
-
-# AST = Union(NumLiteral, BinOp)
-AST = NumLiteral | BinOp | Variable | Let | BoolLiteral | UnOp | If
-
-Value = Fraction | bool | int
-
+from typing import Mapping
+from datatypes.datatypes import *
 
 class InvalidProgram(Exception):
     pass
 
 
-def evaluate(program: AST, environment: Mapping[str, Value] = {}) -> Value:
+def evaluate(program: AST, environment: Mapping[str, Value] = {}):
     match program:
         case Variable(name):
             if name in environment:
@@ -73,21 +21,21 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}) -> Value:
             return value
         case BoolLiteral(value):
             return value
-        case BinOp("+", left, right):
+        case BinOp(left, "+", right):
             return evaluate(left, environment) + evaluate(right, environment)
-        case BinOp("-", left, right):
+        case BinOp(left, "-", right):
             return evaluate(left, environment) - evaluate(right, environment)
-        case BinOp("*", left, right):
+        case BinOp(left, "*", right):
             return evaluate(left, environment) * evaluate(right, environment)
-        case BinOp("/", left, right):
+        case BinOp(left, "/", right):
             return Fraction(evaluate(left, environment), evaluate(right, environment))
-        case BinOp(">", left, right):
+        case BinOp(left, ">", right):
             return evaluate(left, environment) > evaluate(right, environment)
-        case BinOp("<", left, right):
+        case BinOp(left, "<", right):
             return evaluate(left, environment) < evaluate(right, environment)
-        case BinOp("!=", left, right):
+        case BinOp("left, !=", right):
             return evaluate(left, environment) != evaluate(right, environment)
-        case BinOp("==", left, right):
+        case BinOp("left, ==", right):
             return evaluate(left, environment) == evaluate(right, environment)
         case UnOp("!", right):
             return not evaluate(right, environment)
@@ -95,5 +43,15 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}) -> Value:
             return evaluate(right, environment) + 1
         case UnOp("--", right):
             return evaluate(right, environment) - 1
+        case Loop(condition, body):
+            while evaluate(condition, environment):
+                evaluate(body, environment)
+        case Seq(things):
+            output = None
+            for thing in things:
+                output = evaluate(thing, environment)
+            return output
+        case StrLiteral(value):
+            return value
 
     raise InvalidProgram()
