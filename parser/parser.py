@@ -5,8 +5,9 @@ from datatypes.datatypes import *
 
 @dataclass
 class Parser:
-    __tokens : list
-    __current : int = 0
+    def __init__(self, tokenlist) -> None:
+        self.__tokens = tokenlist
+        self.__current = 0
 
 
     def __ifstmt(self):
@@ -35,41 +36,73 @@ class Parser:
         return self.__equality()
 
     def __equality(self):
-        __expr = self.__comparison()
-        while(self.__match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)):
-            __op = self.__prev().text
-            __right = self.__comparison()
-            __expr = BinOp( __expr, __op, __right)
-
-        return __expr
-
+        left_operand = self.__comparison() 
+        while self.__peek_next(): 
+            match self.__tokens[self.__current].ttype:
+                case op if op in [TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL]: 
+                    self.__forward()
+                    right_operand = self.__comparison() 
+                    left_operand = BinOp(left_operand, op, right_operand) 
+                case _:
+                    break 
+        return left_operand 
+    
     def __comparison(self):
-        __expr = self.__add()
-        while(self.__match(TokenType.GREATER, TokenType.GREATER_EQUAL, 
-        TokenType.LESS, TokenType.LESS_EQUAL)):
-            __op = self.__prev().text
-            __right = self.__add()
-            __expr = BinOp( __expr, __op, __right)
-
-        return __expr
+        left_operand = self.__add()  
+        while self.__peek_next(): 
+            match self.__tokens[self.__current].ttype:
+                case op if op in [TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL]: 
+                    self.__forward()
+                    right_operand = self.__add() 
+                    left_operand = BinOp(left_operand, op, right_operand) 
+                case _:
+                    break 
+        return left_operand 
 
     def __add(self):
-        __expr = self.__multiply()
-        while(self.__match(TokenType.MINUS, TokenType.PLUS)):
-            __op = self.__prev().text
-            __right = self.__multiply()
-            __expr = BinOp( __expr, __op, __right)
-
-        return __expr
+        
+        left_operand = self.__multiply() 
+        while self.__peek_next(): 
+            match self.__tokens[self.__current].ttype:
+                case op if op in [TokenType.PLUS, TokenType.MINUS]:
+                    self.__forward()
+                    right_operand = self.__multiply() 
+                    left_operand = BinOp(left_operand, op, right_operand) 
+                case _:
+                    break 
+        return left_operand 
+    
 
     def __multiply(self):
-        __expr = self.__unary()
-        while(self.__match(TokenType.SLASH, TokenType.STAR)):
-            __op = self.__prev().text
-            __right = self.__unary()
-            __expr = BinOp( __expr, __op, __right)
+        left_operand = self.__unary()
+        while self.__peek_next():
+            match self.__tokens[self.__current].ttype:
+                case op if op in [TokenType.STAR, TokenType.SLASH]:
+                    self.__forward()
+                    right_operand = self.__unary() 
+                    left_operand = BinOp(left_operand, op, right_operand)  
+                case _:
+                    break 
+        return left_operand 
 
-        return __expr
+    # def __exponential(self):
+    #     left_operand = self.__unary() 
+    #     operands = [left_operand]
+    #     while self.__peek_next():
+    #         match self.__tokens[self.__current].ttype:
+    #             case op if op in [TokenType.EXPO]:
+    #                 self.__forward()
+    #                 right_operand = self.__unary()
+    #                 operands.append(right_operand) 
+    #             case _:
+    #                 break
+    #     val = operands[-1] 
+    #     operands = operands[::-1]
+    #     for num in operands[1:]:
+    #         val = BinOp(num, op, val) 
+    #     return val 
+
+
 
     def __unary(self):
         while(self.__match(TokenType.BANG, TokenType.MINUS)):
@@ -79,6 +112,7 @@ class Parser:
         return self.__primary()
 
     def __primary(self):
+        # print(self.__current)
         if(self.__match(TokenType.FALSE)):
             return BoolLiteral(False)
         if(self.__match(TokenType.TRUE)):
@@ -129,6 +163,17 @@ class Parser:
         else:
             print(msg)
             exit()
+
+    def __forward(self): 
+        if (self.__current >= len(self.__tokens)-1) : 
+            return
+        self.__current += 1 
+
+    def __peek_next(self):
+        if (self.__current+1 < len(self.__tokens)-1):
+            return self.__tokens[self.__current + 1] 
+        else:
+            return False
 
     def __exprstmt(self):
         __expr = self.__expression()

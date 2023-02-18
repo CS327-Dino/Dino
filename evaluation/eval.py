@@ -1,5 +1,6 @@
 from fractions import Fraction
 from typing import Mapping
+from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 
 class InvalidProgram(Exception):
@@ -18,21 +19,15 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}):
         case If(e0, e1, e2):
             return evaluate(e1) if evaluate(e0) else evaluate(e2)
         case Loop(condition, body):
-            iter = 0
-            n = 10
-            while (evaluate(condition) and iter<n):
+            while (evaluate(condition)):
                 evaluate(body, environment)
-                iter+=1
-            if(iter == n):
-                print("Ran out of maximum iterations")
-            return ""
         case NumLiteral(value):
             return value
         case BoolLiteral(value):
             return value
         case StrLiteral(value):
             return value
-        case BinOp(left, "+", right):
+        case BinOp(left, TokenType.PLUS, right):
             if(type(left.value) == float or type(left.value) == int):
                 if(type(right.value) == float or type(right.value) == int):
                     return evaluate(left, environment) + evaluate(right, environment)
@@ -48,9 +43,9 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}):
         case BinOp(left, op, right):
             try:
                 match op:
-                    case "-": return evaluate(left, environment) - evaluate(right, environment)
-                    case "*": return evaluate(left, environment) * evaluate(right, environment)
-                    case "/": return evaluate(left, environment) / evaluate(right, environment)
+                    case TokenType.MINUS: return evaluate(left, environment) - evaluate(right, environment)
+                    case TokenType.STAR: return evaluate(left, environment) * evaluate(right, environment)
+                    case TokenType.SLASH: return evaluate(left, environment) / evaluate(right, environment)
             except TypeError:
                 print("TypeError: Operation not valid for non numeric values")
                 return ""
@@ -59,18 +54,18 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}):
                 return ""
             try:
                 match op:
-                    case ">": return evaluate(left, environment) > evaluate(right, environment)
-                    case "<": return evaluate(left, environment) < evaluate(right, environment)
-                    case "!=": return evaluate(left, environment) != evaluate(right, environment)
-                    case "==": return evaluate(left, environment) == evaluate(right, environment)
+                    case TokenType.GREATER: return evaluate(left, environment) > evaluate(right, environment)
+                    case TokenType.LESS: return evaluate(left, environment) < evaluate(right, environment)
+                    case TokenType.BANG_EQUAL: return evaluate(left, environment) != evaluate(right, environment)
+                    case TokenType.EQUAL_EQUAL: return evaluate(left, environment) == evaluate(right, environment)
             except TypeError:
                 print("TypeError: Comparison of numeric and non mumeric types")
                 return ""
         case UnOp(op, right):
             try:
                 match op:
-                    case "!": return not evaluate(right, environment)
-                    case "-": return -evaluate(right, environment)
+                    case TokenType.BANG: return not evaluate(right, environment)
+                    case TokenType.MINUS: return -evaluate(right, environment)
                     case "++": return evaluate(right, environment) + 1
                     case "--": return evaluate(right, environment) - 1
             except TypeError:
