@@ -4,10 +4,10 @@ from typing import List
 
 @dataclass
 class NumLiteral:
-    value: Fraction
+    value: float
 
-    def __init__(self, *args):
-        self.value = Fraction(*args)
+    # def __init__(self, *args):
+    #     self.value = Fraction(*args)
 
 @dataclass
 class BoolLiteral:
@@ -56,6 +56,10 @@ class Loop:
 
 @dataclass
 class Expression:
+    expr: 'AST'
+
+@dataclass
+class Echo:
     expr: 'AST'
 
 @dataclass

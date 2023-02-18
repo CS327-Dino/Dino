@@ -202,13 +202,13 @@ class Parser:
         if(self.__match(TokenType.IDENTIFIER)):
             __var = self.__prev()
             return  self.__assign(__var)
+        if(self.__match(TokenType.ECHO)):
+            self.__consume(TokenType.LEFT_PAREN, "'(' expected")
+            __expr = self.__expression()
+            self.__consume(TokenType.RIGHT_PAREN, "')' expected")
+            self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
+            return Echo(__expr)
         return self.__statement()
- 
-    # def parse(self):
-    #     __statements = []
-    #     while(not self.__atEnd()):
-    #         __statements.append(self.__declare())
-    #     return __statements
 
     def parse(self):
         __statements = Seq([])
