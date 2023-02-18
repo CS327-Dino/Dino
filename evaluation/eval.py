@@ -3,8 +3,11 @@ from typing import Mapping
 from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 
+
 class InvalidProgram(Exception):
     pass
+
+# class evaluator():
 
 
 def evaluate(program: AST, environment: Mapping[str, Value] = {}):
