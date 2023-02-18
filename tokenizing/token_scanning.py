@@ -40,6 +40,7 @@ class TokenType(Enum):
     OR = 33
     RETURN = 34
     EOF = 35
+    ECHO = 36
 
 
 class Token():
@@ -82,6 +83,7 @@ class Scanner():
         "and": TokenType.AND,
         "or": TokenType.OR,
         "return": TokenType.RETURN,
+        "echo": TokenType.ECHO
 
     }
 
