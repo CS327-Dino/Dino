@@ -94,17 +94,17 @@ class Scanner():
         return self.current >= len(self.code)
 
     def __peek(self):
-        if(self.__end_reached()):
+        if (self.__end_reached()):
             return '\0'
         return self.code[self.current]
 
     def __peek_next(self):
-        if(self.current + 1 >= len(self.code)):
+        if (self.current + 1 >= len(self.code)):
             return '\0'
         return self.code[self.current+1]
 
     def generate_tokens(self):
-        while(self.__end_reached() == False):
+        while (self.__end_reached() == False):
             self.start = self.current
             self.__scan_tokens()
 
@@ -178,7 +178,7 @@ class Scanner():
             self.error.triggered = True
 
     def __string(self):
-        while(self.__peek() != '"' and self.__end_reached() == False):
+        while (self.__peek() != '"' and self.__end_reached() == False):
             if self.__peek() == '\n':
                 self.line += 1
             self.current += 1
@@ -194,12 +194,12 @@ class Scanner():
             self.token_list.append(string_token)
 
     def __number(self):
-        while(self.__digit_check(self.__peek()) == True):
+        while (self.__digit_check(self.__peek()) == True):
             self.current += 1
 
         if self.__peek() == '.' and self.__digit_check(self.__peek_next()):
             self.current += 1
-            while(self.__digit_check(self.__peek()) == True):
+            while (self.__digit_check(self.__peek()) == True):
                 self.current += 1
 
         n = self.code[self.start:self.current]
@@ -207,7 +207,7 @@ class Scanner():
         self.token_list.append(num_token)
 
     def __identifier(self):
-        while(self.__alpha_numeric_check(self.__peek()) == True):
+        while (self.__alpha_numeric_check(self.__peek()) == True):
             self.current += 1
 
         s = self.code[self.start: self.current]
