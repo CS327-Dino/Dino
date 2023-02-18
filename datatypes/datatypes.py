@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import List
+from tokenizing.token_scanning import TokenType
+from errors.error import *
 
 @dataclass
 class NumLiteral:
@@ -16,7 +18,7 @@ class BoolLiteral:
 @dataclass
 class BinOp:
     left: 'AST'
-    op: str
+    op: TokenType
     right: 'AST'
 
 @dataclass
@@ -28,10 +30,16 @@ class UnOp:
     op: str
     right: 'AST'
 
+# @dataclass
+# class Variable:
+#     name: str
+#     value: 'AST'
+
 @dataclass
-class Variable:
-    name: str
-    value: 'AST'
+class Assignment:
+    var: "Identifier"
+    value: "AST"
+    declaration: bool = False
 
 @dataclass
 class Let:
@@ -62,7 +70,37 @@ class Expression:
 class Seq:
     things: List['AST']
 
+class Scope:
+    def __init__(self, parent=None):
+        self.parent = parent
+        self.variables = {}
 
-AST = NumLiteral | BinOp | UnOp | Variable | Identifier | Let | BoolLiteral | If | Loop | StrLiteral | Expression | Seq | None
+    def get(self, name):
+        if name in self.variables:
+            return self.variables[name]
+        if self.parent:
+            return self.parent.get(name)
+        raise Exception(f"Variable {name} not found")
+
+    def set(self, name, value, declaration=False):
+        if declaration:
+            if name in self.variables:
+                raise Exception(f"Variable {name} already exists")
+            self.variables[name] = value
+            return
+        else:
+            if name in self.variables:
+                self.variables[name] = value
+                return
+            if self.parent:
+                self.parent.set(name, value)
+                return
+            raise Exception(f"Variable {name} not found")
+
+    def __repr__(self):
+        return f"Scope({self.variables})"
+
+
+AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | None
 
 Value = Fraction | bool | int | str | None

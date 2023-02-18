@@ -5,9 +5,10 @@ from datatypes.datatypes import *
 
 @dataclass
 class Parser:
-    def __init__(self, tokenlist) -> None:
+    def __init__(self, tokenlist, error) -> None:
         self.__tokens = tokenlist
         self.__current = 0
+        self.__parseError = error
 
 
     def __ifstmt(self):
@@ -32,8 +33,18 @@ class Parser:
             __body.things.append(self.__declare())
         return Loop(__condition, __body)
 
-    def __expression(self):
-        return self.__equality()
+    def __expression(self) -> AST:
+        return self.__simpleAssignment()
+
+    def __simpleAssignment(self):
+        __left = self.__equality()
+        if self.__match(TokenType.EQUAL):
+            if __left == None or not isinstance(__left, Identifier):
+                self.__parseError.error(self.__tokens[self.__current - 1].line, "Invalid assignment target")
+            else:
+                __right = self.__expression()
+                return Assignment(__left, __right)
+        return __left
 
     def __equality(self):
         left_operand = self.__comparison() 
@@ -161,8 +172,12 @@ class Parser:
         if self.__check(type):
             return self.__advance()
         else:
-            print(msg)
-            exit()
+            self.__parseError.message = "Syntax Error:" + msg
+            self.__parseError.line = self.__prev().line
+            report_error(self.__parseError)
+            self.__advance()
+            # print(msg)
+            # exit()
 
     def __forward(self): 
         if (self.__current >= len(self.__tokens)-1) : 
@@ -191,17 +206,17 @@ class Parser:
         # self.__consume(TokenType.ASSIGN, "Syntax Error")
         if(self.__match(TokenType.EQUAL)):
             __expr = self.__expression()
-
-        self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
-        return Variable(var.text, __expr)
+            self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
+            return Assignment(Identifier(var.text), __expr, True)
+        else:
+            self.__parseError.message = "Syntax Error: Expected '=' after variable declaration"
+            self.__parseError.line = self.__prev().line
+            report_error(self.__parseError)
 
     def __declare(self):
         # print(self.__peek().text)
         if(self.__match(TokenType.ASSIGN)):
             return self.__assign(self.__consume(TokenType.IDENTIFIER, "Identifier expected"))
-        if(self.__match(TokenType.IDENTIFIER)):
-            __var = self.__prev()
-            return  self.__assign(__var)
         return self.__statement()
  
     # def parse(self):

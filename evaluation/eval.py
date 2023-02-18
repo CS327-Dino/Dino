@@ -7,15 +7,20 @@ class InvalidProgram(Exception):
     pass
 
 
-def evaluate(program: AST, environment: Mapping[str, Value] = {}):
+def evaluate(program: AST, environment: Scope = Scope()):
     match program:
-        case Variable(name):
-            if name in environment:
-                return environment[name]
-            raise InvalidProgram()
-        case Let(Variable(name), e1, e2):
+        case Assignment(Identifier(name), value, declaration):
+            environment.set(name, evaluate(value, environment), declaration)
+            return None
+        case Identifier(name):
+            return environment.get(name)
+        case Let(Identifier(name), e1, e2):
             v1 = evaluate(e1, environment)
-            return evaluate(e2, environment | {name: v1})
+            newEnv = Scope(environment)
+            newEnv.set(name, v1)
+            v2 = evaluate(e2, newEnv)
+            del newEnv
+            return v2
         case If(e0, e1, e2):
             return evaluate(e1) if evaluate(e0) else evaluate(e2)
         case NumLiteral(value):
@@ -49,8 +54,12 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}):
         case UnOp("--", right):
             return evaluate(right, environment) - 1
         case Loop(condition, body):
-            while evaluate(condition, environment):
-                evaluate(body, environment)
+            output = None
+            newEnv = Scope(environment)
+            while evaluate(condition, newEnv):
+                output = evaluate(body, newEnv)
+            del newEnv
+            return output
         case Seq(things):
             output = None
             for thing in things:
@@ -58,5 +67,6 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}):
             return output
         case StrLiteral(value):
             return value
+    print(program)
 
     raise InvalidProgram()

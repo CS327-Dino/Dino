@@ -40,9 +40,11 @@ def run(code: str, error: DinoError):
     scanned_code = Scanner(code, error)
     token_list = scanned_code.generate_tokens()
     # print(token_list)
-    parser = Parser(token_list)
+    parser = Parser(token_list, error)
     expression = parser.parse()
     print(expression)
+    if error.triggered:
+        return
     # for expr in expression:
     print(evaluate(expression))
 
