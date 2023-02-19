@@ -6,29 +6,34 @@ from errors.error import *
 
 @dataclass
 class NumLiteral:
-    value: Fraction
+    value: float
+    line: int = 0
 
-    def __init__(self, *args):
-        self.value = Fraction(*args)
+    # def __init__(self, *args):
+    #     self.value = Fraction(*args)
 
 @dataclass
 class BoolLiteral:
     value: bool
+    line: int = 0
 
 @dataclass
 class BinOp:
     left: 'AST'
     op: TokenType
     right: 'AST'
+    line: int = 0
 
 @dataclass
 class Identifier:
     name: str
+    line: int = 0
 
 @dataclass
 class UnOp:
-    op: str
+    op: str | TokenType
     right: 'AST'
+    line: int = 0
 
 # @dataclass
 # class Variable:
@@ -39,6 +44,7 @@ class UnOp:
 class Assignment:
     var: "Identifier"
     value: "AST"
+    line: int = 0
     declaration: bool = False
 
 @dataclass
@@ -46,6 +52,7 @@ class Let:
     var: "AST"
     e1: "AST"
     e2: "AST"
+    line: int = 0
 
 @dataclass
 class If:
@@ -56,6 +63,7 @@ class If:
 @dataclass
 class StrLiteral:
     value: str
+    line: int = 0
 
 @dataclass
 class Loop:
@@ -67,40 +75,16 @@ class Expression:
     expr: 'AST'
 
 @dataclass
+class Echo:
+    expr: 'AST'
+    line: int = 0
+
+@dataclass
 class Seq:
     things: List['AST']
 
-class Scope:
-    def __init__(self, parent=None):
-        self.parent = parent
-        self.variables = {}
-
-    def get(self, name):
-        if name in self.variables:
-            return self.variables[name]
-        if self.parent:
-            return self.parent.get(name)
-        raise Exception(f"Variable {name} not found")
-
-    def set(self, name, value, declaration=False):
-        if declaration:
-            if name in self.variables:
-                raise Exception(f"Variable {name} already exists")
-            self.variables[name] = value
-            return
-        else:
-            if name in self.variables:
-                self.variables[name] = value
-                return
-            if self.parent:
-                self.parent.set(name, value)
-                return
-            raise Exception(f"Variable {name} not found")
-
-    def __repr__(self):
-        return f"Scope({self.variables})"
 
 
-AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | None
+AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | None
 
 Value = Fraction | bool | int | str | None

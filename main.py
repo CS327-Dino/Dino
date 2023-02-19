@@ -46,7 +46,7 @@ def run(code: str, error: DinoError):
     if error.triggered:
         return
     # for expr in expression:
-    print(evaluate(expression))
+    evaluate(expression)
 
 
 main()

@@ -43,7 +43,7 @@ class Parser:
                 self.__parseError.error(self.__tokens[self.__current - 1].line, "Invalid assignment target")
             else:
                 __right = self.__expression()
-                return Assignment(__left, __right)
+                return Assignment(__left, __right, self.__tokens[self.__current - 1].line)
         return __left
 
     def __equality(self):
@@ -53,7 +53,7 @@ class Parser:
                 case op if op in [TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL]: 
                     self.__forward()
                     right_operand = self.__comparison() 
-                    left_operand = BinOp(left_operand, op, right_operand) 
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line) 
                 case _:
                     break 
         return left_operand 
@@ -65,7 +65,7 @@ class Parser:
                 case op if op in [TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL]: 
                     self.__forward()
                     right_operand = self.__add() 
-                    left_operand = BinOp(left_operand, op, right_operand) 
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line) 
                 case _:
                     break 
         return left_operand 
@@ -78,7 +78,7 @@ class Parser:
                 case op if op in [TokenType.PLUS, TokenType.MINUS]:
                     self.__forward()
                     right_operand = self.__multiply() 
-                    left_operand = BinOp(left_operand, op, right_operand) 
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line) 
                 case _:
                     break 
         return left_operand 
@@ -91,7 +91,7 @@ class Parser:
                 case op if op in [TokenType.STAR, TokenType.SLASH]:
                     self.__forward()
                     right_operand = self.__unary() 
-                    left_operand = BinOp(left_operand, op, right_operand)  
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)  
                 case _:
                     break 
         return left_operand 
@@ -119,23 +119,23 @@ class Parser:
         while(self.__match(TokenType.BANG, TokenType.MINUS)):
             __op = self.__prev().text
             __right = self.__unary()
-            return UnOp(__op, __right)
+            return UnOp(__op, __right, self.__tokens[self.__current - 1].line)
         return self.__primary()
 
     def __primary(self):
         # print(self.__current)
         if(self.__match(TokenType.FALSE)):
-            return BoolLiteral(False)
+            return BoolLiteral(False, self.__tokens[self.__current - 1].line)
         if(self.__match(TokenType.TRUE)):
-            return BoolLiteral(True)
+            return BoolLiteral(True, self.__tokens[self.__current - 1].line)
         if(self.__match(TokenType.NULL)):
             return None
         if(self.__match(TokenType.NUMBER)):
-            return NumLiteral(self.__prev().literal)
+            return NumLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if(self.__match(TokenType.STRING)):
-            return StrLiteral(self.__prev().literal)
+            return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if(self.__match(TokenType.IDENTIFIER)):
-            return Identifier(self.__prev().text)
+            return Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
         if(self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
             self.__consume(TokenType.RIGHT_PAREN, "')' expected after expression.")
@@ -207,7 +207,7 @@ class Parser:
         if(self.__match(TokenType.EQUAL)):
             __expr = self.__expression()
             self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
-            return Assignment(Identifier(var.text), __expr, True)
+            return Assignment(Identifier(var.text, self.__tokens[self.__current - 1].line), __expr, self.__tokens[self.__current - 1].line, True)
         else:
             self.__parseError.message = "Syntax Error: Expected '=' after variable declaration"
             self.__parseError.line = self.__prev().line
@@ -217,18 +217,23 @@ class Parser:
         # print(self.__peek().text)
         if(self.__match(TokenType.ASSIGN)):
             return self.__assign(self.__consume(TokenType.IDENTIFIER, "Identifier expected"))
+        # if(self.__match(TokenType.IDENTIFIER)):
+        #     __var = self.__prev()
+        #     return  self.__assign(__var)
+        if(self.__match(TokenType.ECHO)):
+            self.__consume(TokenType.LEFT_PAREN, "'(' expected")
+            __expr = self.__expression()
+            self.__consume(TokenType.RIGHT_PAREN, "')' expected")
+            self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
+            return Echo(__expr, self.__tokens[self.__current - 1].line)
         return self.__statement()
- 
-    # def parse(self):
-    #     __statements = []
-    #     while(not self.__atEnd()):
-    #         __statements.append(self.__declare())
-    #     return __statements
 
     def parse(self):
         __statements = Seq([])
         while(not self.__atEnd()):
-            __statements.things.append(self.__declare())
+            expr = self.__declare()
+            if(expr):
+                __statements.things.append(expr)
         return __statements
 
 

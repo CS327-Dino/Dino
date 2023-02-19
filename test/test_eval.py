@@ -8,33 +8,33 @@ class TestEval(unittest.TestCase):
         e2 = NumLiteral(7)
         e3 = NumLiteral(9)
         e4 = NumLiteral(5)
-        e5 = BinOp("+", e2, e3)
-        e6 = BinOp("-", e4, e1)
-        e7 = BinOp("*", e4, e3)
-        e8 = BinOp("/", e3, e1)
-        e9 = BinOp("/", e5, e3)
+        e5 = BinOp(e2, TokenType.PLUS, e3)
+        e6 = BinOp(e4, TokenType.MINUS, e1)
+        e7 = BinOp(e4, TokenType.STAR, e3)
+        e8 = BinOp(e3, TokenType.SLASH, e1)
+        e9 = BinOp(e5, TokenType.SLASH, e3)
 
-        e10 = BinOp("<", e4, e3)
-        e11 = BinOp("!=", e2, e1)
-        e12 = BinOp("==", e2, NumLiteral(7))
+        e10 = BinOp(e4, TokenType.LESS, e3)
+        e11 = BinOp(e2, TokenType.BANG_EQUAL, e1)
+        e12 = BinOp(e2, TokenType.EQUAL_EQUAL, NumLiteral(7))
 
-        self.assertEqual(evaluate(e5), Fraction(16))
-        self.assertEqual(evaluate(e6), Fraction(3))
-        self.assertEqual(evaluate(e7), Fraction(45))
-        self.assertEqual(evaluate(e8), Fraction(9 / 2))
-        self.assertEqual(evaluate(e9), Fraction(16, 9))
+        self.assertEqual(evaluate(e5), 16)
+        self.assertEqual(evaluate(e6), 3)
+        self.assertEqual(evaluate(e7), 45)
+        self.assertEqual(evaluate(e8), 9/2)
+        self.assertEqual(evaluate(e9), 16/9)
 
         self.assertTrue(evaluate(e10))
         self.assertTrue(evaluate(e11))
         self.assertTrue(evaluate(e12))
-        self.assertFalse(evaluate(UnOp("!", BoolLiteral(True))))
+        self.assertFalse(evaluate(UnOp(TokenType.BANG, BoolLiteral(True))))
 		
         self.assertEqual(evaluate(UnOp("++", e4)), 6)
 
     def test_let_eval(self):
-        a = Variable("a")
+        a = Identifier("a")
         e1 = NumLiteral(5)
-        e2 = BinOp("+", a, a)
+        e2 = BinOp(a, TokenType.PLUS, a)
         e = Let(a, e1, e2)
         self.assertEqual(evaluate(e), 10)
 
@@ -42,13 +42,13 @@ class TestEval(unittest.TestCase):
         self.assertEqual(evaluate(e), 20)
 
     def test_If_eval(self):
-        e1 = BinOp(">", NumLiteral(10), NumLiteral(7))
+        e1 = BinOp(NumLiteral(10), TokenType.GREATER,NumLiteral(7))
         e2 = NumLiteral(20)
         e3 = NumLiteral(30)
 
         e = If(e1, e2, e3)
         self.assertEqual(evaluate(e), 20)
 
-        e1 = BinOp(">", NumLiteral(5), NumLiteral(7))
+        e1 = BinOp(NumLiteral(5), TokenType.GREATER, NumLiteral(7))
         e = If(e1, e2, e3)
         self.assertEqual(evaluate(e), 30)
