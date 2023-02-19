@@ -60,9 +60,14 @@ class Expression:
 
 @dataclass
 class Seq:
-    things: List['AST']
+    things: List['AST'] 
+
+@dataclass 
+class ListLiteral:
+    elements: list()
+    length: int
 
 
-AST = NumLiteral | BinOp | UnOp | Variable | Identifier | Let | BoolLiteral | If | Loop | StrLiteral | Expression | Seq | None
+AST = NumLiteral | BinOp | UnOp | Variable | Identifier | Let | BoolLiteral | If | Loop | StrLiteral | Expression | Seq | ListLiteral |None
 
 Value = Fraction | bool | int | str | None

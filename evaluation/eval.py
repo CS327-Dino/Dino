@@ -21,7 +21,9 @@ def evaluate(program: AST, environment: Mapping[str, Value] = {}):
         case NumLiteral(value):
             return value
         case BoolLiteral(value):
-            return value
+            return value  
+        case ListLiteral(elements, length):
+            return elements
         case BinOp(left, TokenType.PLUS, right):
             return evaluate(left, environment) + evaluate(right, environment)
         case BinOp(left, TokenType.MINUS, right):

@@ -32,7 +32,36 @@ class Parser:
             __body.things.append(self.__declare())
         return Loop(__condition, __body)
 
-    def __expression(self):
+    def __list(self):
+        __elements = []
+        __length = 0
+        while self.__peek_next(): 
+            __elements.append(self.__expression()) 
+            __length += 1
+            if (__elements[__length-1] is None):
+                print(__elements[__length-1])
+                if (__length == 1):
+                    self.__consume(TokenType.RIGHT_BRACKET, "Invalid Syntax") 
+                else:
+                    print(self.__tokens[self.__current].ttype)
+                    match self.__tokens[self.__current].ttype:
+                        case TokenType.RIGHT_BRACKET:
+                            self.__consume(TokenType.RIGHT_BRACKET, "None cannot be an element of the list") 
+                        case _:
+                            self.__consume(TokenType.RIGHT_BRACKET, "Invalid Syntax")
+            match self.__tokens[self.__current].ttype:
+                case TokenType.COMMA:
+                    self.__consume(TokenType.COMMA, "',' expected as delimiter")
+                case TokenType.RIGHT_BRACKET:
+                    self.__consume(TokenType.RIGHT_BRACKET, "']' expected at the end of a list") 
+                case _:
+                    break
+        self.__consume(TokenType.SEMICOLON, "';' expected after expression")
+        return ListLiteral(__elements, __length)
+        
+
+
+    def __expression(self):  
         return self.__equality()
 
     def __equality(self):
@@ -127,7 +156,10 @@ class Parser:
             return Identifier(self.__prev().text)
         if(self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
-            self.__consume(TokenType.RIGHT_PAREN, "')' expected after expression.")
+            self.__consume(TokenType.RIGHT_PAREN, "')' expected after expression.") 
+        # if (self.__match(TokenType.LEFT_BRACKET)):
+        #     __expr = self.__expression() 
+        #     self.__consume(TokenType.RIGHT_BRACKET, "']' expected after expression")
             return __expr
 
     def __match(self, *types):
@@ -184,7 +216,9 @@ class Parser:
         if(self.__match(TokenType.IF)):
             return self.__ifstmt()
         if(self.__match(TokenType.LOOP)):
-            return self.__loop()
+            return self.__loop()  
+        if (self.__match(TokenType.LEFT_BRACKET)):
+            return self.__list()
         return self.__exprstmt()
 
     def __assign(self, var):

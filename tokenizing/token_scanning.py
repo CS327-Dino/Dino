@@ -40,6 +40,8 @@ class TokenType(Enum):
     OR = 33
     RETURN = 34
     EOF = 35
+    LEFT_BRACKET = 40
+    RIGHT_BRACKET = 41
 
 
 class Token():
@@ -137,6 +139,10 @@ class Scanner():
             self.__add_tokens(TokenType.STAR)
         elif c == '/':
             self.__add_tokens(TokenType.SLASH)
+        elif c == '[':
+            self.__add_tokens(TokenType.LEFT_BRACKET) 
+        elif c == ']':
+            self.__add_tokens(TokenType.RIGHT_BRACKET)
         elif c == '!':
             if self.__peek() == '=':
                 self.current += 1

@@ -42,7 +42,7 @@ def run(code: str, error: DinoError):
     # print(token_list)
     parser = Parser(token_list)
     expression = parser.parse()
-    print(expression)
+    # print(expression)
     # for expr in expression:
     print(evaluate(expression))
 
