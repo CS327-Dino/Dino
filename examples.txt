@@ -33,3 +33,16 @@ echo(a);
 echo(b);
 end;
 echo(b);
+
+-----
+
+Functions 
+
+func sum(a , b , c)
+    assign s = a + b + c;
+    echo(s);
+end
+
+sum(2 , 5 , 6);
+
+-----
