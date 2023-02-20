@@ -17,7 +17,6 @@ def main():
 
 
 def scan_file(file_name):
-    print(file_name)
     f = open(file_name, "rb")
     data = f.read()
     error = DinoError()
@@ -40,10 +39,18 @@ def open_prompt():
 def run(code: str, error: DinoError):
     scanned_code = Scanner(code, error)
     token_list = scanned_code.generate_tokens()
+
     parser = Parser(token_list, error)
     expression = parser.parse()
+
+    print("------------------Parsed Expr------------------")
     print(expression)
-    print(evaluate(expression))
+    print("-----------------------------------------------")
+
+    if error.triggered:
+        return
+    # print(evaluate(expression))
+    output = evaluate(expression)
 
 
 main()

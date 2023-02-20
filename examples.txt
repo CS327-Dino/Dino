@@ -1,0 +1,48 @@
+assign b = 3;
+if(b==1)
+echo("wassup");
+end
+else
+echo("sup");
+end
+
+-----
+fibonacci
+
+assign a = 0;
+assign b = 1;
+assign n = 20;
+assign i = 0;
+
+loop(i<n)
+echo(a);
+assign temp = a + b;
+a=b;
+b=temp;
+i=i+1;
+end
+
+-----
+Loop and scope
+assign b = 3;
+loop(b<5)
+assign a = 1;
+a = a+1;
+b = b+1;
+echo(a);
+echo(b);
+end;
+echo(b);
+
+-----
+
+Functions 
+
+func sum(a , b , c)
+    assign s = a + b + c;
+    echo(s);
+end
+
+sum(2 , 5 , 6);
+
+-----
