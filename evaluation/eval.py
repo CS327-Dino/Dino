@@ -44,10 +44,16 @@ class Scope:
 def evaluate(program: AST, environment: Scope = Scope()):
     match program:
         case Assignment(Identifier(name), value, line, declaration):
+            # environment.set(name, value, line, declaration)
             environment.set(name, evaluate(value, environment), line, declaration)
             return None
         case Identifier(name, line):
             return environment.get(name, line)
+        case ListLiteral(elements, length, line):
+            output = []
+            for i in elements:
+                output.append(evaluate(i,environment))
+            return output
         case Let(Identifier(name), e1, e2, line):
             v1 = evaluate(e1, environment)
             newEnv = Scope(environment)
@@ -90,8 +96,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 match op:
                     case TokenType.MINUS: return evaluate(left, environment) - evaluate(right, environment)
                     case TokenType.STAR: return evaluate(left, environment) * evaluate(right, environment)
-                    case TokenType.SLASH:
-                        return evaluate(left, environment) / evaluate(right, environment)
+                    case TokenType.SLASH: return evaluate(left, environment) / evaluate(right, environment)
+                    case TokenType.EXPONENT: return evaluate(left, environment) ** evaluate(right, environment)
             except TypeError:
                 report_runtime_error(line, "TypeError: Operation not valid for non numeric values")
                 return ""

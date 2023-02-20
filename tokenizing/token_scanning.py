@@ -41,6 +41,9 @@ class TokenType(Enum):
     RETURN = 34
     EOF = 35
     ECHO = 36
+    LEFT_BRACKET = 37
+    RIGHT_BRACKET = 38
+    EXPONENT = 39
 
 
 class Token():
@@ -117,6 +120,7 @@ class Scanner():
     def __scan_tokens(self):
         c = self.code[self.current]
         self.current += 1
+        
         if c == '(':
             self.__add_tokens(TokenType.LEFT_PAREN)
         elif c == ')':
@@ -139,6 +143,12 @@ class Scanner():
             self.__add_tokens(TokenType.STAR)
         elif c == '/':
             self.__add_tokens(TokenType.SLASH)
+        elif c == '^':
+            self.__add_tokens(TokenType.EXPONENT)
+        elif c == '[':
+            self.__add_tokens(TokenType.LEFT_BRACKET) 
+        elif c == ']':
+            self.__add_tokens(TokenType.RIGHT_BRACKET)
         elif c == '!':
             if self.__peek() == '=':
                 self.current += 1
@@ -175,6 +185,7 @@ class Scanner():
             self.__identifier()
         else:
             # Produce Error
+            print(c)
             self.error.line = self.line
             self.error.message = "Unexpected Symbol"
             self.error.triggered = True

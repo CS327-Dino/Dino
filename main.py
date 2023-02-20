@@ -39,14 +39,17 @@ def open_prompt():
 def run(code: str, error: DinoError):
     scanned_code = Scanner(code, error)
     token_list = scanned_code.generate_tokens()
-    # print(token_list)
+
     parser = Parser(token_list, error)
     expression = parser.parse()
+
+    print("------------------Parsed Expr------------------")
     print(expression)
+    print("-----------------------------------------------")
+
     if error.triggered:
         return
-    # for expr in expression:
-    evaluate(expression)
+    print(evaluate(expression))
 
 
 main()

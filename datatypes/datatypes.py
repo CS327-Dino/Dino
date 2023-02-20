@@ -28,6 +28,7 @@ class BinOp:
 class Identifier:
     name: str
     line: int = 0
+    
 
 @dataclass
 class UnOp:
@@ -81,10 +82,17 @@ class Echo:
 
 @dataclass
 class Seq:
-    things: List['AST']
+    things: List['AST'] 
+
+@dataclass 
+class ListLiteral:
+    elements: list()
+    length: int
+    line: int
+    head = 'AST' 
+    tail = 'AST'
 
 
-
-AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | None
+AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | None
 
 Value = Fraction | bool | int | str | None

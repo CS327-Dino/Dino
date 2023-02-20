@@ -2,6 +2,7 @@ from fractions import Fraction
 from dataclasses import dataclass
 from tokenizing.token_scanning import *
 from datatypes.datatypes import *
+from evaluation.eval import *
 
 @dataclass
 class Parser:
@@ -33,7 +34,38 @@ class Parser:
             __body.things.append(self.__declare())
         return Loop(__condition, __body)
 
-    def __expression(self) -> AST:
+    def __list(self):
+        __elements = []
+        __length = 0
+        # print(self.__tokens[self.__current].text)
+        if self.__tokens[self.__current].ttype == TokenType.RIGHT_BRACKET:
+            self.__consume(TokenType.RIGHT_BRACKET, "']' expected at the end of a list")
+            return ListLiteral(__elements, __length, self.__prev().line)
+        while self.__peek_next():
+
+            __elements.append(self.__expression()) 
+            __length += 1
+            match self.__tokens[self.__current].ttype:
+                case TokenType.COMMA:
+                    self.__consume(TokenType.COMMA, "',' expected as delimiter")
+                case TokenType.RIGHT_BRACKET:
+                    self.__consume(TokenType.RIGHT_BRACKET, "']' expected at the end of a list")
+                    break
+                case _:
+                    break
+        return ListLiteral(__elements, __length, self.__prev().line)
+        
+    # def __methods_list(self, identifier):
+    #     self.__consume(TokenType.DOT, "Expected '.' to call methods of the list") 
+    #     __method = self.__expression()
+    #     __iden = evaluate(identifier)
+    #     print(type(__iden))
+    #     if (__method.name== "length"):
+    #         return NumLiteral(len(__iden), self.__tokens[self.__current].line)
+    #     # if (__method.name == "head"):
+    #     #     return NumLiteral(__iden[0], self.__tokens[self.__current].line)
+
+    def __expression(self) -> AST:  
         return self.__simpleAssignment()
 
     def __simpleAssignment(self):
@@ -85,33 +117,32 @@ class Parser:
     
 
     def __multiply(self):
-        left_operand = self.__unary()
+        left_operand = self.__exponential()
         while self.__peek_next():
             match self.__tokens[self.__current].ttype:
                 case op if op in [TokenType.STAR, TokenType.SLASH]:
                     self.__forward()
-                    right_operand = self.__unary() 
+                    right_operand = self.__exponential() 
                     left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)  
                 case _:
                     break 
         return left_operand 
 
-    # def __exponential(self):
-    #     left_operand = self.__unary() 
-    #     operands = [left_operand]
-    #     while self.__peek_next():
-    #         match self.__tokens[self.__current].ttype:
-    #             case op if op in [TokenType.EXPO]:
-    #                 self.__forward()
-    #                 right_operand = self.__unary()
-    #                 operands.append(right_operand) 
-    #             case _:
-    #                 break
-    #     val = operands[-1] 
-    #     operands = operands[::-1]
-    #     for num in operands[1:]:
-    #         val = BinOp(num, op, val) 
-    #     return val 
+    def __exponential(self):
+        left_operand = self.__unary() 
+        operands = [left_operand]
+        while self.__peek_next():
+            if self.__tokens[self.__current].ttype == TokenType.EXPONENT:
+                self.__forward()
+                right_operand = self.__unary()
+                operands.append(right_operand)
+            else:
+                break
+        val = operands[-1] 
+        operands = operands[::-1]
+        for num in operands[1:]:
+            val = BinOp(num, TokenType.EXPONENT, val, self.__prev().line) 
+        return val 
 
 
 
@@ -134,12 +165,22 @@ class Parser:
             return NumLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if(self.__match(TokenType.STRING)):
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
-        if(self.__match(TokenType.IDENTIFIER)):
+        if(self.__match(TokenType.IDENTIFIER)): 
+            # if self.__tokens[self.__current].ttype == TokenType.DOT:
+            #     __i = evaluate(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
+            #     if (type(__i) == list):
+            #         return self.__methods_list(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
             return Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
         if(self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
-            self.__consume(TokenType.RIGHT_PAREN, "')' expected after expression.")
+            self.__consume(TokenType.RIGHT_PAREN, "')' expected after expression.") 
             return __expr
+        if (self.__match(TokenType.LEFT_BRACKET)):
+            return self.__list()
+        self.__parseError.message = "Syntax Error: Expected something after '" + self.__prev().text + "'"
+        self.__parseError.line = self.__prev().line
+        report_error(self.__parseError)
+        self.__advance()
 
     def __match(self, *types):
         for type in types:
@@ -199,7 +240,7 @@ class Parser:
         if(self.__match(TokenType.IF)):
             return self.__ifstmt()
         if(self.__match(TokenType.LOOP)):
-            return self.__loop()
+            return self.__loop()  
         return self.__exprstmt()
 
     def __assign(self, var):
