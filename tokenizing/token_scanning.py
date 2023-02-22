@@ -44,6 +44,7 @@ class TokenType(Enum):
     LEFT_BRACKET = 37
     RIGHT_BRACKET = 38
     EXPONENT = 39
+    COMMENT = 40
 
 
 class Token():
@@ -175,6 +176,13 @@ class Scanner():
                 self.__add_tokens(TokenType.GREATER)
         elif c == ' ' or c == '\r' or c == '\t':
             pass
+        elif c== '?':
+    
+            if (self.__peek()== ":"):
+                self.current+=1
+                self.__multicomment()
+            else:
+                self.__comment()
         elif c == '\n':
             self.line += 1
         elif c == '"':
@@ -249,3 +257,26 @@ class Scanner():
         text = self.code[self.start: self.current]
         token = Token(ttype, text, None, self.line)
         self.token_list.append(token)
+
+    def __comment(self):
+        while(self.__end_reached()==False):
+            self.current += 1
+            if (self.__peek() == '\n'):
+                self.line += 1
+                self.current+=1
+                break
+    
+    def __multicomment(self):
+        while(self.__end_reached()==False and not (self.__peek()==':' and self.__peek_next()=='?')):
+            if self.__peek() == '\n':
+                self.line += 1
+            self.current += 1
+        if(self.__end_reached()==False):
+            self.current += 2
+        else:
+            self.error.line = self.line
+            self.error.message = "Unterminated Multiline Comment"
+            self.error.triggered = True
+            pass
+
+        
