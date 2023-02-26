@@ -120,6 +120,9 @@ class ListLiteral:
     head = 'AST'
     tail = 'AST'
 
+@dataclass
+class Abort:
+    msg: str
 
 AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | None
 

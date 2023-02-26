@@ -45,6 +45,7 @@ class TokenType(Enum):
     RIGHT_BRACKET = 38
     EXPONENT = 39
     COMMENT = 40
+    ABORT = 40
 
 
 class Token():
@@ -87,7 +88,8 @@ class Scanner():
         "and": TokenType.AND,
         "or": TokenType.OR,
         "return": TokenType.RETURN,
-        "echo": TokenType.ECHO
+        "echo": TokenType.ECHO,
+        "abort": TokenType.ABORT
 
     }
 

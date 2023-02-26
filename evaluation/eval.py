@@ -155,6 +155,9 @@ def evaluate(program: AST, environment: Scope = Scope()):
             for i in range(0 , len(f.parameters)):
                 environment.set(f.parameters[i].text , evaluate(arguments[i] , environment) , f.line , True)
             return evaluate(f.body, environment)
+        case Abort(msg):
+            print(msg)
+            exit()
 
     print(program)
     raise InvalidProgram()

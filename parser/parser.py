@@ -307,7 +307,6 @@ class Parser:
         return self.__exprstmt()
 
     def __assign(self, var):
-        # self.__consume(TokenType.ASSIGN, "Syntax Error")
         if (self.__match(TokenType.EQUAL)):
             __expr = self.__expression()
             self.__consume(TokenType.SEMICOLON,
@@ -319,7 +318,6 @@ class Parser:
             report_error(self.__parseError)
 
     def __declare(self):
-        # print(self.__peek().text)
         if (self.__match(TokenType.ASSIGN)):
             return self.__assign(self.__consume(TokenType.IDENTIFIER, "Identifier expected"))
         # if(self.__match(TokenType.IDENTIFIER)):
@@ -332,6 +330,11 @@ class Parser:
             self.__consume(TokenType.SEMICOLON,
                            "';' expected after declaration")
             return Echo(__expr, self.__tokens[self.__current - 1].line)
+        if (self.__match(TokenType.ABORT)):
+            self.__consume(TokenType.LEFT_PAREN, "'(' expected")
+            self.__consume(TokenType.RIGHT_PAREN, "')' expected")
+            self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
+            return Abort("Program Aborted")
         return self.__statement()
 
     def parse(self):
