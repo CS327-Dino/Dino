@@ -93,6 +93,6 @@ class ListLiteral:
     tail = 'AST'
 
 
-AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | None
+AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral  |  If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | None
 
 Value = Fraction | bool | int | str | None
