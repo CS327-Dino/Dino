@@ -55,7 +55,7 @@ class Assignment:
 
 
 @dataclass
-class Let:
+class Lambda:
     var: "AST"
     e1: "AST"
     e2: "AST"
@@ -138,6 +138,7 @@ class MethodLiteral:
 
 
 AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral  |  If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | MethodLiteral | None
+
 
 Value = Fraction | bool | int | str | None | AST
 

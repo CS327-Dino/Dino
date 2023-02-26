@@ -11,7 +11,7 @@ class Parser:
         self.__tokens = tokenlist
         self.__current = 0
         self.__parseError = error
-
+        self.__lambdaflag=False
     def __ifstmt(self):
         self.__consume(TokenType.LEFT_PAREN, "'(' expected after if")
         __condition = self.__expression()
@@ -61,7 +61,29 @@ class Parser:
         while (not self.__match(TokenType.END, "")):
             body.things.append(self.__declare())
         return Function(name, parameters, body, line)
-
+    def __lambda(self):
+        '''To parse lambda expressions'''
+        name = self.__peek().text
+        self.__consume(TokenType.IDENTIFIER,
+                              "A variable name was expected")
+        self.__consume(TokenType.EQUAL, "Expected Equal Sign")
+        __expression_1=Seq([])
+        __expression_2=Seq([])
+        while(not self.__match(TokenType.END)):
+            if(self.__peek().ttype==TokenType.IN):
+                self.__consume(TokenType.IN, "invalid in statement")
+                break
+            __expression_1.things.append(self.__exprstmt())
+            if(self.__peek().ttype==TokenType.END):
+                self.__consume(TokenType.END,"Expected end after the statement")
+                return Assignment(Identifier(name), __expression_1,self.__tokens[self.__current - 1].line , True)
+        while(not self.__match(TokenType.END)):
+            if(self.__peek().ttype==TokenType.END):
+                self.__consume(TokenType.END,"Expected end after the statement")
+                break
+            __expression_2.things.append(self.__exprstmt())
+        return Lambda(Identifier(name),__expression_1,__expression_2)
+                
     def __list(self):
         '''
         parses the list and adds it to the AST as the ListLiteral datatype of Dino
@@ -130,6 +152,14 @@ class Parser:
 
 
     def __expression(self) -> AST:
+        if (self.__match(TokenType.LAMBDA)):
+            if(self.__lambdaflag):
+                return self.__lambda()
+            else:
+                self.__lambdaflag=True
+                return_value= self.__lambda()
+                self.__lambdaflag=False
+                return return_value
         return self.__simpleAssignment()
 
     def __simpleAssignment(self):
@@ -387,7 +417,10 @@ class Parser:
             return False
 
     def __exprstmt(self):
+        
         __expr = self.__expression()
+        if(self.__lambdaflag):
+            return __expr
         self.__consume(TokenType.SEMICOLON, "';' expected after expression")
         return __expr
 

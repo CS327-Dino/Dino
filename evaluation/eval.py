@@ -27,6 +27,7 @@ class Scope:
         report_runtime_error(line, f"Variable {name} not found")
 
     def set(self, name, value, line, declaration=False):
+
         if declaration:
             if name in self.variables:
                 report_runtime_error(line, f"Variable {name} already exists")
@@ -43,7 +44,14 @@ class Scope:
 
     def __repr__(self):
         return f"Scope({self.variables})"
-
+    
+    def check(self, name, line):
+        '''To check whether a variable is already declared or not'''
+        if name in self.variables:
+            return True
+        if self.parent:
+            return self.parent.check(name, line)
+        return False
 
 def evaluate(program: AST, environment: Scope = Scope()):
     match program:
@@ -66,10 +74,12 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 arguments.append(evaluate(arg)) 
             return method_name, arguments, line
             
-        case Let(Identifier(name), e1, e2, line):
+        case Lambda(Identifier(name), e1, e2, line):
             v1 = evaluate(e1, environment)
             newEnv = Scope(environment)
             newEnv.set(name, v1, line, True)
+            if e2 is None:
+                return v1
             v2 = evaluate(e2, newEnv)
             del newEnv
             return v2

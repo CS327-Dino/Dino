@@ -47,7 +47,8 @@ class TokenType(Enum):
     COMMENT = 40
     BIT_OR = 41
     BIT_AND = 42
-
+    LAMBDA = 43
+    IN = 44
 
 class Token():
     ttype: TokenType
@@ -89,7 +90,9 @@ class Scanner():
         "and": TokenType.AND,
         "or": TokenType.OR,
         "return": TokenType.RETURN,
-        "echo": TokenType.ECHO
+        "echo": TokenType.ECHO,
+        "lambda" : TokenType.LAMBDA,
+        "in" : TokenType.IN
 
     }
 
