@@ -46,3 +46,16 @@ end
 sum(2 , 5 , 6);
 
 -----
+
+Capture and Exit utilities
+
+assign i = capture("Enter Value: ");
+
+loop(i<10)
+    i= i*2;
+    echo(i);
+end
+
+abort();
+
+-----
