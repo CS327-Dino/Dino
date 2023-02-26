@@ -36,25 +36,25 @@ class TestParser(unittest.TestCase):
 
     def test_list_methods(self):
         expression = Parser(Scanner("assign a = [2, 6^2, 3, 4, 6>7];", DinoError()).generate_tokens(), DinoError()).parse()
-        self.assertEqual(expression, Seq(things=[Assignment(var=Identifier(name='a', line=1), value=ListLiteral(elements=[NumLiteral(2.0, line=1), BinOp(left=NumLiteral(6.0, line=1), op=TokenType.EXPONENT, right=NumLiteral(2.0, line=1), line=1), NumLiteral(3.0, line=1), NumLiteral(4.0, line=1), BinOp(left=NumLiteral(6.0, line=1), op=TokenType.GREATER, right=NumLiteral(7.0, line=1), line=1)], length=5, line=1), line=1, declaration=True)]))
+        self.assertEqual(expression, Seq(things=[Assignment(var=Identifier(name='a', line=1, isconst=False, uid=0), value=ListLiteral(elements=[NumLiteral(value=2.0, line=1), BinOp(left=NumLiteral(value=6.0, line=1), op=TokenType.EXPONENT, right=NumLiteral(value=2.0, line=1), line=1), NumLiteral(value=3.0, line=1), NumLiteral(value=4.0, line=1), BinOp(left=NumLiteral(value=6.0, line=1), op=TokenType.GREATER, right=NumLiteral(value=7.0, line=1), line=1)], length=5, line=1), line=1, declaration=True)]))
 
         expression = Parser(Scanner("echo(a.length);", DinoError()).generate_tokens(), DinoError()).parse()
-        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='a', line=1), op=TokenType.DOT, right=MethodLiteral(name='length', args=[], line=1), line=1), line=1)]))
+        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='a', line=1, isconst=False, uid=1), op=TokenType.DOT, right=MethodLiteral(name='length', args=[], line=1), line=1), line=1)]))
 
         expression = Parser(Scanner("echo(a.head);", DinoError()).generate_tokens(), DinoError()).parse()
-        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='a', line=1), op=TokenType.DOT, right=MethodLiteral(name='head', args=[], line=1), line=1), line=1)]) )
+        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='a', line=1, isconst=False, uid=3), op=TokenType.DOT, right=MethodLiteral(name='head', args=[], line=1), line=1), line=1)]) )
 
         expression = Parser(Scanner("echo(a.tail);", DinoError()).generate_tokens(), DinoError()).parse()
-        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='a', line=1), op=TokenType.DOT, right=MethodLiteral(name='tail', args=[], line=1), line=1), line=1)]) )
+        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='a', line=1, isconst=False, uid=5), op=TokenType.DOT, right=MethodLiteral(name='tail', args=[], line=1), line=1), line=1)]) )
 
         expression = Parser(Scanner("echo(a.slice(0,3));", DinoError()).generate_tokens(), DinoError()).parse()
-        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='a', line=1), op=TokenType.DOT, right=MethodLiteral(name='slice', args=[NumLiteral(0.0, line=1), NumLiteral(3.0, line=1)], line=1), line=1), line=1)]))
+        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='a', line=1, isconst=False, uid=7), op=TokenType.DOT, right=MethodLiteral(name='slice', args=[NumLiteral(value=0.0, line=1), NumLiteral(value=3.0, line=1)], line=1), line=1), line=1)]))
 
     def test_string_methods(self):
-        expression = Parser(Scanner("echo(g.slice(2,5));", DinoError()).generate_tokens(), DinoError()).parse()
-        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='g', line=1), op=TokenType.DOT, right=MethodLiteral(name='slice', args=[NumLiteral(2.0, line=1), NumLiteral(5.0, line=1)], line=1), line=1), line=1)]) )
+        expression = Parser(Scanner('assign g = "hello!! This is our compiler";', DinoError()).generate_tokens(), DinoError()).parse()
+        self.assertEqual(expression, Seq(things=[Assignment(var=Identifier(name='g', line=1, isconst=False, uid=9), value=StrLiteral(value='hello!! This is our compiler', line=1), line=1, declaration=True)]) )
 
         expression = Parser(Scanner("echo(g.slice(2,5));", DinoError()).generate_tokens(), DinoError()).parse()
-        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='g', line=1), op=TokenType.DOT, right=MethodLiteral(name='slice', args=[NumLiteral(2.0, line=1), NumLiteral(5.0, line=1)], line=1), line=1), line=1)]) )
+        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='g', line=1, isconst=False, uid=10), op=TokenType.DOT, right=MethodLiteral(name='slice', args=[NumLiteral(value=2.0, line=1), NumLiteral(value=5.0, line=1)], line=1), line=1), line=1)]) )
 
     

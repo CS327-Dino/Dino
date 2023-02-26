@@ -1,9 +1,9 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from fractions import Fraction
 from typing import List
 from errors.error import *
 from tokenizing.token_scanning import *
-
+from itertools import count
 
 @dataclass
 class NumLiteral:
@@ -19,6 +19,9 @@ class BoolLiteral:
     value: bool
     line: int = 0
 
+@dataclass
+class NullLiteral:
+    line: int = 0
 
 @dataclass
 class BinOp:
@@ -28,11 +31,12 @@ class BinOp:
     line: int = 0
 
 
-@dataclass
+@dataclass(frozen=True)
 class Identifier:
     name: str
-    line: int = 0
-
+    line: int = field(default=0, hash=False, compare=False)
+    isconst: bool = False
+    uid: int = field(default_factory=count().__next__)
 
 @dataclass
 class UnOp:
@@ -83,15 +87,16 @@ class Loop:
 
 @dataclass
 class Call:
-    callee: 'AST'
-    paren: Token
-    arguments: List
+    callee: Identifier
+    # paren: Token
+    arguments: List['AST']
+    line: int = 0
 
 
 @dataclass
 class Function:
-    name: Token
-    parameters: List
+    name: Identifier
+    parameters: List['AST']
     body: 'AST'
     line: int = 0
 
@@ -120,7 +125,7 @@ class ListLiteral:
     length -> length of the list
     line -> line no. in source code
     '''
-    elements: list()
+    elements: List
     length: int
     line: int
 
@@ -133,12 +138,11 @@ class MethodLiteral:
     line -> line no. in the source code
     '''
     name: str 
-    args: list()
+    args: List
     line: int = 0
 
 
-AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral  |  If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | MethodLiteral | None
-
+AST = NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call| MethodLiteral | Lambda | None
 
 Value = Fraction | bool | int | str | None | AST
 

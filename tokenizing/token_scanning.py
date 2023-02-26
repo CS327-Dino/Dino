@@ -49,6 +49,7 @@ class TokenType(Enum):
     BIT_AND = 42
     LAMBDA = 43
     IN = 44
+    CONST = 45
 
 class Token():
     ttype: TokenType
@@ -91,6 +92,7 @@ class Scanner():
         "or": TokenType.OR,
         "return": TokenType.RETURN,
         "echo": TokenType.ECHO,
+        "const": TokenType.CONST,
         "lambda" : TokenType.LAMBDA,
         "in" : TokenType.IN
 
