@@ -59,7 +59,7 @@ class Assignment:
 
 
 @dataclass
-class Let:
+class Lambda:
     var: "AST"
     e1: "AST"
     e2: "AST"
@@ -119,13 +119,31 @@ class Seq:
 
 @dataclass
 class ListLiteral:
-    elements: List['AST']
+    '''
+    datatype to store lists 
+    elements -> elements of 'Dino' list stored as a 'python' list
+    length -> length of the list
+    line -> line no. in source code
+    '''
+    elements: List
     length: int
     line: int
-    head = 'AST'
-    tail = 'AST'
+
+@dataclass 
+class MethodLiteral:
+    '''
+    All the methods of the datatypes (e.g. lists, strings, etc.) are of this type.
+    name -> name of the method (e.g. 'slice')
+    args -> arguments for calling the method as a list
+    line -> line no. in the source code
+    '''
+    name: str 
+    args: List
+    line: int = 0
 
 
-AST = NumLiteral | NullLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call | None
+AST = NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call| MethodLiteral | Lambda | None
 
 Value = Fraction | bool | int | str | None | AST
+
+all_methods = ["length", "head", "tail", "slice", "cons"]
