@@ -44,6 +44,7 @@ class TokenType(Enum):
     LEFT_BRACKET = 37
     RIGHT_BRACKET = 38
     EXPONENT = 39
+    COMMENT = 40
 
 
 class Token():
@@ -99,17 +100,17 @@ class Scanner():
         return self.current >= len(self.code)
 
     def __peek(self):
-        if(self.__end_reached()):
+        if (self.__end_reached()):
             return '\0'
         return self.code[self.current]
 
     def __peek_next(self):
-        if(self.current + 1 >= len(self.code)):
+        if (self.current + 1 >= len(self.code)):
             return '\0'
         return self.code[self.current+1]
 
     def generate_tokens(self):
-        while(self.__end_reached() == False):
+        while (self.__end_reached() == False):
             self.start = self.current
             self.__scan_tokens()
 
@@ -175,6 +176,13 @@ class Scanner():
                 self.__add_tokens(TokenType.GREATER)
         elif c == ' ' or c == '\r' or c == '\t':
             pass
+        elif c== '?':
+    
+            if (self.__peek()== ":"):
+                self.current+=1
+                self.__multicomment()
+            else:
+                self.__comment()
         elif c == '\n':
             self.line += 1
         elif c == '"':
@@ -191,7 +199,7 @@ class Scanner():
             self.error.triggered = True
 
     def __string(self):
-        while(self.__peek() != '"' and self.__end_reached() == False):
+        while (self.__peek() != '"' and self.__end_reached() == False):
             if self.__peek() == '\n':
                 self.line += 1
             self.current += 1
@@ -207,12 +215,12 @@ class Scanner():
             self.token_list.append(string_token)
 
     def __number(self):
-        while(self.__digit_check(self.__peek()) == True):
+        while (self.__digit_check(self.__peek()) == True):
             self.current += 1
 
         if self.__peek() == '.' and self.__digit_check(self.__peek_next()):
             self.current += 1
-            while(self.__digit_check(self.__peek()) == True):
+            while (self.__digit_check(self.__peek()) == True):
                 self.current += 1
 
         n = self.code[self.start:self.current]
@@ -220,7 +228,7 @@ class Scanner():
         self.token_list.append(num_token)
 
     def __identifier(self):
-        while(self.__alpha_numeric_check(self.__peek()) == True):
+        while (self.__alpha_numeric_check(self.__peek()) == True):
             self.current += 1
 
         s = self.code[self.start: self.current]
@@ -249,3 +257,26 @@ class Scanner():
         text = self.code[self.start: self.current]
         token = Token(ttype, text, None, self.line)
         self.token_list.append(token)
+
+    def __comment(self):
+        while(self.__end_reached()==False):
+            self.current += 1
+            if (self.__peek() == '\n'):
+                self.line += 1
+                self.current+=1
+                break
+    
+    def __multicomment(self):
+        while(self.__end_reached()==False and not (self.__peek()==':' and self.__peek_next()=='?')):
+            if self.__peek() == '\n':
+                self.line += 1
+            self.current += 1
+        if(self.__end_reached()==False):
+            self.current += 2
+        else:
+            self.error.line = self.line
+            self.error.message = "Unterminated Multiline Comment"
+            self.error.triggered = True
+            pass
+
+        

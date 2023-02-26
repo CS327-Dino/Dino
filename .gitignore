@@ -131,4 +131,5 @@ dmypy.json
 .vscode
 
 personal.py
+test.dino
 test.txt

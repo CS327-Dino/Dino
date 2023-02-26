@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import List
-from tokenizing.token_scanning import TokenType
 from errors.error import *
+from tokenizing.token_scanning import *
+
 
 @dataclass
 class NumLiteral:
@@ -12,10 +13,12 @@ class NumLiteral:
     # def __init__(self, *args):
     #     self.value = Fraction(*args)
 
+
 @dataclass
 class BoolLiteral:
     value: bool
     line: int = 0
+
 
 @dataclass
 class BinOp:
@@ -24,11 +27,12 @@ class BinOp:
     right: 'AST'
     line: int = 0
 
+
 @dataclass
 class Identifier:
     name: str
     line: int = 0
-    
+
 
 @dataclass
 class UnOp:
@@ -41,12 +45,14 @@ class UnOp:
 #     name: str
 #     value: 'AST'
 
+
 @dataclass
 class Assignment:
     var: "Identifier"
     value: "AST"
     line: int = 0
     declaration: bool = False
+
 
 @dataclass
 class Let:
@@ -55,44 +61,66 @@ class Let:
     e2: "AST"
     line: int = 0
 
+
 @dataclass
 class If:
     condition: 'AST'
     ifPart: 'AST'
     elsePart: 'AST'
 
+
 @dataclass
 class StrLiteral:
     value: str
     line: int = 0
+
 
 @dataclass
 class Loop:
     condition: 'AST'
     body: 'AST'
 
+
+@dataclass
+class Call:
+    callee: 'AST'
+    paren: Token
+    arguments: List
+
+
+@dataclass
+class Function:
+    name: Token
+    parameters: List
+    body: 'AST'
+    line: int = 0
+
+
 @dataclass
 class Expression:
     expr: 'AST'
+
 
 @dataclass
 class Echo:
     expr: 'AST'
     line: int = 0
 
+
 @dataclass
 class Seq:
-    things: List['AST'] 
+    things: List['AST']
 
-@dataclass 
+
+@dataclass
 class ListLiteral:
     elements: list()
     length: int
     line: int
-    head = 'AST' 
+    head = 'AST'
     tail = 'AST'
 
 
 AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral  |  If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | None
 
-Value = Fraction | bool | int | str | None
+Value = Fraction | bool | int | str | None | AST

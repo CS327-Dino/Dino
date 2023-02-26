@@ -1,9 +1,10 @@
 import sys
 import fileinput
-from errors.error import*
+from errors.error import *
 from tokenizing.token_scanning import *
 from parser.parser import *
 from evaluation.eval import *
+
 
 def main():
     # Here we will start our program
@@ -16,12 +17,11 @@ def main():
 
 
 def scan_file(file_name):
-    print(file_name)
     f = open(file_name, "rb")
     data = f.read()
     error = DinoError()
     run(data.decode("utf-8"), error)
-    if(error.triggered):
+    if (error.triggered):
         report_error(error)
         sys.exit()
 
@@ -49,7 +49,8 @@ def run(code: str, error: DinoError):
 
     if error.triggered:
         return
-    print(evaluate(expression))
+    # print(evaluate(expression))
+    output = evaluate(expression)
 
 
 main()

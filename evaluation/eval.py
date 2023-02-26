@@ -4,12 +4,15 @@ from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 from errors.error import *
 
+
 def report_runtime_error(linenum, message):
     print("Runtime Error at", linenum, ":", message)
     exit()
 
+
 class InvalidProgram(Exception):
     pass
+
 
 class Scope:
     def __init__(self, parent=None):
@@ -41,18 +44,20 @@ class Scope:
     def __repr__(self):
         return f"Scope({self.variables})"
 
+
 def evaluate(program: AST, environment: Scope = Scope()):
     match program:
         case Assignment(Identifier(name), value, line, declaration):
             # environment.set(name, value, line, declaration)
-            environment.set(name, evaluate(value, environment), line, declaration)
+            environment.set(name, evaluate(
+                value, environment), line, declaration)
             return None
         case Identifier(name, line):
             return environment.get(name, line)
         case ListLiteral(elements, length, line):
             output = []
             for i in elements:
-                output.append(evaluate(i,environment))
+                output.append(evaluate(i, environment))
             return output
         case Let(Identifier(name), e1, e2, line):
             v1 = evaluate(e1, environment)
@@ -79,17 +84,19 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case BinOp(left, TokenType.PLUS, right, line):
             evaled_left = evaluate(left, environment)
             evaled_right = evaluate(right, environment)
-            if(type(evaled_left) == float or type(evaled_right) == int):
-                if(type(evaled_right) == float or type(evaled_right) == int):
+            if (type(evaled_left) == float or type(evaled_right) == int):
+                if (type(evaled_right) == float or type(evaled_right) == int):
                     return evaluate(left, environment) + evaluate(right, environment)
                 else:
-                    report_runtime_error(line, "Error: '+' operation valid only for two strings or two numerical values")
+                    report_runtime_error(
+                        line, "Error: '+' operation valid only for two strings or two numerical values")
                     return ""
             else:
-                if(type(evaled_right)==str):
+                if (type(evaled_right) == str):
                     return evaluate(left, environment) + evaluate(right, environment)
                 else:
-                    report_runtime_error(line, "Error: '+' operation valid only for two strings or two numerical values")
+                    report_runtime_error(
+                        line, "Error: '+' operation valid only for two strings or two numerical values")
                     return ""
         case BinOp(left, op, right, line):
             try:
@@ -99,10 +106,12 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.SLASH: return evaluate(left, environment) / evaluate(right, environment)
                     case TokenType.EXPONENT: return evaluate(left, environment) ** evaluate(right, environment)
             except TypeError:
-                report_runtime_error(line, "TypeError: Operation not valid for non numeric values")
+                report_runtime_error(
+                    line, "TypeError: Operation not valid for non numeric values")
                 return ""
             except ZeroDivisionError:
-                report_runtime_error(line, "ZeroDivisionError: Division by Zero is not allowed")
+                report_runtime_error(
+                    line, "ZeroDivisionError: Division by Zero is not allowed")
                 return ""
             try:
                 match op:
@@ -113,7 +122,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.BANG_EQUAL: return evaluate(left, environment) != evaluate(right, environment)
                     case TokenType.EQUAL_EQUAL: return evaluate(left, environment) == evaluate(right, environment)
             except TypeError:
-                report_runtime_error(line, "TypeError: Comparison of numeric and non mumeric types")
+                report_runtime_error(
+                    line, "TypeError: Comparison of numeric and non mumeric types")
                 return ""
         case UnOp(op, right, line):
             try:
@@ -123,7 +133,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case "++": return evaluate(right, environment) + 1
                     case "--": return evaluate(right, environment) - 1
             except TypeError:
-                report_runtime_error(line, "TypeError: Operation not valid for non numeric values")
+                report_runtime_error(
+                    line, "TypeError: Operation not valid for non numeric values")
                 return ""
         case Seq(things):
             output = None
@@ -135,6 +146,15 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case Echo(expr, line):
             print(evaluate(expr, environment))
             return ""
+        case Function(name, parameters, body, line):
+            f = Function(name, parameters, body, line)
+            environment.set(name.text, f, line, True)
+            return ""
+        case Call(callee, paren, arguments):
+            f = environment.get(callee.name, 1)
+            for i in range(0 , len(f.parameters)):
+                environment.set(f.parameters[i].text , evaluate(arguments[i] , environment) , f.line , True)
+            return evaluate(f.body, environment)
 
     print(program)
     raise InvalidProgram()
