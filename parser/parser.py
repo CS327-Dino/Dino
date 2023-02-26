@@ -37,30 +37,31 @@ class Parser:
         return Loop(__condition, __body)
 
     def __func(self):
-        name = self.__consume(TokenType.IDENTIFIER,
-                              "A function name was expected")
+        self.__consume(TokenType.IDENTIFIER, "A function name was expected")
+        name = self.__prev().text
         line = self.__tokens[self.__current - 1].line
         parameters = []
-        self.__consume(TokenType.LEFT_PAREN,
-                       "Expected a '(' after the function name")
+        self.__consume(TokenType.LEFT_PAREN,"Expected a '(' after the function name")
         if (self.__check(TokenType.RIGHT_PAREN) == False):
             while (self.__peek_next().ttype == TokenType.COMMA):
                 if len(parameters) > 255:
                     self.__parseError.line = 1
                     self.__parseError.message = "Can't have more than 255 arguments"
                     self.__parseError.triggered = True
-                parameters.append(self.__consume(
-                    TokenType.IDENTIFIER, "Expected Parameter Name"))
+                var = self.__consume(TokenType.IDENTIFIER, "Expected Parameter Name")
+                if var != None:
+                    parameters.append(Identifier(var.text, var.line))
                 self.__advance()
-            parameters.append(self.__consume(
-                TokenType.IDENTIFIER, "Expected Parameter Name"))
-        self.__consume(TokenType.RIGHT_PAREN,
-                       "Expect ')' after parameters.")
+            
+            var = self.__consume(TokenType.IDENTIFIER, "Expected Parameter Name")
+            if var != None:
+                parameters.append(Identifier(var.text, var.line))
+        self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
 
         body = Seq([])
         while (not self.__match(TokenType.END, "")):
             body.things.append(self.__declare())
-        return Function(name, parameters, body, line)
+        return Function(Identifier(name, line), parameters, body, line)
 
     def __list(self):
         __elements = []
@@ -70,7 +71,7 @@ class Parser:
             self.__consume(TokenType.RIGHT_BRACKET,
                            "']' expected at the end of a list")
             return ListLiteral(__elements, __length, self.__prev().line)
-        while self.__peek_next():
+        while self.__peek_next().ttype != TokenType.EOF:
 
             __elements.append(self.__expression())
             __length += 1
@@ -112,7 +113,7 @@ class Parser:
 
     def __equality(self):
         left_operand = self.__comparison()
-        while self.__peek_next():
+        while self.__peek_next().ttype != TokenType.EOF:
             match self.__tokens[self.__current].ttype:
                 case op if op in [TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL]:
                     self.__forward()
@@ -125,7 +126,7 @@ class Parser:
 
     def __comparison(self):
         left_operand = self.__add()
-        while self.__peek_next():
+        while self.__peek_next().ttype != TokenType.EOF:
             match self.__tokens[self.__current].ttype:
                 case op if op in [TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL]:
                     self.__forward()
@@ -139,7 +140,7 @@ class Parser:
     def __add(self):
 
         left_operand = self.__multiply()
-        while self.__peek_next():
+        while self.__peek_next().ttype != TokenType.EOF:
             match self.__tokens[self.__current].ttype:
                 case op if op in [TokenType.PLUS, TokenType.MINUS]:
                     self.__forward()
@@ -152,7 +153,7 @@ class Parser:
 
     def __multiply(self):
         left_operand = self.__exponential()
-        while self.__peek_next():
+        while self.__peek_next().ttype != TokenType.EOF:
             match self.__tokens[self.__current].ttype:
                 case op if op in [TokenType.STAR, TokenType.SLASH]:
                     self.__forward()
@@ -166,7 +167,7 @@ class Parser:
     def __exponential(self):
         left_operand = self.__unary()
         operands = [left_operand]
-        while self.__peek_next():
+        while self.__peek_next().ttype != TokenType.EOF:
             if self.__tokens[self.__current].ttype == TokenType.EXPONENT:
                 self.__forward()
                 right_operand = self.__unary()
@@ -190,7 +191,14 @@ class Parser:
         expr = self.__primary()
         while (True):
             if self.__match(TokenType.LEFT_PAREN):
-                expr = self.__finishCall(expr)
+                    if isinstance(expr, Identifier):
+                        expr = self.__finishCall(expr)
+                    else:
+                        self.__parseError.line = self.__tokens[self.__current].line
+                        self.__parseError.message = "Identifier can't be called"
+                        self.__parseError.triggered = True
+                        self.__advance()
+                        break;
             else:
                 break
 
@@ -210,7 +218,7 @@ class Parser:
         paren = self.__consume(TokenType.RIGHT_PAREN,
                                "Expect ')' after arguments.")
 
-        return Call(expr, paren, arguments)
+        return Call(expr, arguments, self.__prev().line)
 
     def __primary(self):
         # print(self.__current)
@@ -232,13 +240,13 @@ class Parser:
             return Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
-            self.__consume(TokenType.RIGHT_PAREN,
-                           "')' expected after expression.")
+            self.__consume(TokenType.RIGHT_PAREN, "')' expected after expression.")
             return __expr
         if (self.__match(TokenType.LEFT_BRACKET)):
             return self.__list()
-        self.__parseError.message = "Syntax Error: Expected something after '" + \
-            self.__prev().text + "'"
+        if (self.__peek().ttype == TokenType.RIGHT_PAREN):
+            return None
+        self.__parseError.message = "Syntax Error: Expected something after '" + self.__prev().text + "'"
         self.__parseError.line = self.__prev().line
         report_error(self.__parseError)
         self.__advance()
@@ -277,7 +285,7 @@ class Parser:
             self.__parseError.message = "Syntax Error:" + msg
             self.__parseError.line = self.__prev().line
             report_error(self.__parseError)
-            self.__advance()
+            return self.__advance()
             # print(msg)
             # exit()
 
@@ -290,7 +298,7 @@ class Parser:
         if (self.__current+1 < len(self.__tokens)-1):
             return self.__tokens[self.__current + 1]
         else:
-            return False
+            return Token(TokenType.EOF, "", None, -1)
 
     def __exprstmt(self):
         __expr = self.__expression()
@@ -306,22 +314,26 @@ class Parser:
             return self.__func()
         return self.__exprstmt()
 
-    def __assign(self, var):
-        # self.__consume(TokenType.ASSIGN, "Syntax Error")
+    def __assign(self, var, isconst=False):
         if (self.__match(TokenType.EQUAL)):
             __expr = self.__expression()
-            self.__consume(TokenType.SEMICOLON,
-                           "';' expected after declaration")
-            return Assignment(Identifier(var.text, self.__tokens[self.__current - 1].line), __expr, self.__tokens[self.__current - 1].line, True)
-        else:
-            self.__parseError.message = "Syntax Error: Expected '=' after variable declaration"
+            self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
+            return Assignment(Identifier(var.text, self.__tokens[self.__current - 1].line, isconst), __expr, self.__tokens[self.__current - 1].line, True)
+        elif (isconst):
+            self.__parseError.message = "Syntax Error: Expected '=' after const variable declaration"
             self.__parseError.line = self.__prev().line
             report_error(self.__parseError)
+        else:
+            self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
+            return Assignment(Identifier(var.text, self.__tokens[self.__current - 1].line), NullLiteral(self.__tokens[self.__current - 1].line), self.__tokens[self.__current - 1].line, True)
+
 
     def __declare(self):
         # print(self.__peek().text)
         if (self.__match(TokenType.ASSIGN)):
             return self.__assign(self.__consume(TokenType.IDENTIFIER, "Identifier expected"))
+        if (self.__match(TokenType.CONST)):
+            return self.__assign(self.__consume(TokenType.IDENTIFIER, "Identifier expected"), True)
         # if(self.__match(TokenType.IDENTIFIER)):
         #     __var = self.__prev()
         #     return  self.__assign(__var)

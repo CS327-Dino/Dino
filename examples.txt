@@ -46,3 +46,27 @@ end
 sum(2 , 5 , 6);
 
 -----
+
+To check resolution of scope
+
+assign a = 5;
+if(a>5)
+	assign a = 10;
+	echo(a);
+end
+else
+	assign a = 15;
+	echo(a);
+end
+
+echo(a);
+
+-----
+
+func fact(n)
+	if(n == 0) echo(0); end
+	else echo(n); fact(n-1); end
+end
+
+assign n = 5;
+fact(n);

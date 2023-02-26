@@ -21,9 +21,9 @@ def scan_file(file_name):
     data = f.read()
     error = DinoError()
     run(data.decode("utf-8"), error)
-    if (error.triggered):
-        report_error(error)
-        sys.exit()
+    # if (error.triggered):
+    #     report_error(error)
+    #     sys.exit()
 
 
 def open_prompt():
@@ -45,12 +45,16 @@ def run(code: str, error: DinoError):
 
     print("------------------Parsed Expr------------------")
     print(expression)
-    print("-----------------------------------------------")
 
     if error.triggered:
+        print("-----------------------------------------------")
         return
+    print("------------------Resolved Expr----------------")
+    resolved = resolution(expression)
+    print(resolved)
+    print("-----------------------------------------------")
     # print(evaluate(expression))
-    output = evaluate(expression)
+    output = evaluate(resolved)
 
 
 main()
