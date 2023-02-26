@@ -45,10 +45,13 @@ class TokenType(Enum):
     RIGHT_BRACKET = 38
     EXPONENT = 39
     COMMENT = 40
-    ABORT = 40
-    CAPTURE = 41
-    INTEGER = 42
-
+    BIT_OR = 41
+    BIT_AND = 42
+    LAMBDA = 43
+    IN = 44
+    ABORT = 45
+    CAPTURE = 46
+    INTEGER = 47
 
 class Token():
     ttype: TokenType
@@ -92,7 +95,10 @@ class Scanner():
         "return": TokenType.RETURN,
         "echo": TokenType.ECHO,
         "abort": TokenType.ABORT,
-        "capture": TokenType.CAPTURE
+        "capture": TokenType.CAPTURE,
+        "lambda" : TokenType.LAMBDA,
+        "in" : TokenType.IN
+
     }
 
     def __init__(self, code, error):
@@ -154,6 +160,10 @@ class Scanner():
             self.__add_tokens(TokenType.LEFT_BRACKET) 
         elif c == ']':
             self.__add_tokens(TokenType.RIGHT_BRACKET)
+        elif c == '|':
+            self.__add_tokens(TokenType.BIT_OR) 
+        elif c == '&':
+            self.__add_tokens(TokenType.BIT_AND)
         elif c == '!':
             if self.__peek() == '=':
                 self.current += 1

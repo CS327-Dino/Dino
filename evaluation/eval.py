@@ -27,6 +27,7 @@ class Scope:
         report_runtime_error(line, f"Variable {name} not found")
 
     def set(self, name, value, line, declaration=False):
+
         if declaration:
             if name in self.variables:
                 report_runtime_error(line, f"Variable {name} already exists")
@@ -43,7 +44,14 @@ class Scope:
 
     def __repr__(self):
         return f"Scope({self.variables})"
-
+    
+    def check(self, name, line):
+        '''To check whether a variable is already declared or not'''
+        if name in self.variables:
+            return True
+        if self.parent:
+            return self.parent.check(name, line)
+        return False
 
 def evaluate(program: AST, environment: Scope = Scope()):
     match program:
@@ -59,10 +67,19 @@ def evaluate(program: AST, environment: Scope = Scope()):
             for i in elements:
                 output.append(evaluate(i, environment))
             return output
-        case Let(Identifier(name), e1, e2, line):
+        case MethodLiteral(name, args, line):
+            method_name = name
+            arguments = [] 
+            for arg in args:
+                arguments.append(evaluate(arg)) 
+            return method_name, arguments, line
+            
+        case Lambda(Identifier(name), e1, e2, line):
             v1 = evaluate(e1, environment)
             newEnv = Scope(environment)
             newEnv.set(name, v1, line, True)
+            if e2 is None:
+                return v1
             v2 = evaluate(e2, newEnv)
             del newEnv
             return v2
@@ -105,6 +122,14 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.STAR: return evaluate(left, environment) * evaluate(right, environment)
                     case TokenType.SLASH: return evaluate(left, environment) / evaluate(right, environment)
                     case TokenType.EXPONENT: return evaluate(left, environment) ** evaluate(right, environment)
+                    case TokenType.OR: return bool(evaluate(left, environment) or evaluate(right, environment) )
+                    case TokenType.AND: return bool(evaluate(left, environment) and evaluate(right, environment)) 
+                    case TokenType.BIT_OR: 
+                        try: return evaluate(left, environment)|(evaluate(right, environment))
+                        except TypeError:report_runtime_error(line, "TypeError: Bitwise-OR only applicable on integers")
+                    case TokenType.BIT_AND: 
+                        try: return evaluate(left, environment) & evaluate(right, environment)
+                        except TypeError:report_runtime_error(line, "TypeError: Bitwise-AND only applicable on integers")
             except TypeError:
                 report_runtime_error(
                     line, "TypeError: Operation not valid for non numeric values")
@@ -119,9 +144,42 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.GREATER_EQUAL: return evaluate(left, environment) <= evaluate(right, environment)
                     case TokenType.BANG_EQUAL: return evaluate(left, environment) != evaluate(right, environment)
                     case TokenType.EQUAL_EQUAL: return evaluate(left, environment) == evaluate(right, environment)
+                    # case TokenType.DOT: 
             except TypeError:
                 report_runtime_error(
                     line, "TypeError: Comparison of numeric and non mumeric types")
+                return ""
+            try:
+                match op:
+                    case TokenType.DOT: 
+                        val = evaluate(left) 
+                        method, arguments, line = evaluate(right)
+                        # print(arguments)
+                        if (type(val) is list):
+                            # method = right.name
+                            match method:
+                                case "length":
+                                    return len(val) 
+                                case "head":
+                                    return val[0] 
+                                case "tail":
+                                    return val[1:]
+                                case "slice": 
+                                    assert len(arguments) ==2 
+                                    return val[int(arguments[0]): int(arguments[1]) ]
+                                case _:
+                                    report_runtime_error(line, "Invalid method: list does not have any method: {}".format(method))
+                        elif(type(val) is str):
+                            match method:
+                                case "slice":
+                                    assert len(arguments) ==2 
+                                    return val[int(arguments[0]): int(arguments[1]) ]
+                                case _:
+                                    report_runtime_error(line, "Invalid method: string does not have any method: {}".format(method))                   
+            except TypeError:
+                report_runtime_error(
+                    line, "Invalid syntax")
+                return ""
         case UnOp(op, right, line):
             try:
                 match op:
