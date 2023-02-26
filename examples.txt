@@ -32,7 +32,7 @@ b = b+1;
 echo(a);
 echo(b);
 end;
-echo(b);
+echo(b)
 
 -----
 
@@ -46,3 +46,20 @@ end
 sum(2 , 5 , 6);
 
 -----
+
+Lambda Function
+
+assign var = lambda a = 12 in a*a end ;
+echo(var);
+echo(lambda a = 12 in lambda b = 7 in b*b+a end end);
+echo(lambda a= lambda b = 2 in b+ b*b end in a+a end);
+echo(lambda a= lambda a = 2 in a+ a*a end in a+a end);
+echo(lambda a=12 in a+a end);
+lambda a=7 in a+8 end;
+lambda a=8 end;
+echo(a); 
+func sum(a , b , c)
+    assign s = a + b + c;
+    echo(s);
+end
+echo(lambda x = 12 in sum(x,5,6) end);
