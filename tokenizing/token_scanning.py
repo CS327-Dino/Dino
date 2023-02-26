@@ -45,7 +45,8 @@ class TokenType(Enum):
     RIGHT_BRACKET = 38
     EXPONENT = 39
     COMMENT = 40
-
+    LAMBDA = 41
+    IN = 42
 
 class Token():
     ttype: TokenType
@@ -87,7 +88,9 @@ class Scanner():
         "and": TokenType.AND,
         "or": TokenType.OR,
         "return": TokenType.RETURN,
-        "echo": TokenType.ECHO
+        "echo": TokenType.ECHO,
+        "lambda" : TokenType.LAMBDA,
+        "in" : TokenType.IN
 
     }
 
