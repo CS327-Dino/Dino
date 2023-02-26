@@ -1,3 +1,4 @@
+
 from errors.error import *
 from enum import Enum
 
@@ -52,6 +53,7 @@ class TokenType(Enum):
     ABORT = 45
     CAPTURE = 46
     INTEGER = 47
+    CONST = 48
 
 class Token():
     ttype: TokenType
@@ -96,6 +98,7 @@ class Scanner():
         "echo": TokenType.ECHO,
         "abort": TokenType.ABORT,
         "capture": TokenType.CAPTURE,
+        "const": TokenType.CONST,
         "lambda" : TokenType.LAMBDA,
         "in" : TokenType.IN
 

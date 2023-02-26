@@ -30,7 +30,7 @@ class Scope:
 
         if declaration:
             if name in self.variables:
-                report_runtime_error(line, f"Variable {name} already exists")
+                report_runtime_error(line, f"Variable '{name}' already exists")
             self.variables[name] = value
             return
         else:
@@ -40,7 +40,7 @@ class Scope:
             if self.parent:
                 self.parent.set(name, value, line)
                 return
-            report_runtime_error(line, f"Variable {name} not found")
+            report_runtime_error(line, f"Variable '{name}' not found")
 
     def __repr__(self):
         return f"Scope({self.variables})"
@@ -53,20 +53,106 @@ class Scope:
             return self.parent.check(name, line)
         return False
 
-def evaluate(program: AST, environment: Scope = Scope()):
+def resolution(program: AST, environment: Scope = Scope()):
+    if program is None:
+        return None
     match program:
-        case Assignment(Identifier(name), value, line, declaration):
+        case NumLiteral(value, line) as n:
+            return n
+        case BoolLiteral(value, line) as b:
+            return b
+        case Assignment(Identifier(name) as iden, value, line, declaration):
+            value = resolution(value, environment)
+            if declaration:
+                environment.set(name, iden, line, True)
+                return Assignment(Identifier(name, iden.line, iden.isconst, iden.uid), value, line, declaration)
+            else:
+                reiden = environment.get(name, line)
+                return Assignment(Identifier(name, iden.line, reiden.isconst, reiden.uid), value, line, declaration)
+        case Identifier(name, line) as iden:
+            reiden = environment.get(name, line)
+            return Identifier(name, iden.line, reiden.isconst, reiden.uid)
+        case Seq(things):
+            output = []
+            for thing in things:
+                output.append(resolution(thing, environment))
+            return Seq(output)
+        case Echo(expr, line):
+            return Echo(resolution(expr, environment), line)
+        case BinOp(left, op, right, line):
+            return BinOp(resolution(left, environment), op, resolution(right, environment), line)
+        case UnOp(op, right, line):
+            return UnOp(op, resolution(right, environment), line)
+        case ListLiteral(elements, length, line):
+            output = []
+            for i in elements:
+                output.append(resolution(i, environment))
+            return ListLiteral(output, length, line)
+        case Lambda(Identifier(name), e1, e2, line):
+            e1 = resolution(e1, environment)
+            newEnv = Scope(environment)
+            newIden = Identifier(name, line, True)
+            newEnv.set(name, newIden, line, True)
+            # print(newEnv)
+            e2 = resolution(e2, newEnv)
+            del newEnv
+            return Lambda(newIden, e1, e2, line)
+        case If(e0, e1, e2):
+            e0 = resolution(e0, environment)
+            newEnv = Scope(environment)
+            e1 = resolution(e1, newEnv)
+            del newEnv
+            newEnv = Scope(environment)
+            e2 = resolution(e2, newEnv)
+            del newEnv
+            return If(e0, e1, e2)
+        case Loop(condition, body):
+            condition = resolution(condition, environment)
+            newEnv = Scope(environment)
+            body = resolution(body, newEnv)
+            del newEnv
+            return Loop(condition, body)
+        case StrLiteral(value, line):
+            return StrLiteral(value, line)
+        case Function(name, args, body, line):
+            environment.set(name.name, name, line, True)
+            newEnv = Scope(environment)
+            for i in args:
+                newEnv.set(i.name, i, line, True)
+            body = resolution(body, newEnv)
+            del newEnv
+            return Function(name, args, body, line)
+        case Call(name, args, line):
+            args = [resolution(i, environment) for i in args]
+            return Call(resolution(name, environment), args, line)
+        case MethodLiteral(name, args, line):
+            args = [resolution(i, environment) for i in args]
+            return MethodLiteral(name, args, line)
+
+    
+    print(program)
+    raise InvalidProgram()
+
+
+def evaluate(program: AST, environment: Scope = Scope()):
+    if program is None:
+        return None
+    match program:
+        case Assignment(Identifier(name, _, isconst) as v, value, line, declaration):
             # environment.set(name, value, line, declaration)
-            environment.set(name, evaluate(
-                value, environment), line, declaration)
+            if isconst and not declaration:
+                report_runtime_error(line, f"Variable {name} is constant")
+            environment.set(v, evaluate(value, environment), line, declaration)
             return None
-        case Identifier(name, line):
-            return environment.get(name, line)
+        case Identifier(name, line) as v:
+            return environment.get(v, line)
+        
         case ListLiteral(elements, length, line):
             output = []
             for i in elements:
                 output.append(evaluate(i, environment))
             return output
+        
         case MethodLiteral(name, args, line):
             method_name = name
             arguments = [] 
@@ -74,17 +160,18 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 arguments.append(evaluate(arg)) 
             return method_name, arguments, line
             
-        case Lambda(Identifier(name), e1, e2, line):
+        case Lambda(Identifier(name) as iden, e1, e2, line):
             v1 = evaluate(e1, environment)
             newEnv = Scope(environment)
-            newEnv.set(name, v1, line, True)
+            newEnv.set(iden, v1, line, True)
             if e2 is None:
                 return v1
             v2 = evaluate(e2, newEnv)
             del newEnv
             return v2
+        
         case If(e0, e1, e2):
-            return evaluate(e1) if evaluate(e0) else evaluate(e2)
+            return evaluate(e1, environment) if evaluate(e0, environment) else evaluate(e2, environment)
         case Loop(condition, body):
             output = None
             while evaluate(condition, environment):
@@ -146,8 +233,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.EQUAL_EQUAL: return evaluate(left, environment) == evaluate(right, environment)
                     # case TokenType.DOT: 
             except TypeError:
-                report_runtime_error(
-                    line, "TypeError: Comparison of numeric and non mumeric types")
+                report_runtime_error(line, "TypeError: Comparison of numeric and non mumeric types")
                 return ""
             try:
                 match op:
@@ -188,8 +274,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case "++": return evaluate(right, environment) + 1
                     case "--": return evaluate(right, environment) - 1
             except TypeError:
-                report_runtime_error(
-                    line, "TypeError: Operation not valid for non numeric values")
+                report_runtime_error(line, "TypeError: Operation not valid for non numeric values")
         case Seq(things):
             output = None
             for thing in things:
@@ -200,15 +285,20 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case Echo(expr, line):
             print(evaluate(expr, environment))
             return ""
-        case Function(name, parameters, body, line):
-            f = Function(name, parameters, body, line)
-            environment.set(name.text, f, line, True)
+        case Function(name, parameters, body, line) as f:
+            # f = Function(name, parameters, body, line)
+            environment.set(name, f, line, True)
             return ""
-        case Call(callee, paren, arguments):
-            f = environment.get(callee.name, 1)
+        case Call(callee, arguments, line):
+            f = environment.get(callee, line)
+            newEnv = Scope(environment)
             for i in range(0 , len(f.parameters)):
-                environment.set(f.parameters[i].text , evaluate(arguments[i] , environment) , f.line , True)
-            return evaluate(f.body, environment)
+                newEnv.set(f.parameters[i] , evaluate(arguments[i] , newEnv) , f.line , True)
+            v = evaluate(f.body, newEnv)
+            del newEnv
+            return v
+        case NullLiteral(line):
+            return None
         case Abort(msg):
             print(msg)
             exit()

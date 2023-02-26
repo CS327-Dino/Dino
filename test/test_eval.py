@@ -35,10 +35,10 @@ class TestEval(unittest.TestCase):
         a = Identifier("a")
         e1 = NumLiteral(5)
         e2 = BinOp(a, TokenType.PLUS, a)
-        e = Let(a, e1, e2)
+        e = Lambda(a, e1, e2)
         self.assertEqual(evaluate(e), 10)
 
-        e = Let(a, e1, Let(a, e2, e2))
+        e = Lambda(a, e1, Lambda(a, e2, e2))
         self.assertEqual(evaluate(e), 20)
 
     def test_If_eval(self):
