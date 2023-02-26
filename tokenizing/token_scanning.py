@@ -46,6 +46,8 @@ class TokenType(Enum):
     EXPONENT = 39
     COMMENT = 40
     ABORT = 40
+    CAPTURE = 41
+    INTEGER = 42
 
 
 class Token():
@@ -89,8 +91,8 @@ class Scanner():
         "or": TokenType.OR,
         "return": TokenType.RETURN,
         "echo": TokenType.ECHO,
-        "abort": TokenType.ABORT
-
+        "abort": TokenType.ABORT,
+        "capture": TokenType.CAPTURE
     }
 
     def __init__(self, code, error):
@@ -225,9 +227,13 @@ class Scanner():
             while (self.__digit_check(self.__peek()) == True):
                 self.current += 1
 
-        n = self.code[self.start:self.current]
-        num_token = Token(TokenType.NUMBER, n, float(n), self.line)
-        self.token_list.append(num_token)
+            n = self.code[self.start:self.current]
+            num_token = Token(TokenType.NUMBER, n, float(n), self.line)
+            self.token_list.append(num_token)
+        else:
+            n = self.code[self.start:self.current]
+            int_token = Token(TokenType.INTEGER, n, int(n), self.line)
+            self.token_list.append(int_token)
 
     def __identifier(self):
         while (self.__alpha_numeric_check(self.__peek()) == True):

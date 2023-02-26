@@ -21,9 +21,9 @@ class Parser:
         __elsepart = Seq([])
         while (not self.__match(TokenType.END, "")):
             __ifpart.things.append(self.__declare())
-        self.__consume(TokenType.ELSE, "")
-        while (not self.__match(TokenType.END, "")):
-            __elsepart.things.append(self.__declare())
+        if(self.__match(TokenType.ELSE, "")):
+            while (not self.__match(TokenType.END, "")):
+                __elsepart.things.append(self.__declare())
         return If(__condition, __ifpart, __elsepart)
 
     def __loop(self):
@@ -214,6 +214,15 @@ class Parser:
 
     def __primary(self):
         # print(self.__current)
+        if (self.__match(TokenType.CAPTURE)):
+            self.__consume(TokenType.LEFT_PAREN, "'(' expected")
+            __text = self.__expression()
+            if(type(__text.value) != str):
+                self.__parseError.message = "Syntax Error: Only string accepted during capture"
+                self.__parseError.line = self.__prev().line
+                report_error(self.__parseError)
+            self.__consume(TokenType.RIGHT_PAREN, "')' expected")
+            return Capture(__text, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.FALSE)):
             return BoolLiteral(False, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.TRUE)):
@@ -222,6 +231,8 @@ class Parser:
             return None
         if (self.__match(TokenType.NUMBER)):
             return NumLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
+        if (self.__match(TokenType.INTEGER)):
+            return IntLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.STRING)):
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.IDENTIFIER)):

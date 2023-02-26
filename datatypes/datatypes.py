@@ -6,6 +6,11 @@ from tokenizing.token_scanning import *
 
 
 @dataclass
+class IntLiteral:
+    value: int
+    line: int = 0
+
+@dataclass
 class NumLiteral:
     value: float
     line: int = 0
@@ -123,7 +128,13 @@ class ListLiteral:
 @dataclass
 class Abort:
     msg: str
+    line: int = 0
 
-AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | None
+@dataclass
+class Capture:
+    msg: str
+    line: int = 0
 
-Value = Fraction | bool | int | str | None | AST
+AST = IntLiteral | NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Capture | None
+
+Value =  float | bool | int | str | None | AST
