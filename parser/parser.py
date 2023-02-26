@@ -63,6 +63,9 @@ class Parser:
         return Function(name, parameters, body, line)
 
     def __list(self):
+        '''
+        parses the list and adds it to the AST as the ListLiteral datatype of Dino
+        '''
         __elements = []
         __length = 0
         # print(self.__tokens[self.__current].text)
@@ -86,15 +89,45 @@ class Parser:
                     break
         return ListLiteral(__elements, __length, self.__prev().line)
 
-    # def __methods_list(self, identifier):
-    #     self.__consume(TokenType.DOT, "Expected '.' to call methods of the list")
-    #     __method = self.__expression()
-    #     __iden = evaluate(identifier)
-    #     print(type(__iden))
-    #     if (__method.name== "length"):
-    #         return NumLiteral(len(__iden), self.__tokens[self.__current].line)
-    #     # if (__method.name == "head"):
-    #     #     return NumLiteral(__iden[0], self.__tokens[self.__current].line)
+    def __methods(self, identifier):
+        '''
+        methods of all datatypes of Dino are added to the AST as MethodLiteral datatype of Dino
+        '''
+        self.__consume(TokenType.DOT, "Expected '.' to call methods")
+        __iden = self.__primary()
+        __args = []
+        reading_args = False
+        if self.__peek_next() and self.__tokens[self.__current].ttype == TokenType.LEFT_PAREN:
+            reading_args = True
+        while self.__peek_next() and reading_args:
+            match self.__tokens[self.__current].ttype:
+                case TokenType.LEFT_PAREN:
+                    self.__forward()
+                    match self.__tokens[self.__current].ttype:
+                        case TokenType.RIGHT_PAREN:
+                            report_error(DinoError("Invalid Syntax",self.__tokens[self.__current].line) ) 
+                            
+                        case TokenType.COMMA:
+                            report_error(DinoError("Expected an argument before ',' ", self.__tokens[self.__current].line))
+                            
+                    __args.append(self.__expression()) 
+                    
+                case TokenType.COMMA:
+                    self.__consume(TokenType.COMMA,
+                                   "Invalid Syntax")
+                    __args.append(self.__expression()) 
+                case TokenType.RIGHT_PAREN:
+                    self.__consume(TokenType.RIGHT_PAREN,
+                                   "')' expected at the end of the arguments")
+                    break
+                case _:
+                    break
+        # print(self.__tokens[self.__current].text)
+        __method = MethodLiteral(__iden.name, __args, self.__tokens[self.__current].line)
+        if (__method.name not in all_methods):
+            return report_error(DinoError("{} is not a valid method".format(__method.name) , self.__tokens[self.__current].line))
+        return BinOp(identifier,TokenType.DOT, __method,  self.__tokens[self.__current].line)
+
 
     def __expression(self) -> AST:
         return self.__simpleAssignment()
@@ -111,6 +144,9 @@ class Parser:
         return __left
 
     def __equality(self):
+        '''
+        Parsing the expressions having operators: "!=" (not equal to) and "=="(equal to)
+        '''
         left_operand = self.__comparison()
         while self.__peek_next():
             match self.__tokens[self.__current].ttype:
@@ -124,16 +160,68 @@ class Parser:
         return left_operand
 
     def __comparison(self):
-        left_operand = self.__add()
+        '''
+        Parsing the expressions having operators: '<', '<=' , '>', '>='
+        '''
+        left_operand = self.__logical_or()
         while self.__peek_next():
             match self.__tokens[self.__current].ttype:
                 case op if op in [TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL]:
                     self.__forward()
-                    right_operand = self.__add()
+                    right_operand = self.__logical_or()
                     left_operand = BinOp(
                         left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
                     break
+        return left_operand
+    
+    def __logical_or(self):
+
+        left_operand = self.__logical_and() 
+        while self.__peek_next():
+            match self.__tokens[self.__current].ttype:
+                case op if op == TokenType.OR:
+                    self.__forward() 
+                    right_operand = self.__logical_and() 
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                case _:
+                    break 
+        return left_operand
+    
+    def __logical_and(self):
+        left_operand = self.__bitwise_or() 
+        while self.__peek_next():
+            match self.__tokens[self.__current].ttype:
+                case op if op == TokenType.AND:
+                    self.__forward() 
+                    right_operand = self.__bitwise_or() 
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                case _:
+                    break 
+        return left_operand
+    
+    def __bitwise_or(self):
+        left_operand = self.__bitwise_and() 
+        while self.__peek_next():
+            match self.__tokens[self.__current].ttype:
+                case op if op == TokenType.BIT_OR:
+                    self.__forward() 
+                    right_operand = self.__bitwise_and() 
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                case _:
+                    break 
+        return left_operand
+    
+    def __bitwise_and(self):
+        left_operand = self.__add() 
+        while self.__peek_next():
+            match self.__tokens[self.__current].ttype:
+                case op if op == TokenType.BIT_AND:
+                    self.__forward() 
+                    right_operand = self.__add() 
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                case _:
+                    break 
         return left_operand
 
     def __add(self):
@@ -144,8 +232,7 @@ class Parser:
                 case op if op in [TokenType.PLUS, TokenType.MINUS]:
                     self.__forward()
                     right_operand = self.__multiply()
-                    left_operand = BinOp(
-                        left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
                     break
         return left_operand
@@ -225,10 +312,8 @@ class Parser:
         if (self.__match(TokenType.STRING)):
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.IDENTIFIER)):
-            # if self.__tokens[self.__current].ttype == TokenType.DOT:
-            #     __i = evaluate(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
-            #     if (type(__i) == list):
-            #         return self.__methods_list(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
+            if self.__tokens[self.__current].ttype == TokenType.DOT: 
+                return self.__methods(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
             return Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
@@ -282,11 +367,20 @@ class Parser:
             # exit()
 
     def __forward(self):
+        '''
+        helper function to increment the pointer to the current token in the list of tokens.
+        If the iterator 'self.__current' is pointing to the last token, function does nothing. 
+        Otherwise, increments the iterator
+        '''
         if (self.__current >= len(self.__tokens)-1):
             return
         self.__current += 1
 
-    def __peek_next(self):
+    def __peek_next(self): 
+        '''
+        helper function to check if there is any other token after the current token.
+        returns next token (if its there) or False(bool) if the current token is the last token
+        '''
         if (self.__current+1 < len(self.__tokens)-1):
             return self.__tokens[self.__current + 1]
         else:

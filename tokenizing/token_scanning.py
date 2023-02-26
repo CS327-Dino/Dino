@@ -45,6 +45,8 @@ class TokenType(Enum):
     RIGHT_BRACKET = 38
     EXPONENT = 39
     COMMENT = 40
+    BIT_OR = 41
+    BIT_AND = 42
 
 
 class Token():
@@ -150,6 +152,10 @@ class Scanner():
             self.__add_tokens(TokenType.LEFT_BRACKET) 
         elif c == ']':
             self.__add_tokens(TokenType.RIGHT_BRACKET)
+        elif c == '|':
+            self.__add_tokens(TokenType.BIT_OR) 
+        elif c == '&':
+            self.__add_tokens(TokenType.BIT_AND)
         elif c == '!':
             if self.__peek() == '=':
                 self.current += 1
