@@ -123,6 +123,12 @@ class Seq:
 
 
 @dataclass
+class Return:
+    return_exp: 'AST'
+    line: int = 0
+
+
+@dataclass
 class ListLiteral:
     '''
     datatype to store lists 
