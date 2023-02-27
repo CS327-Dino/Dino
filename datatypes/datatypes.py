@@ -6,6 +6,11 @@ from tokenizing.token_scanning import *
 from itertools import count
 
 @dataclass
+class IntLiteral:
+    value: int
+    line: int = 0
+
+@dataclass
 class NumLiteral:
     value: float
     line: int = 0
@@ -141,9 +146,18 @@ class MethodLiteral:
     args: List
     line: int = 0
 
+@dataclass
+class Abort:
+    msg: str
+    line: int = 0
 
-AST = NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call| MethodLiteral | Lambda | None
+@dataclass
+class Capture:
+    msg: str
+    line: int = 0
 
-Value = Fraction | bool | int | str | None | AST
+AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call | Capture | MethodLiteral | Lambda | None
+
+Value =  float | bool | int | str | None | AST
 
 all_methods = ["length", "head", "tail", "slice", "cons"]

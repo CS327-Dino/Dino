@@ -47,6 +47,18 @@ sum(2 , 5 , 6);
 
 -----
 
+Capture and Exit utilities
+
+assign i = capture("Enter Value: ");
+
+loop(i<10)
+    i= i*2;
+    echo(i);
+end
+
+abort();
+
+-----
 To check resolution of scope
 
 assign a = 5;
@@ -75,6 +87,18 @@ fact(n);
 
 -----
 
+Capture and Exit utilities
+
+assign i = capture("Enter Value: ");
+
+loop(i<10)
+    i= i*2;
+    echo(i);
+end
+
+abort();
+
+-----
 Lambda Function
 
 assign var = lambda a = 12 in a*a end ;

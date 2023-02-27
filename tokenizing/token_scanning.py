@@ -1,3 +1,4 @@
+
 from errors.error import *
 from enum import Enum
 
@@ -49,7 +50,10 @@ class TokenType(Enum):
     BIT_AND = 42
     LAMBDA = 43
     IN = 44
-    CONST = 45
+    ABORT = 45
+    CAPTURE = 46
+    INTEGER = 47
+    CONST = 48
 
 class Token():
     ttype: TokenType
@@ -92,6 +96,8 @@ class Scanner():
         "or": TokenType.OR,
         "return": TokenType.RETURN,
         "echo": TokenType.ECHO,
+        "abort": TokenType.ABORT,
+        "capture": TokenType.CAPTURE,
         "const": TokenType.CONST,
         "lambda" : TokenType.LAMBDA,
         "in" : TokenType.IN
@@ -234,9 +240,13 @@ class Scanner():
             while (self.__digit_check(self.__peek()) == True):
                 self.current += 1
 
-        n = self.code[self.start:self.current]
-        num_token = Token(TokenType.NUMBER, n, float(n), self.line)
-        self.token_list.append(num_token)
+            n = self.code[self.start:self.current]
+            num_token = Token(TokenType.NUMBER, n, float(n), self.line)
+            self.token_list.append(num_token)
+        else:
+            n = self.code[self.start:self.current]
+            int_token = Token(TokenType.INTEGER, n, int(n), self.line)
+            self.token_list.append(int_token)
 
     def __identifier(self):
         while (self.__alpha_numeric_check(self.__peek()) == True):
