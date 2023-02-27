@@ -133,6 +133,10 @@ def resolution(program: AST, environment: Scope = Scope()):
         case MethodLiteral(name, args, line):
             args = [resolution(i, environment) for i in args]
             return MethodLiteral(name, args, line)
+        case Abort(msg, line):
+            return Abort(msg, line)
+        case Capture(msg, line):
+            return Capture(msg, line)
 
     print(program)
     raise InvalidProgram()
@@ -324,7 +328,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case Abort(msg):
             print(msg)
             exit()
-        case Capture(msg):
+        case Capture(msg, line):
             try:
                 # Try block checks if the input is valid or not
                 input_val = input(msg.value)
