@@ -47,6 +47,24 @@ sum(2 , 5 , 6);
 
 -----
 
+Functions with return statements:
+
+func fact(n)
+    if (n == 0)
+        return 1;
+    end
+    else
+        return n * fact(n-1);
+    end
+end
+
+assign f = fact(5);
+echo(f);
+
+? The above code will print 120.
+
+-----
+
 Capture and Exit utilities
 
 assign i = capture("Enter Value: ");

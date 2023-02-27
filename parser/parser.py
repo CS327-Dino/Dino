@@ -317,7 +317,7 @@ class Parser:
                         self.__parseError.message = "Identifier can't be called"
                         self.__parseError.triggered = True
                         self.__advance()
-                        break;
+                        break
             else:
                 break
 
@@ -338,6 +338,11 @@ class Parser:
                                "Expect ')' after arguments.")
 
         return Call(expr, arguments, self.__prev().line)
+
+    def __return(self):
+        expr = self.__expression()
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return Return(expr, self.__prev().line)
 
     def __primary(self):
         # print(self.__current)
@@ -452,6 +457,8 @@ class Parser:
             return self.__loop()
         if (self.__match(TokenType.FUNC)):
             return self.__func()
+        if (self.__match(TokenType.RETURN)):
+            return self.__return()
         return self.__exprstmt()
 
     def __assign(self, var, isconst=False):

@@ -44,7 +44,7 @@ class Scope:
 
     def __repr__(self):
         return f"Scope({self.variables})"
-    
+
     def check(self, name, line):
         '''To check whether a variable is already declared or not'''
         if name in self.variables:
@@ -53,12 +53,15 @@ class Scope:
             return self.parent.check(name, line)
         return False
 
+
 def resolution(program: AST, environment: Scope = Scope()):
     if program is None:
         return None
     match program:
         case NumLiteral(value, line) as n:
             return n
+        case IntLiteral(value, line) as i:
+            return i
         case BoolLiteral(value, line) as b:
             return b
         case Assignment(Identifier(name) as iden, value, line, declaration):
@@ -79,6 +82,8 @@ def resolution(program: AST, environment: Scope = Scope()):
             return Seq(output)
         case Echo(expr, line):
             return Echo(resolution(expr, environment), line)
+        case Return(expr, line):
+            return Return(resolution(expr, environment), line)
         case BinOp(left, op, right, line):
             return BinOp(resolution(left, environment), op, resolution(right, environment), line)
         case UnOp(op, right, line):
@@ -128,8 +133,11 @@ def resolution(program: AST, environment: Scope = Scope()):
         case MethodLiteral(name, args, line):
             args = [resolution(i, environment) for i in args]
             return MethodLiteral(name, args, line)
+        case Abort(msg, line):
+            return Abort(msg, line)
+        case Capture(msg, line):
+            return Capture(msg, line)
 
-    
     print(program)
     raise InvalidProgram()
 
@@ -146,20 +154,20 @@ def evaluate(program: AST, environment: Scope = Scope()):
             return None
         case Identifier(name, line) as v:
             return environment.get(v, line)
-        
+
         case ListLiteral(elements, length, line):
             output = []
             for i in elements:
                 output.append(evaluate(i, environment))
             return output
-        
+
         case MethodLiteral(name, args, line):
             method_name = name
-            arguments = [] 
+            arguments = []
             for arg in args:
-                arguments.append(evaluate(arg)) 
+                arguments.append(evaluate(arg))
             return method_name, arguments, line
-            
+
         case Lambda(Identifier(name) as iden, e1, e2, line):
             v1 = evaluate(e1, environment)
             newEnv = Scope(environment)
@@ -169,7 +177,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
             v2 = evaluate(e2, newEnv)
             del newEnv
             return v2
-        
+
         case If(e0, e1, e2):
             return evaluate(e1, environment) if evaluate(e0, environment) else evaluate(e2, environment)
         case Loop(condition, body):
@@ -209,14 +217,20 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.STAR: return evaluate(left, environment) * evaluate(right, environment)
                     case TokenType.SLASH: return evaluate(left, environment) / evaluate(right, environment)
                     case TokenType.EXPONENT: return evaluate(left, environment) ** evaluate(right, environment)
-                    case TokenType.OR: return bool(evaluate(left, environment) or evaluate(right, environment) )
-                    case TokenType.AND: return bool(evaluate(left, environment) and evaluate(right, environment)) 
-                    case TokenType.BIT_OR: 
-                        try: return evaluate(left, environment)|(evaluate(right, environment))
-                        except TypeError:report_runtime_error(line, "TypeError: Bitwise-OR only applicable on integers")
-                    case TokenType.BIT_AND: 
-                        try: return evaluate(left, environment) & evaluate(right, environment)
-                        except TypeError:report_runtime_error(line, "TypeError: Bitwise-AND only applicable on integers")
+                    case TokenType.OR: return bool(evaluate(left, environment) or evaluate(right, environment))
+                    case TokenType.AND: return bool(evaluate(left, environment) and evaluate(right, environment))
+                    case TokenType.BIT_OR:
+                        try:
+                            return evaluate(left, environment) | (evaluate(right, environment))
+                        except TypeError:
+                            report_runtime_error(
+                                line, "TypeError: Bitwise-OR only applicable on integers")
+                    case TokenType.BIT_AND:
+                        try:
+                            return evaluate(left, environment) & evaluate(right, environment)
+                        except TypeError:
+                            report_runtime_error(
+                                line, "TypeError: Bitwise-AND only applicable on integers")
             except TypeError:
                 report_runtime_error(
                     line, "TypeError: Operation not valid for non numeric values")
@@ -231,37 +245,40 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.GREATER_EQUAL: return evaluate(left, environment) <= evaluate(right, environment)
                     case TokenType.BANG_EQUAL: return evaluate(left, environment) != evaluate(right, environment)
                     case TokenType.EQUAL_EQUAL: return evaluate(left, environment) == evaluate(right, environment)
-                    # case TokenType.DOT: 
+                    # case TokenType.DOT:
             except TypeError:
-                report_runtime_error(line, "TypeError: Comparison of numeric and non mumeric types")
+                report_runtime_error(
+                    line, "TypeError: Comparison of numeric and non mumeric types")
                 return ""
             try:
                 match op:
-                    case TokenType.DOT: 
-                        val = evaluate(left) 
+                    case TokenType.DOT:
+                        val = evaluate(left)
                         method, arguments, line = evaluate(right)
                         # print(arguments)
                         if (type(val) is list):
                             # method = right.name
                             match method:
                                 case "length":
-                                    return len(val) 
+                                    return len(val)
                                 case "head":
-                                    return val[0] 
+                                    return val[0]
                                 case "tail":
                                     return val[1:]
-                                case "slice": 
-                                    assert len(arguments) ==2 
-                                    return val[int(arguments[0]): int(arguments[1]) ]
+                                case "slice":
+                                    assert len(arguments) == 2
+                                    return val[int(arguments[0]): int(arguments[1])]
                                 case _:
-                                    report_runtime_error(line, "Invalid method: list does not have any method: {}".format(method))
-                        elif(type(val) is str):
+                                    report_runtime_error(
+                                        line, "Invalid method: list does not have any method: {}".format(method))
+                        elif (type(val) is str):
                             match method:
                                 case "slice":
-                                    assert len(arguments) ==2 
-                                    return val[int(arguments[0]): int(arguments[1]) ]
+                                    assert len(arguments) == 2
+                                    return val[int(arguments[0]): int(arguments[1])]
                                 case _:
-                                    report_runtime_error(line, "Invalid method: string does not have any method: {}".format(method))                   
+                                    report_runtime_error(
+                                        line, "Invalid method: string does not have any method: {}".format(method))
             except TypeError:
                 report_runtime_error(
                     line, "Invalid syntax")
@@ -274,7 +291,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case "++": return evaluate(right, environment) + 1
                     case "--": return evaluate(right, environment) - 1
             except TypeError:
-                report_runtime_error(line, "TypeError: Operation not valid for non numeric values")
+                report_runtime_error(
+                    line, "TypeError: Operation not valid for non numeric values")
         case Seq(things):
             output = None
             for thing in things:
@@ -285,6 +303,9 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case Echo(expr, line):
             print(evaluate(expr, environment))
             return ""
+        case Return(expr, line):
+            environment.set("return", evaluate(expr, environment), line, True)
+            return ""
         case Function(name, parameters, body, line) as f:
             # f = Function(name, parameters, body, line)
             environment.set(name, f, line, True)
@@ -292,31 +313,36 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case Call(callee, arguments, line):
             f = environment.get(callee, line)
             newEnv = Scope(environment)
-            for i in range(0 , len(f.parameters)):
-                newEnv.set(f.parameters[i] , evaluate(arguments[i] , newEnv) , f.line , True)
-            v = evaluate(f.body, newEnv)
+            for i in range(0, len(f.parameters)):
+                newEnv.set(f.parameters[i], evaluate(
+                    arguments[i], newEnv), f.line, True)
+            for ast in f.body.things:
+                output = evaluate(ast, newEnv)
+                if "return" in newEnv.variables:
+                    return newEnv.get("return", line)
             del newEnv
-            return v
+            return None
+
         case NullLiteral(line):
             return None
         case Abort(msg):
             print(msg)
             exit()
-        case Capture(msg):
+        case Capture(msg, line):
             try:
                 # Try block checks if the input is valid or not
                 input_val = input(msg.value)
                 try:
-                    # The subsequent try-except blocks identify the datatype of the input 
+                    # The subsequent try-except blocks identify the datatype of the input
                     # and return the value accordingly
-                    if(int(input_val)):
+                    if (int(input_val)):
                         return int(input_val)
                 except:
                     try:
-                        if(float(input_val)):
+                        if (float(input_val)):
                             return float(input_val)
                     except:
-                        if(input_val == "True" or input_val == "False"):
+                        if (input_val == "True" or input_val == "False"):
                             return bool(input_val)
                         return input_val
             except:
