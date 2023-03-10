@@ -120,7 +120,7 @@ class ListLiteral:
     length -> length of the list
     line -> line no. in source code
     '''
-    elements: list()
+    elements: List
     length: int
     line: int
 
@@ -133,11 +133,11 @@ class MethodLiteral:
     line -> line no. in the source code
     '''
     name: str 
-    args: list()
+    args: List
     line: int = 0
 
 
-AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral  |  If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | MethodLiteral | None
+AST = NumLiteral | BinOp | UnOp | Identifier | Let | BoolLiteral | ListLiteral  |  If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | MethodLiteral | Function | None
 
 Value = Fraction | bool | int | str | None | AST
 
