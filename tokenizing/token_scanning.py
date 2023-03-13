@@ -57,7 +57,8 @@ class TokenType(Enum):
     INCREMENT = 49
     DECREMENT = 50
     MOD = 51
-    COLON = 49
+    SLASH_SLASH = 52
+    COLON = 53
 
 
 class Token():
@@ -169,7 +170,11 @@ class Scanner():
         elif c == '*':
             self.__add_tokens(TokenType.STAR)
         elif c == '/':
-            self.__add_tokens(TokenType.SLASH)
+            if self.__peek() == '/':
+                self.current += 1
+                self.__add_tokens(TokenType.SLASH_SLASH)
+            else:
+                self.__add_tokens(TokenType.SLASH)
         elif c == '%':
             self.__add_tokens(TokenType.MOD)
         elif c == '^':

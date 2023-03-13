@@ -181,3 +181,47 @@ end
 
 echo(sum);  
 
+------------
+Project Euler Problem 4: Largest palindrome product
+
+
+func pallindrome(num)
+    assign temp = num;
+    assign rev = 0;
+    loop(temp>0)
+        rev = (rev * 10) + (temp % 10);
+        temp = temp // 10;
+    end
+    if(rev == num)
+        return 1;
+    end
+    else
+        return 0;
+    end
+end
+
+assign n1 = 999;
+assign n2 = 999;
+assign pall_check = 0;
+assign product = 0;
+assign max_product = 0;
+
+loop(n1>99)
+    n2 = 999;
+    loop(n2>99)
+        product = n1 * n2;
+        if(product < max_product)
+            n2 = 90;
+        end
+        n2 = n2 - 1;
+        pall_check = pallindrome(product);
+        if(pall_check == 1)
+            n2 = 90;
+        end
+    end
+    if(product > max_product)
+        max_product = product;
+    end
+    n1 = n1 - 1;
+end
+echo(max_product);

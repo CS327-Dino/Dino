@@ -316,7 +316,7 @@ class Parser:
         left_operand = self.__exponential()
         while self.__peek_next().ttype != TokenType.EOF:
             match self.__tokens[self.__current].ttype:
-                case op if op in [TokenType.STAR, TokenType.SLASH, TokenType.MOD]:
+                case op if op in [TokenType.STAR, TokenType.SLASH, TokenType.MOD, TokenType.SLASH_SLASH]:
                     self.__forward()
                     right_operand = self.__exponential()
                     left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
