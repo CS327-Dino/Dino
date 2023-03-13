@@ -53,19 +53,16 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope()):
         if parsed_args.verbose:
             print("-----------------------------------------------")
         return
-    
+
     resolved = resolution(expression)
     if parsed_args.verbose:
         print("------------------Resolved Expr----------------")
         print(resolved)
         print("-----------------------------------------------")
-    
-    typecheck(resolved, typeenv, error)
-    if error.triggered:
-        return
-    
+
     output = evaluate(resolved)
     print(output)
+
 
 args = argparse.ArgumentParser()
 args.add_argument("file", nargs="?", help="file to run")
