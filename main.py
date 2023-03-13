@@ -21,9 +21,9 @@ def scan_file(file_name):
     data = f.read()
     error = DinoError()
     run(data.decode("utf-8"), error)
-    if (error.triggered):
-        report_error(error)
-        sys.exit()
+    # if (error.triggered):
+    #     report_error(error)
+    #     sys.exit()
 
 
 def open_prompt():
@@ -39,18 +39,23 @@ def open_prompt():
 def run(code: str, error: DinoError):
     scanned_code = Scanner(code, error)
     token_list = scanned_code.generate_tokens()
-
     parser = Parser(token_list, error)
     expression = parser.parse()
 
     print("------------------Parsed Expr------------------")
     print(expression)
-    print("-----------------------------------------------")
 
     if error.triggered:
+        print("-----------------------------------------------")
         return
+    print("------------------Resolved Expr----------------")
+    resolved = resolution(expression)
+    print(resolved)
+    print("-----------------------------------------------")
     # print(evaluate(expression))
-    output = evaluate(expression)
+    output = evaluate(resolved)
+    # output = evaluate(expression)
+    print(output)
 
 
 main()

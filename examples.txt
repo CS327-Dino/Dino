@@ -31,7 +31,7 @@ a = a+1;
 b = b+1;
 echo(a);
 echo(b);
-end;
+end
 echo(b);
 
 -----
@@ -46,3 +46,108 @@ end
 sum(2 , 5 , 6);
 
 -----
+
+Functions with return statements:
+
+func fact(n)
+    if (n == 0)
+        return 1;
+    end
+    else
+        return n * fact(n-1);
+    end
+end
+
+assign f = fact(5);
+echo(f);
+
+? The above code will print 120.
+
+-----
+
+Capture and Exit utilities
+
+assign i = capture("Enter Value: ");
+
+loop(i<10)
+    i= i*2;
+    echo(i);
+end
+
+abort();
+
+-----
+To check resolution of scope
+
+assign a = 5;
+if(a>5)
+	assign a = 10;
+	echo(a);
+end
+else
+	assign a = 15;
+	echo(a);
+end
+
+echo(a);
+
+-----
+
+Recursive function
+
+func fact(n)
+	if(n == 0) echo(0); end
+	else echo(n); fact(n-1); end
+end
+
+assign n = 5;
+fact(n);
+
+-----
+
+Capture and Exit utilities
+
+assign i = capture("Enter Value: ");
+
+loop(i<10)
+    i= i*2;
+    echo(i);
+end
+
+abort();
+
+-----
+Lambda Function
+
+assign var = lambda a = 12 in a*a end ;
+echo(var);
+echo(lambda a = 12 in lambda b = 7 in b*b+a end end);
+echo(lambda a= lambda b = 2 in b+ b*b end in a+a end);
+echo(lambda a= lambda a = 2 in a+ a*a end in a+a end);
+echo(lambda a=12 in a+a end);
+lambda a=7 in a+8 end;
+lambda a=8 end;
+echo(a); 
+func sum(a , b , c)
+    assign s = a + b + c;
+    echo(s);
+end
+echo(lambda x = 12 in sum(x,5,6) end);
+echo(lambda a=2 in a*(lambda b=3 in lambda a=10 in a+b end end) end);
+
+------
+List methods
+
+assign l = [1,2,3,4,5];
+echo(l);
+echo(l.head);
+echo(l.tail);
+echo(l.length);
+echo(l.slice(1,3));
+
+------
+String methods
+
+assign s = "Hello!! My name is Lipika Rajpal";
+echo(s);
+echo(s.slice(3,7));
