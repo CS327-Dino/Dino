@@ -54,6 +54,11 @@ class TokenType(Enum):
     CAPTURE = 46
     INTEGER = 47
     CONST = 48
+    INCREMENT = 49
+    DECREMENT = 50
+    MOD = 51
+    COLON = 49
+
 
 class Token():
     ttype: TokenType
@@ -99,8 +104,8 @@ class Scanner():
         "abort": TokenType.ABORT,
         "capture": TokenType.CAPTURE,
         "const": TokenType.CONST,
-        "lambda" : TokenType.LAMBDA,
-        "in" : TokenType.IN
+        "lambda": TokenType.LAMBDA,
+        "in": TokenType.IN
 
     }
 
@@ -134,7 +139,7 @@ class Scanner():
     def __scan_tokens(self):
         c = self.code[self.current]
         self.current += 1
-        
+
         if c == '(':
             self.__add_tokens(TokenType.LEFT_PAREN)
         elif c == ')':
@@ -148,23 +153,33 @@ class Scanner():
         elif c == '.':
             self.__add_tokens(TokenType.DOT)
         elif c == '-':
-            self.__add_tokens(TokenType.MINUS)
+            if self.__peek() == '-':
+                self.current += 1
+                self.__add_tokens(TokenType.DECREMENT)
+            else:
+                self.__add_tokens(TokenType.MINUS)
         elif c == '+':
-            self.__add_tokens(TokenType.PLUS)
+            if self.__peek() == '+':
+                self.current += 1
+                self.__add_tokens(TokenType.INCREMENT)
+            else:
+                self.__add_tokens(TokenType.PLUS)
         elif c == ';':
             self.__add_tokens(TokenType.SEMICOLON)
         elif c == '*':
             self.__add_tokens(TokenType.STAR)
         elif c == '/':
             self.__add_tokens(TokenType.SLASH)
+        elif c == '%':
+            self.__add_tokens(TokenType.MOD)
         elif c == '^':
             self.__add_tokens(TokenType.EXPONENT)
         elif c == '[':
-            self.__add_tokens(TokenType.LEFT_BRACKET) 
+            self.__add_tokens(TokenType.LEFT_BRACKET)
         elif c == ']':
             self.__add_tokens(TokenType.RIGHT_BRACKET)
         elif c == '|':
-            self.__add_tokens(TokenType.BIT_OR) 
+            self.__add_tokens(TokenType.BIT_OR)
         elif c == '&':
             self.__add_tokens(TokenType.BIT_AND)
         elif c == '!':
@@ -193,13 +208,15 @@ class Scanner():
                 self.__add_tokens(TokenType.GREATER)
         elif c == ' ' or c == '\r' or c == '\t':
             pass
-        elif c== '?':
-    
-            if (self.__peek()== ":"):
-                self.current+=1
+        elif c == '?':
+
+            if (self.__peek() == ":"):
+                self.current += 1
                 self.__multicomment()
             else:
                 self.__comment()
+        elif c == ':':
+            self.__add_tokens(TokenType.COLON)
         elif c == '\n':
             self.line += 1
         elif c == '"':
@@ -280,24 +297,22 @@ class Scanner():
         self.token_list.append(token)
 
     def __comment(self):
-        while(self.__end_reached()==False):
+        while (self.__end_reached() == False):
             self.current += 1
             if (self.__peek() == '\n'):
                 self.line += 1
-                self.current+=1
+                self.current += 1
                 break
-    
+
     def __multicomment(self):
-        while(self.__end_reached()==False and not (self.__peek()==':' and self.__peek_next()=='?')):
+        while (self.__end_reached() == False and not (self.__peek() == ':' and self.__peek_next() == '?')):
             if self.__peek() == '\n':
                 self.line += 1
             self.current += 1
-        if(self.__end_reached()==False):
+        if (self.__end_reached() == False):
             self.current += 2
         else:
             self.error.line = self.line
             self.error.message = "Unterminated Multiline Comment"
             self.error.triggered = True
             pass
-
-        

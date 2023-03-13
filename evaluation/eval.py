@@ -93,6 +93,13 @@ def resolution(program: AST, environment: Scope = Scope()):
             for i in elements:
                 output.append(resolution(i, environment))
             return ListLiteral(output, length, line)
+        case DictLiteral(elements, length, line):
+            output = {}
+            for i in elements:
+                new_s = StrLiteral(i, line)
+                output[resolution(new_s, environment).value] = resolution(
+                    elements[i], environment)
+            return DictLiteral(output, length, line)
         case Lambda(Identifier(name), e1, e2, line):
             e1 = resolution(e1, environment)
             newEnv = Scope(environment)
@@ -148,8 +155,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
     match program:
         case Assignment(Identifier(name, _, isconst) as v, value, line, declaration):
             # environment.set(name, value, line, declaration)
-            if isconst and not declaration:
-                report_runtime_error(line, f"Variable {name} is constant")
+            # if isconst and not declaration:
+            #     report_runtime_error(line, f"Variable {name} is constant")
             environment.set(v, evaluate(value, environment), line, declaration)
             return None
         case Identifier(name, line) as v:
@@ -159,6 +166,14 @@ def evaluate(program: AST, environment: Scope = Scope()):
             output = []
             for i in elements:
                 output.append(evaluate(i, environment))
+            return output
+
+        case DictLiteral(elements, length, line):
+            output = {}
+            for i in elements:
+                new_s = StrLiteral(i, line)
+                output[evaluate(new_s, environment)] = evaluate(
+                    elements[i], environment)
             return output
 
         case MethodLiteral(name, args, line):
@@ -202,8 +217,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 if (type(evaled_right) == float or type(evaled_right) == int):
                     return evaluate(left, environment) + evaluate(right, environment)
                 else:
-                    report_runtime_error(
-                        line, "Error: '+' operation valid only for two strings or two numerical values")
+                    report_runtime_error(line, "Error: '+' operation valid only for two strings or two numerical values")
             else:
                 if (type(evaled_right) == str):
                     return evaluate(left, environment) + evaluate(right, environment)
@@ -216,6 +230,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.MINUS: return evaluate(left, environment) - evaluate(right, environment)
                     case TokenType.STAR: return evaluate(left, environment) * evaluate(right, environment)
                     case TokenType.SLASH: return evaluate(left, environment) / evaluate(right, environment)
+                    case TokenType.MOD: return evaluate(left, environment) % evaluate(right, environment)
                     case TokenType.EXPONENT: return evaluate(left, environment) ** evaluate(right, environment)
                     case TokenType.OR: return bool(evaluate(left, environment) or evaluate(right, environment))
                     case TokenType.AND: return bool(evaluate(left, environment) and evaluate(right, environment))
@@ -223,20 +238,16 @@ def evaluate(program: AST, environment: Scope = Scope()):
                         try:
                             return evaluate(left, environment) | (evaluate(right, environment))
                         except TypeError:
-                            report_runtime_error(
-                                line, "TypeError: Bitwise-OR only applicable on integers")
+                            report_runtime_error(line, "TypeError: Bitwise-OR only applicable on integers")
                     case TokenType.BIT_AND:
                         try:
                             return evaluate(left, environment) & evaluate(right, environment)
                         except TypeError:
-                            report_runtime_error(
-                                line, "TypeError: Bitwise-AND only applicable on integers")
+                            report_runtime_error(line, "TypeError: Bitwise-AND only applicable on integers")
             except TypeError:
-                report_runtime_error(
-                    line, "TypeError: Operation not valid for non numeric values")
+                report_runtime_error(line, "TypeError: Operation not valid for non numeric values")
             except ZeroDivisionError:
-                report_runtime_error(
-                    line, "ZeroDivisionError: Division by Zero is not allowed")
+                report_runtime_error(line, "ZeroDivisionError: Division by Zero is not allowed")
             try:
                 match op:
                     case TokenType.GREATER: return evaluate(left, environment) > evaluate(right, environment)
@@ -247,8 +258,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.EQUAL_EQUAL: return evaluate(left, environment) == evaluate(right, environment)
                     # case TokenType.DOT:
             except TypeError:
-                report_runtime_error(
-                    line, "TypeError: Comparison of numeric and non mumeric types")
+                report_runtime_error(line, "TypeError: Comparison of numeric and non mumeric types")
                 return ""
             try:
                 match op:
@@ -269,30 +279,26 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                     assert len(arguments) == 2
                                     return val[int(arguments[0]): int(arguments[1])]
                                 case _:
-                                    report_runtime_error(
-                                        line, "Invalid method: list does not have any method: {}".format(method))
+                                    report_runtime_error(line, "Invalid method: list does not have any method: {}".format(method))
                         elif (type(val) is str):
                             match method:
                                 case "slice":
                                     assert len(arguments) == 2
                                     return val[int(arguments[0]): int(arguments[1])]
                                 case _:
-                                    report_runtime_error(
-                                        line, "Invalid method: string does not have any method: {}".format(method))
+                                    report_runtime_error(line, "Invalid method: string does not have any method: {}".format(method))
             except TypeError:
-                report_runtime_error(
-                    line, "Invalid syntax")
+                report_runtime_error(line, "Invalid syntax")
                 return ""
         case UnOp(op, right, line):
             try:
                 match op:
                     case TokenType.BANG: return not evaluate(right, environment)
                     case TokenType.MINUS: return -evaluate(right, environment)
-                    case "++": return evaluate(right, environment) + 1
-                    case "--": return evaluate(right, environment) - 1
+                    case TokenType.INCREMENT: return evaluate(right, environment) + 1
+                    case TokenType.DECREMENT: return evaluate(right, environment) - 1
             except TypeError:
-                report_runtime_error(
-                    line, "TypeError: Operation not valid for non numeric values")
+                report_runtime_error(line, "TypeError: Operation not valid for non numeric values")
         case Seq(things):
             output = None
             for thing in things:
@@ -331,7 +337,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case Capture(msg, line):
             try:
                 # Try block checks if the input is valid or not
-                input_val = input(msg.value)
+                input_val = input(msg)
                 try:
                     # The subsequent try-except blocks identify the datatype of the input
                     # and return the value accordingly
