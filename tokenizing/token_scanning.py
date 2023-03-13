@@ -54,6 +54,9 @@ class TokenType(Enum):
     CAPTURE = 46
     INTEGER = 47
     CONST = 48
+    INCREMENT = 49
+    DECREMENT = 50
+    MOD = 51
 
 class Token():
     ttype: TokenType
@@ -148,15 +151,25 @@ class Scanner():
         elif c == '.':
             self.__add_tokens(TokenType.DOT)
         elif c == '-':
-            self.__add_tokens(TokenType.MINUS)
+            if self.__peek() == '-':
+                self.current += 1
+                self.__add_tokens(TokenType.DECREMENT)
+            else:
+                self.__add_tokens(TokenType.MINUS)
         elif c == '+':
-            self.__add_tokens(TokenType.PLUS)
+            if self.__peek() == '+':
+                self.current += 1
+                self.__add_tokens(TokenType.INCREMENT)
+            else:
+                self.__add_tokens(TokenType.PLUS)
         elif c == ';':
             self.__add_tokens(TokenType.SEMICOLON)
         elif c == '*':
             self.__add_tokens(TokenType.STAR)
         elif c == '/':
             self.__add_tokens(TokenType.SLASH)
+        elif c == '%':
+            self.__add_tokens(TokenType.MOD)
         elif c == '^':
             self.__add_tokens(TokenType.EXPONENT)
         elif c == '[':
