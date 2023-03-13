@@ -59,7 +59,6 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope()):
         print("------------------Resolved Expr----------------")
         print(resolved)
         print("-----------------------------------------------")
-
     output = evaluate(resolved)
     print(output)
 
