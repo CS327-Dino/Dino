@@ -166,7 +166,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
             output = []
             for i in elements:
                 output.append(evaluate(i, environment))
-            return output
+            # return output
+            return ListLiteral(output, length, line)
 
         case DictLiteral(elements, length, line):
             output = {}
@@ -208,8 +209,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
             return value
         case BoolLiteral(value, line):
             return value
-        case StrLiteral(value, line):
-            return value
+        case StrLiteral(value, line) as s:
+            return s
         case BinOp(left, TokenType.PLUS, right, line):
             evaled_left = evaluate(left, environment)
             evaled_right = evaluate(right, environment)
@@ -219,11 +220,14 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 else:
                     report_runtime_error(line, "Error: '+' operation valid only for two strings or two numerical values")
             else:
-                if (type(evaled_right) == str):
-                    return evaluate(left, environment) + evaluate(right, environment)
-                else:
-                    report_runtime_error(
-                        line, "Error: '+' operation valid only for two strings or two numerical values")
+                print(evaled_right)
+                match evaled_right:
+                    case StrLiteral(value, line):
+                # if ((evaled_right) == StrLiteral):
+                        return evaluate(left, environment).value + evaluate(right, environment).value
+                    case _:
+                        report_runtime_error(
+                            line, "Error: '+' operation valid only for two strings or two numerical values")
         case BinOp(left, op, right, line):
             try:
                 match op:
@@ -266,28 +270,69 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.DOT:
                         val = evaluate(left)
                         method, arguments, line = evaluate(right)
+                        print(left)
                         # print(arguments)
-                        if (type(val) is list):
-                            # method = right.name
-                            match method:
-                                case "length":
-                                    return len(val)
-                                case "head":
-                                    return val[0]
-                                case "tail":
-                                    return val[1:]
-                                case "slice":
-                                    assert len(arguments) == 2
-                                    return val[int(arguments[0]): int(arguments[1])]
-                                case _:
-                                    report_runtime_error(line, "Invalid method: list does not have any method: {}".format(method))
-                        elif (type(val) is str):
-                            match method:
-                                case "slice":
-                                    assert len(arguments) == 2
-                                    return val[int(arguments[0]): int(arguments[1])]
-                                case _:
-                                    report_runtime_error(line, "Invalid method: string does not have any method: {}".format(method))
+                        # if (type(val) is list):
+                        match val:
+                            case ListLiteral(elements, length, line):
+                                # method = right.name
+                                match method:
+                                    case "length":
+                                        # return len(val)
+                                        assert len(arguments) == 0, "No arguments are expected"
+                                        return length
+                                    case "head":
+                                        # return val[0]
+                                        assert len(arguments) == 0, "No arguments are expected"
+                                        if (length > 0):
+                                            return elements[0]
+                                        else:
+                                            report_runtime_error(line, "The list has no elements")
+                                    case "tail":
+                                        # return val[1:]
+                                        # return elements[1:]
+                                        assert len(arguments) == 0, "No arguments are expected"
+                                        return ListLiteral(elements[1:], length -1, line)
+                                    case "slice":
+                                        assert len(arguments) == 2 , "Expected 2 arguments"
+                                        # return val[int(arguments[0]): int(arguments[1])]
+                                        # return elements[arguments[0] : arguments[1]]
+                                        try:
+                                            sliced_list = elements[arguments[0] : arguments[1]]
+                                        except:
+                                            report_runtime_error(line, "List index is out of range")
+                                        return ListLiteral(sliced_list, len(sliced_list), line)
+                                    case "add":
+                                        assert len(arguments) == 1, "Expected 1 argument"
+                                        elements.append(arguments[0]) 
+                                        length += 1 
+                                        environment.set(left, ListLiteral(elements, length, line) , line, False)
+                                        return None
+                                    case "at":
+                                        assert len(arguments) == 1, "Expected 1 argument"
+                                        try:
+                                            return elements[arguments[0]]
+                                        except:
+                                            report_runtime_error(line, "Invalid Index")
+                                    case _:
+                                        report_runtime_error(
+                                            line, "Invalid method: list does not have any method: {}".format(method))
+                        # elif (type(val) is str):
+                            case StrLiteral(value, line): 
+                                match method:
+                                    case "slice":
+                                        assert len(arguments) == 2 , "Expected 2 arguments" 
+                                        sliced_str = value[arguments[0]: arguments[1]]
+                                        return StrLiteral(sliced_str, line)
+                                    case "at":
+                                        assert len(arguments) == 1 , "Expected 1 argument"
+                                        try:
+                                            return value[arguments[0]]
+                                        except:
+                                            report_runtime_error(line, "Invalid index")
+                                    case _:
+                                        report_runtime_error(
+                                            line, "Invalid method: string does not have any method: {}".format(method))
             except TypeError:
                 report_runtime_error(line, "Invalid syntax")
                 return ""

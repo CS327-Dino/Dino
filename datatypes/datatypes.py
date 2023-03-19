@@ -178,4 +178,4 @@ AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLi
 
 Value =  float | bool | int | str | None | AST
 
-all_methods = ["length", "head", "tail", "slice", "cons"]
+all_methods = ["length", "head", "tail", "slice", "cons", "add", "at"]
