@@ -126,7 +126,10 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 match op:
                     case TokenType.MINUS: return evaluate(left, environment) - evaluate(right, environment)
                     case TokenType.STAR: return evaluate(left, environment) * evaluate(right, environment)
-                    case TokenType.SLASH: return evaluate(left, environment) / evaluate(right, environment)
+                    case TokenType.SLASH: 
+                        if evaluate(right, environment) == 0:
+                            report_runtime_error(line, "ZeroDivisionError: Division by zero")
+                        return evaluate(left, environment) / evaluate(right, environment)
                     case TokenType.MOD: return evaluate(left, environment) % evaluate(right, environment)
                     case TokenType.EXPONENT: return evaluate(left, environment) ** evaluate(right, environment)
                     case TokenType.OR: return bool(evaluate(left, environment) or evaluate(right, environment))

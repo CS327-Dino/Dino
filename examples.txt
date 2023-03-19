@@ -151,3 +151,22 @@ String methods
 assign s = "Hello!! My name is Lipika Rajpal";
 echo(s);
 echo(s.slice(3,7));
+
+------
+Multiple of 3 or 5
+
+assign i = capture("Enter Value: ");
+
+if ((i % 3 == 0) and (i % 5 == 0))
+    echo("FizzBuzz"); 
+end
+else 
+    if(i%3 == 0) 
+        echo("Fizz");
+    end
+    else
+        if(i%5 == 0)
+            echo("Buzz");
+        end
+    end
+end
