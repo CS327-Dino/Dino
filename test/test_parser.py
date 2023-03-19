@@ -5,7 +5,7 @@ from errors.error import*
 import unittest
 
 class TestParser(unittest.TestCase):
-    def test_operators(self):
+    def test_arithmetic_operators(self):
         expression = Parser(Scanner("10==23;", DinoError()).generate_tokens(), DinoError()).parse()
         self.assertEqual(
             expression, Seq(things=[BinOp(left=IntLiteral(value=10, line=1), op=TokenType.EQUAL_EQUAL, right=IntLiteral(value=23, line=1), line=1)]))
@@ -17,6 +17,24 @@ class TestParser(unittest.TestCase):
         expression = Parser(Scanner("2^3^2 + 3;", DinoError()).generate_tokens(), DinoError()).parse()
         self.assertEqual(
             expression, Seq(things=[BinOp(left=BinOp(left=IntLiteral(value=2, line=1), op=TokenType.EXPONENT, right=BinOp(left=IntLiteral(value=3, line=1), op=TokenType.EXPONENT, right=IntLiteral(value=2, line=1), line=1), line=1), op=TokenType.PLUS, right=IntLiteral(value=3, line=1), line=1)]))
+        
+    def test_unary_operators(self):
+        expression = Parser(Scanner("!2;", DinoError()).generate_tokens(), DinoError()).parse()
+        self.assertEqual(expression, Seq(things=[UnOp(op=TokenType.BANG, right=IntLiteral(value=2, line=1), line=1)]))
+
+        expression = Parser(Scanner("++2;", DinoError()).generate_tokens(), DinoError()).parse()
+        self.assertEqual(expression, Seq(things=[UnOp(op=TokenType.INCREMENT, right=IntLiteral(value=2, line=1), line=1)]))
+
+        expression = Parser(Scanner("-2;", DinoError()).generate_tokens(), DinoError()).parse()
+        self.assertEqual(expression, Seq(things=[UnOp(op=TokenType.MINUS, right=IntLiteral(value=2, line=1), line=1)]))
+
+    def test_bitwise_operators(self):
+        expression = Parser(Scanner("2&3;", DinoError()).generate_tokens(), DinoError()).parse()
+        self.assertEqual(expression, Seq(things=[BinOp(left=IntLiteral(value=2, line=1), op=TokenType.BIT_AND, right=IntLiteral(value=3, line=1), line=1)]))
+
+        expression = Parser(Scanner("4|5;", DinoError()).generate_tokens(), DinoError()).parse()
+        self.assertEqual(expression, Seq(things=[BinOp(left=IntLiteral(value=4, line=1), op=TokenType.BIT_OR, right=IntLiteral(value=5, line=1), line=1)]))
+
 
     def test_logical_operators(self):
         expression = Parser(Scanner("echo(2<3 and 1<4+2);", DinoError()).generate_tokens(), DinoError()).parse()
@@ -86,6 +104,9 @@ class TestParser(unittest.TestCase):
 
         expression = Parser(Scanner("echo(g.slice(2,5));", DinoError()).generate_tokens(), DinoError()).parse()
         self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='g', line=1, isconst=False, uid=17), op=TokenType.DOT, right=MethodLiteral(name='slice', args=[IntLiteral(value=2, line=1), IntLiteral(value=5, line=1)], line=1), line=1), line=1)]))
+
+        expression = Parser(Scanner('echo("Hello" + " World");', DinoError()).generate_tokens(), DinoError()).parse()
+        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=StrLiteral(value='Hello', line=1), op=TokenType.PLUS, right=StrLiteral(value=' World', line=1), line=1), line=1)]))
 
     
 
