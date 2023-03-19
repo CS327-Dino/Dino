@@ -1,4 +1,7 @@
 import unittest
+from parser.parser import *
+from tokenizing.token_scanning import *
+from datatypes.datatypes import *
 from evaluation.eval import *
 
 
@@ -17,6 +20,7 @@ class TestEval(unittest.TestCase):
         e10 = BinOp(e4, TokenType.LESS, e3)
         e11 = BinOp(e2, TokenType.BANG_EQUAL, e1)
         e12 = BinOp(e2, TokenType.EQUAL_EQUAL, NumLiteral(7))
+        e13 = BinOp(NumLiteral(7), TokenType.SLASH, NumLiteral(0))
 
         self.assertEqual(evaluate(e5), 16)
         self.assertEqual(evaluate(e6), 3)
@@ -29,7 +33,9 @@ class TestEval(unittest.TestCase):
         self.assertTrue(evaluate(e12))
         self.assertFalse(evaluate(UnOp(TokenType.BANG, BoolLiteral(True))))
 		
-        self.assertEqual(evaluate(UnOp("++", e4)), 6)
+        self.assertEqual(evaluate(UnOp(TokenType.INCREMENT, e4)), 6)
+        with self.assertRaises(SystemExit):
+            evaluate(e13)
 
     def test_let_eval(self):
         a = Identifier("a")
@@ -52,3 +58,21 @@ class TestEval(unittest.TestCase):
         e1 = BinOp(NumLiteral(5), TokenType.GREATER, NumLiteral(7))
         e = If(e1, e2, e3)
         self.assertEqual(evaluate(e), 30)
+
+    def test_conditional_eval(self):
+        e1 = BinOp(BinOp(IntLiteral(10), TokenType.SLASH, IntLiteral(2)), TokenType.EQUAL_EQUAL, right=IntLiteral(5))
+        e2 = BinOp(BinOp(IntLiteral(10), TokenType.MOD, IntLiteral(2)), TokenType.EQUAL_EQUAL, right=IntLiteral(0))
+
+        self.assertTrue(evaluate(BinOp(e1, TokenType.AND, e2)))
+        self.assertTrue(evaluate(BinOp(e1, TokenType.OR, e2)))
+
+        e2 = BinOp(BinOp(IntLiteral(10), TokenType.MOD, IntLiteral(3)), TokenType.EQUAL_EQUAL, right=IntLiteral(0))
+        self.assertFalse(evaluate(BinOp(e1, TokenType.AND, e2)))
+        self.assertTrue(evaluate(BinOp(e1, TokenType.OR, e2)))
+
+    def test_bitwise(self):
+        e1 = BinOp(IntLiteral(10), TokenType.BIT_AND, IntLiteral(2))
+        e2 = BinOp(IntLiteral(10), TokenType.BIT_OR, IntLiteral(2))
+
+        self.assertEqual(evaluate(e1), 2)
+        self.assertEqual(evaluate(e2), 10)
