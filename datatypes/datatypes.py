@@ -140,6 +140,18 @@ class ListLiteral:
     length: int
     line: int
 
+@dataclass
+class DictLiteral:
+    '''
+    datatype to store dictionaries
+    elements -> elements of 'Dino' dictionary stored as a 'python' dictionary
+    length -> length of the dictionary
+    line -> line no. in source code
+    '''
+    elements: dict
+    length: int
+    line: int
+
 @dataclass 
 class MethodLiteral:
     '''

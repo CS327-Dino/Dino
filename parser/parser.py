@@ -11,7 +11,8 @@ class Parser:
         self.__tokens = tokenlist
         self.__current = 0
         self.__parseError = error
-        self.__lambdaflag=False
+        self.__lambdaflag = False
+
     def __ifstmt(self):
         self.__consume(TokenType.LEFT_PAREN, "'(' expected after if")
         __condition = self.__expression()
@@ -21,7 +22,7 @@ class Parser:
         __elsepart = Seq([])
         while (not self.__match(TokenType.END, "")):
             __ifpart.things.append(self.__declare())
-        if(self.__match(TokenType.ELSE, "")):
+        if (self.__match(TokenType.ELSE, "")):
             while (not self.__match(TokenType.END, "")):
                 __elsepart.things.append(self.__declare())
         return If(__condition, __ifpart, __elsepart)
@@ -41,19 +42,22 @@ class Parser:
         name = self.__prev().text
         line = self.__tokens[self.__current - 1].line
         parameters = []
-        self.__consume(TokenType.LEFT_PAREN,"Expected a '(' after the function name")
+        self.__consume(TokenType.LEFT_PAREN,
+                       "Expected a '(' after the function name")
         if (self.__check(TokenType.RIGHT_PAREN) == False):
             while (self.__peek_next().ttype == TokenType.COMMA):
                 if len(parameters) > 255:
                     self.__parseError.line = 1
                     self.__parseError.message = "Can't have more than 255 arguments"
                     self.__parseError.triggered = True
-                var = self.__consume(TokenType.IDENTIFIER, "Expected Parameter Name")
+                var = self.__consume(TokenType.IDENTIFIER,
+                                     "Expected Parameter Name")
                 if var != None:
                     parameters.append(Identifier(var.text, var.line))
                 self.__advance()
-            
-            var = self.__consume(TokenType.IDENTIFIER, "Expected Parameter Name")
+
+            var = self.__consume(TokenType.IDENTIFIER,
+                                 "Expected Parameter Name")
             if var != None:
                 parameters.append(Identifier(var.text, var.line))
         self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
@@ -64,29 +68,32 @@ class Parser:
         return Function(Identifier(name, line), parameters, body, line)
 
         return Function(name, parameters, body, line)
+
     def __lambda(self):
         '''To parse lambda expressions'''
         name = self.__peek().text
         self.__consume(TokenType.IDENTIFIER,
-                              "A variable name was expected")
+                       "A variable name was expected")
         self.__consume(TokenType.EQUAL, "Expected Equal Sign")
-        __expression_1=Seq([])
-        __expression_2=Seq([])
-        while(not self.__match(TokenType.END)):
-            if(self.__peek().ttype==TokenType.IN):
+        __expression_1 = Seq([])
+        __expression_2 = Seq([])
+        while (not self.__match(TokenType.END)):
+            if (self.__peek().ttype == TokenType.IN):
                 self.__consume(TokenType.IN, "invalid in statement")
                 break
             __expression_1.things.append(self.__exprstmt())
-            if(self.__peek().ttype==TokenType.END):
-                self.__consume(TokenType.END,"Expected end after the statement")
-                return Assignment(Identifier(name), __expression_1,self.__tokens[self.__current - 1].line , True)
-        while(not self.__match(TokenType.END)):
-            if(self.__peek().ttype==TokenType.END):
-                self.__consume(TokenType.END,"Expected end after the statement")
+            if (self.__peek().ttype == TokenType.END):
+                self.__consume(
+                    TokenType.END, "Expected end after the statement")
+                return Assignment(Identifier(name), __expression_1, self.__tokens[self.__current - 1].line, True)
+        while (not self.__match(TokenType.END)):
+            if (self.__peek().ttype == TokenType.END):
+                self.__consume(
+                    TokenType.END, "Expected end after the statement")
                 break
             __expression_2.things.append(self.__exprstmt())
-        return Lambda(Identifier(name),__expression_1,__expression_2)
-                
+        return Lambda(Identifier(name), __expression_1, __expression_2)
+
     def __list(self):
         '''
         parses the list and adds it to the AST as the ListLiteral datatype of Dino
@@ -114,6 +121,34 @@ class Parser:
                     break
         return ListLiteral(__elements, __length, self.__prev().line)
 
+    def __dict(self):
+        '''
+        Parses the dictionary and adds it to the AST as the DictLiteral datatype of Dino
+        '''
+        __elements = {}
+        __length = 0
+        if self.__tokens[self.__current].ttype == TokenType.RIGHT_BRACE:
+            self.__consume(TokenType.RIGHT_BRACE,
+                           "'}' expected at the end of a dictionary")
+            return DictLiteral(__elements, __length, self.__prev().line)
+        while self.__peek_next().ttype != TokenType.EOF:
+            __key = self.__expression()
+            self.__consume(TokenType.COLON, "':' expected as delimiter")
+            __value = self.__expression()
+            __elements[__key.value] = __value
+            __length += 1
+            match self.__tokens[self.__current].ttype:
+                case TokenType.COMMA:
+                    self.__consume(TokenType.COMMA,
+                                   "',' expected as delimiter")
+                case TokenType.RIGHT_BRACE:
+                    self.__consume(TokenType.RIGHT_BRACE,
+                                   "'}' expected at the end of a dictionary")
+                    break
+                case _:
+                    break
+        return DictLiteral(__elements, __length, self.__prev().line)
+
     def __methods(self, identifier):
         '''
         methods of all datatypes of Dino are added to the AST as MethodLiteral datatype of Dino
@@ -130,17 +165,19 @@ class Parser:
                     self.__forward()
                     match self.__tokens[self.__current].ttype:
                         case TokenType.RIGHT_PAREN:
-                            report_error(DinoError("Invalid Syntax",self.__tokens[self.__current].line) ) 
-                            
+                            report_error(
+                                DinoError("Invalid Syntax", self.__tokens[self.__current].line))
+
                         case TokenType.COMMA:
-                            report_error(DinoError("Expected an argument before ',' ", self.__tokens[self.__current].line))
-                            
-                    __args.append(self.__expression()) 
-                    
+                            report_error(DinoError(
+                                "Expected an argument before ',' ", self.__tokens[self.__current].line))
+
+                    __args.append(self.__expression())
+
                 case TokenType.COMMA:
                     self.__consume(TokenType.COMMA,
                                    "Invalid Syntax")
-                    __args.append(self.__expression()) 
+                    __args.append(self.__expression())
                 case TokenType.RIGHT_PAREN:
                     self.__consume(TokenType.RIGHT_PAREN,
                                    "')' expected at the end of the arguments")
@@ -148,20 +185,20 @@ class Parser:
                 case _:
                     break
         # print(self.__tokens[self.__current].text)
-        __method = MethodLiteral(__iden.name, __args, self.__tokens[self.__current].line)
+        __method = MethodLiteral(
+            __iden.name, __args, self.__tokens[self.__current].line)
         if (__method.name not in all_methods):
-            return report_error(DinoError("{} is not a valid method".format(__method.name) , self.__tokens[self.__current].line))
-        return BinOp(identifier,TokenType.DOT, __method,  self.__tokens[self.__current].line)
-
+            return report_error(DinoError("{} is not a valid method".format(__method.name), self.__tokens[self.__current].line))
+        return BinOp(identifier, TokenType.DOT, __method,  self.__tokens[self.__current].line)
 
     def __expression(self) -> AST:
         if (self.__match(TokenType.LAMBDA)):
-            if(self.__lambdaflag):
+            if (self.__lambdaflag):
                 return self.__lambda()
             else:
-                self.__lambdaflag=True
-                return_value= self.__lambda()
-                self.__lambdaflag=False
+                self.__lambdaflag = True
+                return_value = self.__lambda()
+                self.__lambdaflag = False
                 return return_value
         return self.__simpleAssignment()
 
@@ -207,54 +244,58 @@ class Parser:
                 case _:
                     break
         return left_operand
-    
+
     def __logical_or(self):
 
-        left_operand = self.__logical_and() 
+        left_operand = self.__logical_and()
         while self.__peek_next():
             match self.__tokens[self.__current].ttype:
                 case op if op == TokenType.OR:
-                    self.__forward() 
-                    right_operand = self.__logical_and() 
-                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                    self.__forward()
+                    right_operand = self.__logical_and()
+                    left_operand = BinOp(
+                        left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
-                    break 
+                    break
         return left_operand
-    
+
     def __logical_and(self):
-        left_operand = self.__bitwise_or() 
+        left_operand = self.__bitwise_or()
         while self.__peek_next():
             match self.__tokens[self.__current].ttype:
                 case op if op == TokenType.AND:
-                    self.__forward() 
-                    right_operand = self.__bitwise_or() 
-                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                    self.__forward()
+                    right_operand = self.__bitwise_or()
+                    left_operand = BinOp(
+                        left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
-                    break 
+                    break
         return left_operand
-    
+
     def __bitwise_or(self):
-        left_operand = self.__bitwise_and() 
+        left_operand = self.__bitwise_and()
         while self.__peek_next():
             match self.__tokens[self.__current].ttype:
                 case op if op == TokenType.BIT_OR:
-                    self.__forward() 
-                    right_operand = self.__bitwise_and() 
-                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                    self.__forward()
+                    right_operand = self.__bitwise_and()
+                    left_operand = BinOp(
+                        left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
-                    break 
+                    break
         return left_operand
-    
+
     def __bitwise_and(self):
-        left_operand = self.__add() 
+        left_operand = self.__add()
         while self.__peek_next():
             match self.__tokens[self.__current].ttype:
                 case op if op == TokenType.BIT_AND:
-                    self.__forward() 
-                    right_operand = self.__add() 
-                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                    self.__forward()
+                    right_operand = self.__add()
+                    left_operand = BinOp(
+                        left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
-                    break 
+                    break
         return left_operand
 
     def __add(self):
@@ -265,7 +306,8 @@ class Parser:
                 case op if op in [TokenType.PLUS, TokenType.MINUS]:
                     self.__forward()
                     right_operand = self.__multiply()
-                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                    left_operand = BinOp(
+                        left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
                     break
         return left_operand
@@ -274,7 +316,7 @@ class Parser:
         left_operand = self.__exponential()
         while self.__peek_next().ttype != TokenType.EOF:
             match self.__tokens[self.__current].ttype:
-                case op if op in [TokenType.STAR, TokenType.SLASH, TokenType.MOD]:
+                case op if op in [TokenType.STAR, TokenType.SLASH, TokenType.MOD, TokenType.SLASH_SLASH]:
                     self.__forward()
                     right_operand = self.__exponential()
                     left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
@@ -309,14 +351,14 @@ class Parser:
         expr = self.__primary()
         while (True):
             if self.__match(TokenType.LEFT_PAREN):
-                    if isinstance(expr, Identifier):
-                        expr = self.__finishCall(expr)
-                    else:
-                        self.__parseError.line = self.__tokens[self.__current].line
-                        self.__parseError.message = "Identifier can't be called"
-                        self.__parseError.triggered = True
-                        self.__advance()
-                        break
+                if isinstance(expr, Identifier):
+                    expr = self.__finishCall(expr)
+                else:
+                    self.__parseError.line = self.__tokens[self.__current].line
+                    self.__parseError.message = "Identifier can't be called"
+                    self.__parseError.triggered = True
+                    self.__advance()
+                    break
             else:
                 break
 
@@ -370,7 +412,7 @@ class Parser:
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         
         if (self.__match(TokenType.IDENTIFIER)):
-            if self.__tokens[self.__current].ttype == TokenType.DOT: 
+            if self.__tokens[self.__current].ttype == TokenType.DOT:
                 return self.__methods(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
             if (self.__tokens[self.__current].ttype == TokenType.LEFT_BRACKET):
                 __iden  = Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
@@ -382,13 +424,17 @@ class Parser:
         
         if (self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
-            self.__consume(TokenType.RIGHT_PAREN, "')' expected after expression.")
+            self.__consume(TokenType.RIGHT_PAREN,
+                           "')' expected after expression.")
             return __expr
         if (self.__match(TokenType.LEFT_BRACKET)):
             return self.__list()
+        if (self.__match(TokenType.LEFT_BRACE)):
+            return self.__dict()
         if (self.__peek().ttype == TokenType.RIGHT_PAREN):
             return None
-        self.__parseError.message = "Syntax Error: Expected something after '" + self.__prev().text + "'"
+        self.__parseError.message = "Syntax Error: Expected something after '" + \
+            self.__prev().text + "'"
         self.__parseError.line = self.__prev().line
         report_error(self.__parseError)
         self.__advance()
@@ -441,7 +487,7 @@ class Parser:
             return
         self.__current += 1
 
-    def __peek_next(self): 
+    def __peek_next(self):
         '''
         helper function to check if there is any other token after the current token.
         returns next token (if its there) or False(bool) if the current token is the last token
@@ -452,9 +498,9 @@ class Parser:
             return Token(TokenType.EOF, "", None, -1)
 
     def __exprstmt(self):
-        
+
         __expr = self.__expression()
-        if(self.__lambdaflag):
+        if (self.__lambdaflag):
             return __expr
         self.__consume(TokenType.SEMICOLON, "';' expected after expression")
         return __expr
@@ -473,16 +519,17 @@ class Parser:
     def __assign(self, var, isconst=False):
         if (self.__match(TokenType.EQUAL)):
             __expr = self.__expression()
-            self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
+            self.__consume(TokenType.SEMICOLON,
+                           "';' expected after declaration")
             return Assignment(Identifier(var.text, self.__tokens[self.__current - 1].line, isconst), __expr, self.__tokens[self.__current - 1].line, True)
         elif (isconst):
             self.__parseError.message = "Syntax Error: Expected '=' after const variable declaration"
             self.__parseError.line = self.__prev().line
             report_error(self.__parseError)
         else:
-            self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
+            self.__consume(TokenType.SEMICOLON,
+                           "';' expected after declaration")
             return Assignment(Identifier(var.text, self.__tokens[self.__current - 1].line), NullLiteral(self.__tokens[self.__current - 1].line), self.__tokens[self.__current - 1].line, True)
-
 
     def __declare(self):
         if (self.__match(TokenType.ASSIGN)):
@@ -502,7 +549,8 @@ class Parser:
         if (self.__match(TokenType.ABORT)):
             self.__consume(TokenType.LEFT_PAREN, "'(' expected")
             self.__consume(TokenType.RIGHT_PAREN, "')' expected")
-            self.__consume(TokenType.SEMICOLON, "';' expected after declaration")
+            self.__consume(TokenType.SEMICOLON,
+                           "';' expected after declaration")
             return Abort("Program Aborted")
         return self.__statement()
 
