@@ -274,11 +274,10 @@ class Parser:
         left_operand = self.__exponential()
         while self.__peek_next().ttype != TokenType.EOF:
             match self.__tokens[self.__current].ttype:
-                case op if op in [TokenType.STAR, TokenType.SLASH]:
+                case op if op in [TokenType.STAR, TokenType.SLASH, TokenType.MOD]:
                     self.__forward()
                     right_operand = self.__exponential()
-                    left_operand = BinOp(
-                        left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
                     break
         return left_operand
@@ -300,8 +299,8 @@ class Parser:
         return val
 
     def __unary(self):
-        while (self.__match(TokenType.BANG, TokenType.MINUS)):
-            __op = self.__prev().text
+        while (self.__match(TokenType.BANG, TokenType.MINUS, TokenType.INCREMENT, TokenType.DECREMENT)):
+            __op = self.__prev().ttype
             __right = self.__unary()
             return UnOp(__op, __right, self.__tokens[self.__current - 1].line)
         return self.__call()
@@ -348,13 +347,15 @@ class Parser:
         # print(self.__current)
         if (self.__match(TokenType.CAPTURE)):
             self.__consume(TokenType.LEFT_PAREN, "'(' expected")
-            __text = self.__expression()
-            if(type(__text.value) != str):
+            if (self.__match(TokenType.STRING)):
+                val = Capture(self.__prev().literal, self.__tokens[self.__current - 1].line)
+                self.__consume(TokenType.RIGHT_PAREN, "')' expected")
+                return val
+            else:
                 self.__parseError.message = "Syntax Error: Only string accepted during capture"
                 self.__parseError.line = self.__prev().line
                 report_error(self.__parseError)
-            self.__consume(TokenType.RIGHT_PAREN, "')' expected")
-            return Capture(__text, self.__tokens[self.__current - 1].line)
+                self.__consume(TokenType.RIGHT_PAREN, "')' expected")
         if (self.__match(TokenType.FALSE)):
             return BoolLiteral(False, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.TRUE)):
@@ -367,10 +368,18 @@ class Parser:
             return IntLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.STRING)):
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
+        
         if (self.__match(TokenType.IDENTIFIER)):
             if self.__tokens[self.__current].ttype == TokenType.DOT: 
                 return self.__methods(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
+            if (self.__tokens[self.__current].ttype == TokenType.LEFT_BRACKET):
+                __iden  = Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
+                index = self.__primary() 
+                __method = MethodLiteral("at", index.elements, self.__tokens[self.__current - 1].line)
+                
+                return BinOp(__iden ,TokenType.DOT, __method,  self.__tokens[self.__current].line)
             return Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
+        
         if (self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
             self.__consume(TokenType.RIGHT_PAREN, "')' expected after expression.")

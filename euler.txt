@@ -1,0 +1,33 @@
+? even fibonacci problem
+func even_fibo(n) 
+    assign a = 1;
+    assign b = 2;
+    assign sum = 0;
+    assign temp = 0;
+    loop(temp < n) 
+        temp = b;
+        if (temp % 2 == 0) 
+            sum = sum + temp; 
+        end
+        temp = a + b;
+        a = b;
+        b = temp; 
+    end 
+    return sum;
+end
+
+echo(even_fibo(4000000));
+
+? problem 3
+
+func prob3(n) 
+    assign i = 2;
+    loop( i*i < n) 
+        loop (n % i ==0) 
+            n =  n/i; 
+        end
+        i = i +1;
+    end 
+    return n;
+end
+echo(prob3(600851475143));

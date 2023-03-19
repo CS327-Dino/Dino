@@ -25,13 +25,6 @@ class TestParser(unittest.TestCase):
         expression = Parser(Scanner("echo([2,3] or 0);", DinoError()).generate_tokens(), DinoError()).parse()
         self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=ListLiteral(elements=[NumLiteral(2.0, line=1), NumLiteral(3.0, line=1)], length=2, line=1), op=TokenType.OR, right=NumLiteral(0.0, line=1), line=1), line=1)]))
 
-    def test_logical_operators(self):
-        expression = Parser(Scanner("echo(2<3 and 1<4+2);", DinoError()).generate_tokens(), DinoError()).parse()
-        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=BinOp(left=NumLiteral(2.0, line=1), op=TokenType.LESS, right=BinOp(left=NumLiteral(value=3.0, line=1), op=TokenType.AND, right=NumLiteral(1.0, line=1), line=1), line=1), op=TokenType.LESS, right=BinOp(left=NumLiteral(4.0, line=1), op=TokenType.PLUS, right=NumLiteral(2.0, line=1), line=1), line=1), line=1)]) )
-
-        expression = Parser(Scanner("echo([2,3] or 0);", DinoError()).generate_tokens(), DinoError()).parse()
-        self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=ListLiteral(elements=[NumLiteral(2.0, line=1), NumLiteral(3.0, line=1)], length=2, line=1), op=TokenType.OR, right=NumLiteral(0.0, line=1), line=1), line=1)]))
-
     def test_if(self):
         expression = Parser(Scanner("if (2<=3) 2+3; end else 4+4; end", DinoError()).generate_tokens(), DinoError()).parse()
         self.assertEqual(
@@ -61,6 +54,10 @@ class TestParser(unittest.TestCase):
 
         expression = Parser(Scanner("echo(a.slice(0,3));", DinoError()).generate_tokens(), DinoError()).parse()
         self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=Identifier(name='a', line=1, isconst=False, uid=7), op=TokenType.DOT, right=MethodLiteral(name='slice', args=[NumLiteral(value=0.0, line=1), NumLiteral(value=3.0, line=1)], line=1), line=1), line=1)]))
+        
+        expression = Parser(Scanner("a.add(553);", DinoError()).generate_tokens(), DinoError()).parse()
+        self.assertEqual(expression, Seq(things=[BinOp(left=Identifier(name='a', line=1, isconst=False, uid=3), op=TokenType.DOT, right=MethodLiteral(name='add', args=[IntLiteral(value=553, line=1)], line=1), line=1)]))
+
 
     def test_string_methods(self):
         expression = Parser(Scanner('assign g = "hello!! This is our compiler";', DinoError()).generate_tokens(), DinoError()).parse()
