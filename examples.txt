@@ -125,6 +125,7 @@ echo(lambda a = 12 in lambda b = 7 in b*b+a end end);
 echo(lambda a= lambda b = 2 in b+ b*b end in a+a end);
 echo(lambda a= lambda a = 2 in a+ a*a end in a+a end);
 echo(lambda a=12 in a+a end);
+echo(lambda a = true in lambda b = false in a and b end end);
 lambda a=7 in a+8 end;
 lambda a=8 end;
 echo(a); 
@@ -170,3 +171,75 @@ else
         end
     end
 end
+------------
+
+Dictionary Declaration
+
+assign d = {5 : 10 , "hello" : 4 , 9 : "world" , "dict" : "works"};
+echo(d);
+
+? The above code will create a dictionary with 4 key-value pairs.
+
+------------
+
+Even Fibonacci Numbers
+
+assign sum = 0;
+assign prev = 0;
+assign curr = 1;
+
+loop(curr <= 4000000) 
+        if (curr % 2 == 0)
+                sum = sum + curr;
+        end
+        assign t = curr + prev ;
+        prev = curr;
+        curr = t; 
+end
+
+echo(sum);  
+
+------------
+Project Euler Problem 4: Largest palindrome product
+
+
+func pallindrome(num)
+    assign temp = num;
+    assign rev = 0;
+    loop(temp>0)
+        rev = (rev * 10) + (temp % 10);
+        temp = temp // 10;
+    end
+    if(rev == num)
+        return 1;
+    end
+    else
+        return 0;
+    end
+end
+
+assign n1 = 999;
+assign n2 = 999;
+assign pall_check = 0;
+assign product = 0;
+assign max_product = 0;
+
+loop(n1>99)
+    n2 = 999;
+    loop(n2>99)
+        product = n1 * n2;
+        if(product < max_product)
+            n2 = 90;
+        end
+        n2 = n2 - 1;
+        pall_check = pallindrome(product);
+        if(pall_check == 1)
+            n2 = 90;
+        end
+    end
+    if(product > max_product)
+        max_product = product;
+    end
+    n1 = n1 - 1;
+end
+echo(max_product);

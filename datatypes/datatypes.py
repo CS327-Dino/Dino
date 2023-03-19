@@ -140,6 +140,18 @@ class ListLiteral:
     length: int
     line: int
 
+@dataclass
+class DictLiteral:
+    '''
+    datatype to store dictionaries
+    elements -> elements of 'Dino' dictionary stored as a 'python' dictionary
+    length -> length of the dictionary
+    line -> line no. in source code
+    '''
+    elements: dict
+    length: int
+    line: int
+
 @dataclass 
 class MethodLiteral:
     '''
@@ -162,8 +174,8 @@ class Capture:
     msg: str
     line: int = 0
 
-AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call | Capture | MethodLiteral | Lambda | Abort | Return | None
+AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call | Capture | MethodLiteral | Lambda | Abort | Return | DictLiteral | None
 
 Value =  float | bool | int | str | None | AST
 
-all_methods = ["length", "head", "tail", "slice", "cons"]
+all_methods = ["length", "head", "tail", "slice", "cons", "add", "at"]

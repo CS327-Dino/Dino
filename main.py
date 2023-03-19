@@ -53,7 +53,7 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
         if parsed_args.verbose:
             print("-----------------------------------------------")
         return
-    
+
     resolved = resolution(expression)
     if parsed_args.verbose:
         print("------------------Resolved Expr----------------")
@@ -66,6 +66,7 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     
     output = evaluate(resolved)
     if prompt: print(output)
+
 
 args = argparse.ArgumentParser()
 args.add_argument("file", nargs="?", help="file to run")
