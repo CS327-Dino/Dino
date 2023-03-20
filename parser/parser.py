@@ -316,7 +316,7 @@ class Parser:
         left_operand = self.__exponential()
         while self.__peek_next().ttype != TokenType.EOF:
             match self.__tokens[self.__current].ttype:
-                case op if op in [TokenType.STAR, TokenType.SLASH, TokenType.MOD]:
+                case op if op in [TokenType.STAR, TokenType.SLASH, TokenType.MOD, TokenType.SLASH_SLASH]:
                     self.__forward()
                     right_operand = self.__exponential()
                     left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
@@ -410,10 +410,18 @@ class Parser:
             return IntLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.STRING)):
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
+        
         if (self.__match(TokenType.IDENTIFIER)):
             if self.__tokens[self.__current].ttype == TokenType.DOT:
                 return self.__methods(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
+            if (self.__tokens[self.__current].ttype == TokenType.LEFT_BRACKET):
+                __iden  = Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
+                index = self.__primary() 
+                __method = MethodLiteral("at", index.elements, self.__tokens[self.__current - 1].line)
+                
+                return BinOp(__iden ,TokenType.DOT, __method,  self.__tokens[self.__current].line)
             return Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
+        
         if (self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
             self.__consume(TokenType.RIGHT_PAREN,

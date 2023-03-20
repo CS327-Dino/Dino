@@ -37,13 +37,13 @@ def open_prompt():
     error = DinoError()
     typeenv = Scope()
     while True:
-        run(input(">>> "), error, typeenv)
+        run(input(">>> "), error, typeenv, True)
         # if error.triggered == True:
         #     report_error(error)
         error.triggered = False
 
 
-def run(code: str, error: DinoError, typeenv: Scope = Scope()):
+def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = False):
     scanned_code = Scanner(code, error)
     token_list = scanned_code.generate_tokens()
     parser = Parser(token_list, error)
@@ -63,9 +63,13 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope()):
         print("------------------Resolved Expr----------------")
         print(resolved)
         print("-----------------------------------------------")
-
+    
+    # typecheck(resolved, typeenv, error)
+    # if error.triggered:
+    #     return
+    
     output = evaluate(resolved)
-    print(output)
+    if prompt: print(output)
 
 
 args = argparse.ArgumentParser()

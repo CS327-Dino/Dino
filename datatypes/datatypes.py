@@ -174,8 +174,8 @@ class Capture:
     msg: str
     line: int = 0
 
-AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call | Capture | MethodLiteral | Lambda | Abort | Return | None
+AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call | Capture | MethodLiteral | Lambda | Abort | Return | DictLiteral | None
 
 Value =  float | bool | int | str | None | AST
 
-all_methods = ["length", "head", "tail", "slice", "cons"]
+all_methods = ["length", "head", "tail", "slice", "cons", "add", "at"]
