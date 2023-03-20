@@ -7,7 +7,7 @@ from parser.parser import *
 from evaluation.eval import *
 from evaluation.resolve import *
 from evaluation.typecheck import *
-
+import time
 # def main():
 #     # Here we will start our program
 #     if len(sys.argv) > 2:
@@ -20,9 +20,13 @@ from evaluation.typecheck import *
 
 def scan_file(file_name):
     f = open(file_name, "rb")
+    start_time = time.time()
     data = f.read()
     error = DinoError()
     run(data.decode("utf-8"), error)
+    if parsed_args.time:
+        print("--- %s seconds ---" % (time.time() - start_time))
+
     # if (error.triggered):
     #     report_error(error)
     #     sys.exit()
@@ -67,6 +71,7 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope()):
 args = argparse.ArgumentParser()
 args.add_argument("file", nargs="?", help="file to run")
 args.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
+args.add_argument("-t", "--time", action="store_true", help="time mode")
 parsed_args = args.parse_args()
 # print(parsed_args)
 
