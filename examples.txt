@@ -243,3 +243,22 @@ loop(n1>99)
     n1 = n1 - 1;
 end
 echo(max_product);
+
+
+---
+Project Euler Problem 6:
+
+func fib(n)
+    if (n == 1)
+        return 1;
+    end
+    if (n==2)
+        return 1;
+    end
+    else
+        return fib(n-1) + fib(n-2);
+    end
+end
+
+assign f = fib(15);
+echo(f);
