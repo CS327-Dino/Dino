@@ -67,8 +67,6 @@ class Parser:
             body.things.append(self.__declare())
         return Function(Identifier(name, line), parameters, body, line)
 
-        return Function(name, parameters, body, line)
-
     def __lambda(self):
         '''To parse lambda expressions'''
         name = self.__peek().text

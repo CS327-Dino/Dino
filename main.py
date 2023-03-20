@@ -8,14 +8,6 @@ from evaluation.eval import *
 from evaluation.resolve import *
 from evaluation.typecheck import *
 import time
-# def main():
-#     # Here we will start our program
-#     if len(sys.argv) > 2:
-#         print("Hello")
-#     elif len(sys.argv) == 2:
-#         scan_file(sys.argv[1])
-#     else:
-#         open_prompt()
 
 
 def scan_file(file_name):
@@ -63,13 +55,14 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
         print("------------------Resolved Expr----------------")
         print(resolved)
         print("-----------------------------------------------")
-    
+
     # typecheck(resolved, typeenv, error)
     # if error.triggered:
     #     return
-    
+
     output = evaluate(resolved)
-    if prompt: print(output)
+    if prompt:
+        print(output)
 
 
 args = argparse.ArgumentParser()
