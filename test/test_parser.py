@@ -107,7 +107,4 @@ class TestParser(unittest.TestCase):
 
         expression = Parser(Scanner('echo("Hello" + " World");', DinoError()).generate_tokens(), DinoError()).parse()
         self.assertEqual(expression, Seq(things=[Echo(expr=BinOp(left=StrLiteral(value='Hello', line=1), op=TokenType.PLUS, right=StrLiteral(value=' World', line=1), line=1), line=1)]))
-
-    
-
-    
+        

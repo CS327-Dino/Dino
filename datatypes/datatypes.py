@@ -5,10 +5,12 @@ from errors.error import *
 from tokenizing.token_scanning import *
 from itertools import count
 
+
 @dataclass
 class IntLiteral:
     value: int
     line: int = 0
+
 
 @dataclass
 class NumLiteral:
@@ -24,9 +26,11 @@ class BoolLiteral:
     value: bool
     line: int = 0
 
+
 @dataclass
 class NullLiteral:
     line: int = 0
+
 
 @dataclass
 class BinOp:
@@ -42,6 +46,7 @@ class Identifier:
     line: int = field(default=0, hash=False, compare=False)
     isconst: bool = False
     uid: int = field(default_factory=count().__next__)
+
 
 @dataclass
 class UnOp:
@@ -140,6 +145,7 @@ class ListLiteral:
     length: int
     line: int
 
+
 @dataclass
 class DictLiteral:
     '''
@@ -152,7 +158,8 @@ class DictLiteral:
     length: int
     line: int
 
-@dataclass 
+
+@dataclass
 class MethodLiteral:
     '''
     All the methods of the datatypes (e.g. lists, strings, etc.) are of this type.
@@ -160,22 +167,26 @@ class MethodLiteral:
     args -> arguments for calling the method as a list
     line -> line no. in the source code
     '''
-    name: str 
+    name: str
     args: List
     line: int = 0
+
 
 @dataclass
 class Abort:
     msg: str
     line: int = 0
 
+
 @dataclass
 class Capture:
     msg: str
     line: int = 0
 
+
 AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call | Capture | MethodLiteral | Lambda | Abort | Return | DictLiteral | None
 
-Value =  float | bool | int | str | None | AST
+Value = float | bool | int | str | None | AST
 
-all_methods = ["length", "head", "tail", "slice", "cons", "add", "at"]
+all_methods = ["length", "head", "tail", "slice",
+               "cons", "add", "at", "keys", "values"]
