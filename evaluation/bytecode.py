@@ -24,8 +24,6 @@ class Op(Enum):
     LESS_EQUAL = 16
     POW = 19
     POP = 23
-    LOAD = 28
-    STORE = 29
 
     def __repr__(self):
         return f"{self.name}"
@@ -34,6 +32,14 @@ class I:
     @dataclass
     class Push:
         value: int
+    
+    @dataclass
+    class PushFN:
+        address: int
+    
+    @dataclass
+    class Call:
+        iden: int
     
     @dataclass
     class Load:
@@ -100,38 +106,64 @@ class Bytecode:
         label.address = len(self.code)
 
     def bytecode_generator(self, prog):
-        def gen_(program):
-            self.bytecode_generator(program)
-
         match prog:
             case IntLiteral(value) | NumLiteral(value) | StrLiteral(value) | BoolLiteral(value) | NullLiteral(value):
                 self.emit(I.Push(value))
             case BinOp(left, op, right) if op in simpleOP:
-                gen_(left)
-                gen_(right)
+                self.bytecode_generator(left)
+                self.bytecode_generator(right)
                 self.emit(simpleOP[op])
             case BinOp(left, TokenType.AND, right):
-                gen_(left)
+                self.bytecode_generator(left)
                 else_label = self.label()
                 self.emit(I.JmpIfFalseOrPop(else_label))
-                gen_(right)
+                self.bytecode_generator(right)
                 self.emit_label(else_label)
             case BinOp(left, TokenType.OR, right):
-                gen_(left)
+                self.bytecode_generator(left)
                 else_label = self.label()
                 self.emit(I.JmpIfTrueOrPop(else_label))
-                gen_(right)
+                self.bytecode_generator(right)
                 self.emit_label(else_label)
             case If(condition, then, else_):
-                gen_(condition)
+                self.bytecode_generator(condition)
                 else_label = self.label()
                 self.emit(I.JmpIfFalse(else_label))
-                gen_(then)
+                self.bytecode_generator(then)
                 end_label = self.label()
                 self.emit(I.Jmp(end_label))
                 self.emit_label(else_label)
-                gen_(else_)
+                self.bytecode_generator(else_)
                 self.emit_label(end_label)
             case Seq(things):
-                for thing in things:
-                    gen_(thing)
+                for thing in things[:-1]:
+                    self.bytecode_generator(thing)
+                    self.emit(I.POP)
+                self.bytecode_generator(things[-1])
+            case Assignment(name, value):
+                self.bytecode_generator(value)
+                self.emit(I.Store(name))
+                self.emit(I.Push(None))
+            case Identifier(_) as iden:
+                self.emit(I.Load(iden))
+            case Loop(condition, body):
+                condition_label = self.label()
+                self.emit_label(condition_label)
+                self.bytecode_generator(condition)
+                end_label = self.label()
+                self.emit(I.JmpIfFalse(end_label))
+                self.bytecode_generator(body)
+                self.emit(I.Jmp(condition_label))
+                self.emit_label(end_label)
+            case Function(name, _, body):
+                FBEGIN = self.label()
+                FEND = self.label()
+                self.emit(I.JMP(FEND))
+                self.emit_label(FBEGIN)
+                self.bytecode_generator(body)
+                self.emit_label(FEND)
+                self.emit(I.PushFN(FBEGIN))
+                self.emit(I.Store(name))
+                self.emit(I.Push(None))
+            case Call(name, _):
+                self.emit(I.Call(name))
