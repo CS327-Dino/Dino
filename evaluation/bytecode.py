@@ -138,14 +138,17 @@ class Bytecode:
             case Seq(things):
                 for thing in things[:-1]:
                     self.bytecode_generator(thing)
-                    self.emit(I.POP)
+                    # self.emit(I.POP)  
+                    self.emit(Op.POP) 
                 self.bytecode_generator(things[-1])
             case Assignment(name, value):
-                self.bytecode_generator(value)
-                self.emit(I.Store(name))
-                self.emit(I.Push(None))
+                self.bytecode_generator(value)   
+                # self.emit(I.Store(name))  
+                self.emit(I.Store(name.uid))
+                self.emit(I.Push(None))    
             case Identifier(_) as iden:
-                self.emit(I.Load(iden))
+                # self.emit(I.Load(iden))  
+                self.emit(I.Load(iden.uid))
             case Loop(condition, body):
                 condition_label = self.label()
                 self.emit_label(condition_label)
@@ -158,12 +161,153 @@ class Bytecode:
             case Function(name, _, body):
                 FBEGIN = self.label()
                 FEND = self.label()
-                self.emit(I.JMP(FEND))
+                self.emit(I.Jmp(FEND))
                 self.emit_label(FBEGIN)
                 self.bytecode_generator(body)
                 self.emit_label(FEND)
                 self.emit(I.PushFN(FBEGIN))
-                self.emit(I.Store(name))
+                # self.emit(I.Store(name))   
+                self.emit(I.Store(name.uid))
                 self.emit(I.Push(None))
             case Call(name, _):
                 self.emit(I.Call(name))
+
+@dataclass
+class Frame:
+    def __init__(self, retaddr=-1, parent=None):
+        MAX_LOCALS = 32
+        self.locals = [None] * MAX_LOCALS
+        self.retaddr = retaddr
+        self.parent = parent
+
+
+class VM:
+    def __init__(self, code) -> None:
+        self.code = code
+        self.stack = []
+        self.Frame = Frame()
+        self.ip = 0
+
+    def run(self):
+        while self.ip < len(self.code):
+            match self.code[self.ip]:  
+                case I.Push(value):
+                    self.stack.append(value)
+                    self.ip += 1 
+                case I.Load(index):
+                    self.stack.append(self.Frame.locals[index])
+                    # print("L", self.Frame.locals[index])
+                    self.ip += 1 
+                case I.Store(index):
+                    self.Frame.locals[index] = self.stack.pop() 
+                    # print("L", self.Frame.locals[index])
+                    self.ip += 1 
+                case I.Jmp(address):
+                    self.ip = address.address
+                case I.JmpIfFalse(address):
+                    if not self.stack.pop():
+                        self.ip = address.address
+                    else:
+                        self.ip += 1 
+                case I.JmpIfTrue(address):
+                    if self.stack.pop():
+                        self.ip = address.address 
+                    else:
+                        self.ip += 1 
+                case I.JmpIfFalseOrPop(address): 
+                    if not self.stack.pop():
+                        self.ip = address.address
+                    else:
+                        self.stack.pop()
+                        self.ip += 1 
+                case I.JmpIfTrueOrPop(address):
+                    if self.stack.pop():
+                        self.ip = address.address
+                    else:
+                        self.stack.pop()
+                        self.ip += 1 
+                case Op.ADD:
+                    right = self.stack.pop()
+                    left = self.stack.pop()
+                    self.stack.append(left + right)
+                    self.ip += 1 
+                case Op.SUB:
+                    right = self.stack.pop()
+                    left = self.stack.pop()
+                    self.stack.append(left - right)
+                    self.ip += 1  
+                case Op.MUL:
+                    right = self.stack.pop()
+                    left = self.stack.pop()
+                    self.stack.append(left * right)
+                    self.ip += 1 
+                case Op.DIV:
+                    right = self.stack.pop()
+                    left = self.stack.pop()
+                    self.stack.append(left / right)
+                    self.ip += 1 
+                case Op.MOD: 
+                    right = self.stack.pop()
+                    left = self.stack.pop()
+                    self.stack.append(left % right)
+                    self.ip += 1  
+                case Op.NEG:
+                    self.stack.append(-1*self.stack.pop())
+                    self.ip += 1 
+                case Op.NOT: 
+                    self.stack.append(not self.stack.pop()) 
+                    self.ip += 1 
+                case Op.AND:
+                    right = self.stack.pop() 
+                    left = self.stack.pop() 
+                    self.stack.append(left and right) 
+                    self.ip += 1
+                case Op.OR: 
+                    right = self.stack.pop() 
+                    left = self.stack.pop() 
+                    self.stack.append(left or right)
+                    self.ip += 1 
+                case Op.XOR:
+                    right = self.stack.pop() 
+                    left = self.stack.pop() 
+                    self.stack.append(left ^ right) 
+                    self.ip += 1 
+                case Op.EQUAL:
+                    right = self.stack.pop() 
+                    left = self.stack.pop() 
+                    self.stack.append(left == right) 
+                    self.ip += 1 
+                case Op.NOT_EQUAL:
+                    right = self.stack.pop() 
+                    left = self.stack.pop() 
+                    self.stack.append(left != right) 
+                    self.ip += 1 
+                case Op.GREATER: 
+                    right = self.stack.pop() 
+                    left = self.stack.pop()
+                    self.stack.append(left > right)
+                    self.ip += 1
+                case Op.GREATER_EQUAL:
+                    right = self.stack.pop() 
+                    left = self.stack.pop()
+                    self.stack.append(left >= right)
+                    self.ip += 1
+                case Op.LESS:
+                    right = self.stack.pop() 
+                    left = self.stack.pop()
+                    self.stack.append(left < right)
+                    self.ip += 1
+                case Op.LESS_EQUAL:
+                    right = self.stack.pop() 
+                    left = self.stack.pop()
+                    self.stack.append(left <= right)
+                    self.ip += 1
+                case Op.POW:
+                    right = self.stack.pop() 
+                    left = self.stack.pop()
+                    self.stack.append(left ** right)
+                    self.ip += 1
+                case Op.POP:
+                    self.stack.pop()
+                    self.ip += 1    
+        return self.stack.pop()       
