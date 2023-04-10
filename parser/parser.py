@@ -21,7 +21,11 @@ class Parser:
         __ifpart = Seq([])
         __elsepart = Seq([])
         while (not self.__match(TokenType.END, "")):
-            __ifpart.things.append(self.__declare())
+            if (self.__match(TokenType.IF, "")):
+                __ifpart.things.append(self.__ifstmt())
+            else:
+                __ifpart.things.append(self.__declare())
+
         if (self.__match(TokenType.ELSE, "")):
             while (not self.__match(TokenType.END, "")):
                 __elsepart.things.append(self.__declare())

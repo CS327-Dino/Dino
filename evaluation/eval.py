@@ -315,7 +315,14 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case StrLiteral(value, line):
             return value
         case Echo(expr, line):
-            print(evaluate(expr, environment))
+            expr_eval = evaluate(expr, environment)
+            if(isinstance(expr_eval, StrLiteral)):
+                print(expr_eval.value)
+            elif(isinstance(expr_eval, ListLiteral)):
+                print(expr_eval.elements)
+            else:
+                print(expr_eval)
+            # print(evaluate(expr, environment))
             return ""
         case Return(expr, line):
             environment.set("return", evaluate(expr, environment), line, True)

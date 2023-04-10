@@ -64,9 +64,9 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
         print(resolved)
         print("-----------------------------------------------")
 
-    # typecheck(resolved, typeenv, error)
-    # if error.triggered:
-    #     return
+    typecheck(resolved, typeenv, error)
+    if error.triggered:
+        return
 
     # output = evaluate(resolved) 
     bytecode = Bytecode()
