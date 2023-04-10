@@ -76,3 +76,52 @@ class TestEval(unittest.TestCase):
 
         self.assertEqual(evaluate(e1), 2)
         self.assertEqual(evaluate(e2), 10)
+
+    def test_lambda(self):
+        # lambda a = 2 in a + a end
+        e1 = NumLiteral(2)
+        e2 = Identifier("a")
+        e3 = BinOp(e2, TokenType.PLUS, e2)
+        e4 = Lambda(e2, e1, e3, 0)
+
+        # lambda a = 2 in lambda b = 3 in a * b end end
+        e5 = NumLiteral(5)
+        e6 = Identifier("b")
+        e7 = BinOp(e2, TokenType.STAR, e6)
+        e8 = Lambda(e6, e5, e7, 0)
+        e9 = Lambda(e2, e1, e8, 0)
+
+        self.assertEqual(evaluate(e4), 4)
+        self.assertEqual(evaluate(e9), 10)
+
+    def test_lists(self):
+        e1 = ListLiteral([IntLiteral(1), IntLiteral(2), IntLiteral(3)], 3, 1)
+        e2 = ListLiteral([IntLiteral(1), IntLiteral(2), IntLiteral(3), IntLiteral(4)], 4, 1)
+        e3 = ListLiteral([IntLiteral(1), IntLiteral(2), BoolLiteral(True), StrLiteral("Hello")], 4, 1)
+
+        self.assertEqual(evaluate(e1).elements, [1, 2, 3])
+        self.assertEqual(evaluate(e2).elements, [1, 2, 3, 4])
+        self.assertEqual(evaluate(e3).elements, [1, 2, True, StrLiteral(value='Hello', line=0)])
+
+
+    def test_methods(self):
+        e1 = ListLiteral([IntLiteral(1), IntLiteral(2), IntLiteral(3)], 3, 1)
+        e2 = ListLiteral([IntLiteral(1), IntLiteral(2), IntLiteral(3), IntLiteral(4)], 4, 1)
+        e3 = MethodLiteral("length", [], 1)
+        e4 = MethodLiteral("head", [], 1)
+        e5 = MethodLiteral("tail", [], 1)
+        e6 = MethodLiteral("slice", [IntLiteral(1), IntLiteral(3)], 1)
+        e11 = MethodLiteral("at", [IntLiteral(2)], 1)
+        # e6 = MethodLiteral("add", [IntLiteral(7)], 1)
+
+        e7 = BinOp(e1, TokenType.DOT, e3)
+        e8 = BinOp(e1, TokenType.DOT, e4)
+        e9 = BinOp(e2, TokenType.DOT, e5)
+        e10 = BinOp(e2, TokenType.DOT, e6)
+        e12 = BinOp(e2, TokenType.DOT, e11)
+
+        self.assertEqual(evaluate(e7), 3)
+        self.assertEqual(evaluate(e8), 1)
+        self.assertEqual(evaluate(e9).elements, [2, 3, 4])
+        self.assertEqual(evaluate(e10).elements, [2, 3])
+        self.assertEqual(evaluate(e12), 3)
