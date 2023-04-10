@@ -29,9 +29,9 @@ Prof. Balagopal Komarath
 -----
 ## Tests
 * To run specific tests, use the following command:<br>
-	`make check FILE={file_name}`
+	make check FILE={file_name}
 * To run all tests, use the following command:<br>
-	`make checkall`
+	make checkall
 
 -----
 ## The Dino Tutorial
@@ -109,7 +109,7 @@ Output: Program Aborted
 #### <a name="_udl7hgjt7da7"></a>2.1 Defining Variables
 Variables are the containers in which we can store data in the memory and access it later.
 
-` `In **Dino** we give users to define two types of container-
+In **Dino** we give users to define two types of container-
 
 - Using *assign* keyword- Containers defined by this method can be reassigned with different values.
 - Using *const* keyword- These containers have constant value and can not be reassigned with different values.
@@ -125,17 +125,17 @@ The scoping of vaiiables in **Dino** is lexical scoping. The language does a res
 
 *if(a>5)*
 
-`	`*assign a = 10;*
+*assign a = 10;*
 
-`	`*echo(a);*
+*echo(a);*
 
 *end*
 
 *else*
 
-`	`*assign a = 15;*
+*assign a = 15;*
 
-`	`*echo(a);*
+*echo(a);*
 
 *end*
 
@@ -254,98 +254,102 @@ Output: Runtime Error at 1 : Error: '+' operation valid only for two strings or 
 -----
 
 ### <a name="_mdu1cewc16ik"></a>4.1 If Statement
-`	`The language handles conditional statements using the if-else statement
+The language handles conditional statements using the if-else statement
 
-`	`Syntax:
+Syntax:
 
-`		`*if (<condition>)*
+		*if (<condition>)*
 
-`			`*<if block body>*
+			*<if block body>*
 
-`		`*end*
+		*end*
 
-`		`*else*
+		*else*
 
-`			`*<else block body>*
+			*<else block body>*
 
-`		`*end* 
+		*end* 
 
-`	`If there is no else-block, then the syntax is:
-
-
-
-*if (<condition>)*
-
-`			`*<if block body>*
-
-`		`*end*
+If there is no else-block, then the syntax is:
 
 
 
-`	`Examples:
+      *if (<condition>)*
 
-\>>	assign num = 20;
+			*<if block body>*
 
-if(num % 2 == 0)
+		*end*
 
-`    `echo("Even");
 
-end
 
-else
+Examples:
 
-`    `echo("Odd");
+\>>	
 
-end
+      assign num = 20;
 
-`	`Output: Even
+      if(num % 2 == 0)
+
+         echo("Even");
+
+      end
+
+      else
+
+         echo("Odd");
+
+      end
+
+Output: Even
 
 ### <a name="_1j1x3aor4k"></a>4.2 Loops
-`	`The usual While loop in most languages is used in the following manner in Dino.
+The usual While loop in most languages is used in the following manner in Dino.
 
-`	`Syntax:
+Syntax:
 
-`		`*loop (<condition>)*
+		*loop (<condition>)*
 
-`			`*<body>*
+			*<body>*
 
-`		`*end* 
+		*end* 
 
 
 
-`	`Examples:
+Examples:
 
-\>>	assign num = 20;
+\>>	
+      
+      assign num = 20;
 
-loop(num >10)
+      loop(num >10)
 
-`    `echo(num);
+         echo(num);
 
-`    `num = num - 1;
+         num = num - 1;
 
-end
+      end
 
-`	`Output: 
+Output: 
 
-`		`20
+		20
 
-`		`19
+		19
 
-`		`18
+		18
 
-`		`17
+		17
 
-`		`16
+		16
 
-`		`15
+		15
 
-`		`14
+		14
 
-`		`13
+		13
 
-`		`12
+		12
 
-`		`11
+		11
 ### <a name="_7uzr0bwlygr2"></a>4.3 Defining Functions
 Functions in Dino are code blocks having their own scope that can be used multiple times by calling them anywhere else in the code.
 
@@ -357,17 +361,17 @@ Here’s an example of how we create functions in Dino:
 
 *>>       func fact(n)*
 
-`    `*if (n == 0)*
+*if (n == 0)*
 
-`        `*return 1;*
+   *return 1;*
 
-`    `*end*
+*end*
 
-`    `*else*
+*else*
 
-`        `*return n \* fact(n-1);*
+   *return n \* fact(n-1);*
 
-`    `*end*
+*end*
 
 *end*
 
@@ -379,9 +383,9 @@ Here’s declaring a function without the return keyword:
 
 \>>	*func g(a, b, c)*
 
-`	    `*assign s = a+b+c;*
+   *assign s = a+b+c;*
 
-`    `*echo(s);*
+*echo(s);*
 
 *end* 
 
@@ -398,9 +402,9 @@ Here we will create a function named ‘sum’:
 
 \>>	*func sum(a, b, c)*
 
-`	    `*assign s = a+b+c;*
+   *assign s = a+b+c;*
 
-`    `*return s;*
+*return s;*
 
 *end* 
 
@@ -408,7 +412,7 @@ Now we will call this function for some 3 numbers:
 
 *>>	assign s = sum(2, 3, 5);*
 
-`	`*echo(s);*
+*echo(s);*
 
 This will print ‘10’ as the function sum will return 2+3+5 = 10. 
 
@@ -416,13 +420,13 @@ Similarly, if we declare:
 
 *>>	func do\_this()*
 
-`	    `*echo(“Hello World”);*
+*echo(“Hello World”);*
 
-`	`*end*
+*end*
 
 
 
-`	`*do\_this();*
+*do\_this();*
 
 Here we declare and then call the function ‘do\_this’ which will print out “Hello World” to the terminal as that is what this function does.
 
@@ -442,17 +446,17 @@ A few other examples:
 
 \>> *func sum(a, b, c)*
 
-`	    `*assign s = a+b+c;*
+*assign s = a+b+c;*
 
-`    	    `*return s;*
+   *return s;*
 
-`    `*end* 
+*end* 
 
-`   `*echo(lambda x = 12 in sum(x,5,6) end);*
+   *echo(lambda x = 12 in sum(x,5,6) end);*
 
 This outputs 23
 
-`          `*>> echo(lambda a=2 in a\*(lambda b=1 in lambda a=10 in b+a\*b end end) end;)*
+*>> echo(lambda a=2 in a\*(lambda b=1 in lambda a=10 in b+a\*b end end) end;)*
 
 This outputs 22  *(2\*(1+10))*
 ## More Data Structures
@@ -468,7 +472,7 @@ Creating a list while assigning it to a variable:
 
 Output:
 
-`	`*ListLiteral(elements=[1, 5, 3, True, StrLiteral(value='i am a string', line=1)], length=5, line=1)*
+*ListLiteral(elements=[1, 5, 3, True, StrLiteral(value='i am a string', line=1)], length=5, line=1)*
 
 **Methods on lists:**
 
@@ -478,9 +482,9 @@ Add x as an element to the end of the *list*.
 
 Example on the previously assigned list ‘a’:
 
-`	`>> a.add(“hii”);
+>> a.add(“hii”);
 
-`	`>>a;
+>>a;
 
 Output:
 
@@ -492,7 +496,7 @@ Returns the element at the index ‘x’ in the *list*. It is equivalent to **li
 
 Example:
 
-`	`>>a.at[2];
+>>a.at[2];
 
 Output:
 
@@ -504,7 +508,7 @@ Returns the first element of the list. Reports error if the list has no elements
 
 Example:
 
-`	`>>a.head;
+>>a.head;
 
 Output:
 
@@ -516,7 +520,7 @@ Returns a list same as *list* without its first element.
 
 Example:
 
-`	`>>a.tail;
+>>a.tail;
 
 
 
@@ -530,7 +534,7 @@ Returns the length of the list as an integer.
 
 Example:
 
-`	`>>a.length;
+>>a.length;
 
 Output:
 
@@ -542,7 +546,7 @@ Returns a list containing elements starting from the index x till index y-1 in *
 
 Example:
 
-`	`>>a.slice(2, 4);
+>>a.slice(2, 4);
 
 Output:
 
@@ -591,62 +595,47 @@ We are yet to add several methods that will help using these dictionaries furthe
 ## Input and Output
 -----
 ### <a name="_1v8ezztxexcy"></a>6.1 Input
-`	`The Dino language provides the utility to accept user-input to the programmer and then use that 
-`	`input and store it in a variable to be used further in the program.
+The Dino language provides the utility to accept user-input to the programmer and then use that 
+input and store it in a variable to be used further in the program.
 
-`	`Syntax:
+Syntax:
 
-`		`*capture(<Text to be displayed>)*
+*capture(<Text to be displayed>)*
 
 
 
 - This can be used as an input to a variable
 - It can be printed directly to the terminal with or without some manipulation
 
-`	`Examples:
+Examples:
 
-\>>	assign num = capture(“Enter Number ”);
+\>>	
 
-`	`num = num + 5;
+assign num = capture(“Enter Number ”);
 
-`	`Output: 
+num = num + 5;
 
-`		`Enter Number 10
+Output: 
 
-`		`// num stores the value 15
+		Enter Number
+	  // num store the number entered by the user
+      // num = num + 5
 
-`	`>>	if (capture(“Enter Number ”) != 2)
-
-`			`num = num + 5;
-
-`		`end
-
-`	`Output: 
-
-`		`Enter Number 2
-
-`		`// num stores the value 2
-
-
-
-`		`Enter Number 7
-
-`		`// num stores the value 12
 
 ### <a name="_iazpu2tlqds6"></a>6.2 Output
-`	`The Dino language provides the utility of the usual print statement, i.e., to write the output to 
-`	`the console using the echo command.
+The Dino language provides the utility of the usual print statement, i.e., to write the output to 
+the console using the echo command.
 
-`	`Syntax:
+Syntax:
 
-`		`*echo(<Output to be displayed>);*
+		*echo(<Output to be displayed>);*
 
 
 
 - Any Variable/ Literal can be passed to this function
 - It can also take an expression as input and output the evaluated expression
 
-`	`Examples:
+Examples:
 
 \>>	echo(“Hello World”)
 
@@ -654,13 +643,13 @@ We are yet to add several methods that will help using these dictionaries furthe
 
 Output: 
 
-`		`Hello World
+		Hello World
 
 \>>	echo(3+5^2)
 
-`	`Output: 
+Output: 
 
-`		`28
+		28
 
 
 ## Comments
@@ -688,17 +677,17 @@ For eg:
 
 *>> echo(2);*
 
-`    `*?: This entire*
+*?: This entire*
 
-`        `*block of* 
+   *block of* 
 
-`       `*code is*
+   *code is*
 
-`       `*not executed.* 
+   *not executed.* 
 
-`   `*:?*  
+*:?*  
 
-`   `*assign a=3;*
+*assign a=3;*
 
 
 
@@ -717,9 +706,9 @@ As an example if we code the following:
 
 *>>0	assign s = 0;*
 
-`     `*1	assign a = 3*
+   *1	assign a = 3*
 
-`     `*2	assign b = 6;*
+   *2	assign b = 6;*
 
 This code will return the following error:
 
@@ -733,9 +722,9 @@ For example, if we try to call a variable that does not already exist:
 
 *>>0	assign a = 5;*
 
-`     `*1	assign b = x;*
+   *1	assign b = x;*
 
-`     `*2	assign c = 10;*
+   *2	assign c = 10;*
 
 
 
@@ -747,11 +736,11 @@ Also, if we have errors in multiple lines, dino returns all errors.
 
 *>>0	assign s = 0;*
 
-`     `*1	assign a = 3*
+   *1	assign a = 3*
 
-`     `*2	assign b = 6;*
+   *2	assign b = 6;*
 
-`     `*3	assign c = 5*
+   *3	assign c = 5*
 
 
 This returns the error: “Error on line 2 : Syntax Error:';' expected after declaration
