@@ -32,6 +32,24 @@ Prof. Balagopal Komarath
 	make check FILE={file_name}
 * To run all tests, use the following command:<br>
 	make checkall
+-----
+
+## Quick Startup
+
+- Clone the repository using the following command:<br>
+	`git clone https://github.com/CS327-Dino/Dino.git`
+- Navigate to the Dino directory.
+- Run the following command to start the Dino prompt:<br>
+	`python main.py`
+- To run a code file, use the following command:<br>
+	`python main.py {file_name}`
+- To run the Dino prompt with verbose, use the following command:<br>
+	`python main.py -v`
+- To run a code file with verbose, use the following command:<br>
+	`python main.py {file_name} -v`
+- To exit the compilation process at any point, either close the Dino prompt or exit from a code file, use the abort utility provided,<br>
+	`abort();`
+
 
 -----
 ## The Dino Tutorial
