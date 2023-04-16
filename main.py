@@ -68,13 +68,14 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     # if error.triggered:
     #     return
 
-    # # output = evaluate(resolved) 
+    # output = evaluate(resolved) 
+
     # bytecode = Bytecode()
     # bytecode.bytecode_generator(resolved) 
     # # print(bytecode.code)
     # vm = VM(bytecode.code) 
     # output = vm.run() 
-    print(output)
+    # print(output)
     if prompt:
         print(output)
 

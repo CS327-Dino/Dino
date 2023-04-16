@@ -131,7 +131,9 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 match evaled_right:
                     case StrLiteral(value, line):
                         # if ((evaled_right) == StrLiteral):
-                        return evaluate(left, environment).value + evaluate(right, environment).value
+                        # return evaluate(left, environment).value + evaluate(right, environment).value
+                        __concat_str = evaluate(left, environment).value + evaluate(right, environment).value
+                        return StrLiteral(__concat_str, line)
                     case _:
                         report_runtime_error(
                             line, "Error: '+' operation valid only for two strings or two numerical values")
@@ -240,11 +242,24 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         except:
                                             report_runtime_error(
                                                 line, "Invalid Index")
+                                    case "copy":
+                                        assert len(arguments) == 0, "No arguments are expected" 
+                                        return ListLiteral(elements[:], length, line) 
+                                    case "update": 
+                                        assert len(arguments) == 2, "Expected 2 arguments" 
+                                        try: 
+                                            elements[arguments[0]] = arguments[1] 
+                                            return None
+                                        except: 
+                                            report_runtime_error(line, "Invalid Expression")
                                     case _:
                                         report_runtime_error(
                                             line, "Invalid method: list does not have any method: {}".format(method))
                             case StrLiteral(value, line):
                                 match method:
+                                    case "length":
+                                        assert len(arguments) == 0, "No arguments are expected" 
+                                        return len(value)
                                     case "slice":
                                         assert len(
                                             arguments) == 2, "Expected 2 arguments"
