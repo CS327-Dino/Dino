@@ -127,7 +127,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     report_runtime_error(
                         line, "Error: '+' operation valid only for two strings or two numerical values")
             else:
-                print(evaled_right)
+                # print(evaled_right)
                 match evaled_right:
                     case StrLiteral(value, line):
                         # if ((evaled_right) == StrLiteral):
@@ -315,7 +315,25 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case StrLiteral(value, line):
             return value
         case Echo(expr, line):
-            print(evaluate(expr, environment))
+            print_elem = []
+            for elem in expr:
+                expr_eval = evaluate(elem, environment)
+                if(isinstance(expr_eval, StrLiteral)):
+                    print_elem.append(expr_eval.value)
+                elif(isinstance(expr_eval, ListLiteral)):
+                    print_elem.append(expr_eval.elements)
+                else:
+                    print_elem.append(expr_eval)
+            # expr_eval = evaluate(expr, environment)
+            # if(isinstance(expr_eval, StrLiteral)):
+            #     print(expr_eval.value)
+            # elif(isinstance(expr_eval, ListLiteral)):
+            #     print(expr_eval.elements)
+            # else:
+            #     print(expr_eval)
+            # print(evaluate(expr, environment))
+            for elem in print_elem:
+                print(elem, end=" ")
             return ""
         case Return(expr, line):
             environment.set("return", evaluate(expr, environment), line, True)

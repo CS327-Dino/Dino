@@ -539,11 +539,18 @@ class Parser:
         #     return  self.__assign(__var)
         if (self.__match(TokenType.ECHO)):
             self.__consume(TokenType.LEFT_PAREN, "'(' expected")
-            __expr = self.__expression()
+            elems = []
+            # __expr = self.__expression()
+            left = self.__expression()
+            elems.append(left)
+            while (self.__match(TokenType.COMMA)):
+                left = self.__expression()
+                elems.append(left)     
+                       
             self.__consume(TokenType.RIGHT_PAREN, "')' expected")
             self.__consume(TokenType.SEMICOLON,
                            "';' expected after declaration")
-            return Echo(__expr, self.__tokens[self.__current - 1].line)
+            return Echo(elems, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.ABORT)):
             self.__consume(TokenType.LEFT_PAREN, "'(' expected")
             self.__consume(TokenType.RIGHT_PAREN, "')' expected")

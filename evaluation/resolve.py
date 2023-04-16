@@ -32,7 +32,10 @@ def resolution(program: AST, environment: Scope = Scope()):
                 output.append(resolution(thing, environment))
             return Seq(output)
         case Echo(expr, line):
-            return Echo(resolution(expr, environment), line)
+            elem_resolve = []
+            for elem in expr:
+                elem_resolve.append(resolution(elem, environment))
+            return Echo(elem_resolve, line)
         case Return(expr, line):
             return Return(resolution(expr, environment), line)
         case BinOp(left, op, right, line):
