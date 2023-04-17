@@ -86,7 +86,9 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     # print(output)
 
     if prompt:
-        print(output)
+        if output is not None:
+            print(output)
+        # print(output)
 
 
 args = argparse.ArgumentParser()

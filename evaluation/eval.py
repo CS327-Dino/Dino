@@ -299,12 +299,12 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                             arguments) == 0, "No arguments are expected"
                                         return ListLiteral(list(elements.values()), length, line)
                                     case "add":
-                                        assert len(
-                                            arguments) == 2, "Expected 2 arguments"
+                                        assert len(arguments) == 2, "Expected 2 arguments"
+                                        l = 0
+                                        if (arguments[0] not in elements.keys()):
+                                            l = 1
                                         elements[arguments[0]] = arguments[1]
-                                        length += 1
-                                        environment.set(left, DictLiteral(
-                                            elements, length, line), line, False)
+                                        environment.set(left, DictLiteral(elements, length + l, line), line, False)
                                         return None
                                     case "at":
                                         assert len(
@@ -317,8 +317,12 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                                 line, "Invalid key")
                                     case "update": 
                                         assert len(arguments) == 2, "Expected 2 arguments" 
-                                        try: 
-                                            elements[arguments[0]] = arguments[1] 
+                                        try:
+                                            l = 0
+                                            if (arguments[0] not in elements.keys()):
+                                                l = 1 
+                                            elements[arguments[0]] = arguments[1]
+                                            environment.set(left, DictLiteral(elements, length + l, line), line, False)
                                             return None
                                         except: 
                                             report_runtime_error(line, "Invalid Expression")
@@ -366,7 +370,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
             for elem in print_elem:
                 print(elem, end="")
             print()
-            return print_elem
+            return None
         case Return(expr, line):
             environment.set("return", evaluate(expr, environment), line, True)
             return ""
