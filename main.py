@@ -57,7 +57,7 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
         return
 
     resolved = resolution(expression)
-    output = evaluate(resolved)
+    # output = evaluate(resolved)
 
     if parsed_args.verbose:
         print("------------------Resolved Expr----------------")
@@ -68,7 +68,7 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     # if error.triggered:
     #     return
 
-    # output = evaluate(resolved) 
+    output = evaluate(resolved) 
 
     # bytecode = Bytecode()
     # bytecode.bytecode_generator(resolved) 
