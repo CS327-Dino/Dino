@@ -27,12 +27,6 @@ Last Update: 19th March 2023
 Prof. Balagopal Komarath
 
 -----
-## Tests
-* To run specific tests, use the following command:<br>
-	make check FILE={file_name}
-* To run all tests, use the following command:<br>
-	make checkall
------
 
 ## Quick Startup
 
@@ -47,9 +41,24 @@ Prof. Balagopal Komarath
 	`python main.py -v`
 - To run a code file with verbose, use the following command:<br>
 	`python main.py {file_name} -v`
+- To get the time of execution of a code file, use the following command:<br>
+   `python main.py {file_name} -t`
 - To exit the compilation process at any point, either close the Dino prompt or exit from a code file, use the abort utility provided,<br>
 	`abort();`
 
+-----
+## Tests
+* To run specific tests, use the following command:<br>
+	make check FILE={file_name}
+* To run all tests, use the following command:<br>
+	make checkall
+-----
+### Euler 14
+To run euler 14 test file, use the following command:
+```bash
+python main.py euler14.dino
+```
+Results of Euler14 are here: [euler14_Results.md](./docs/euler14_Results.md)
 
 -----
 ## The Dino Tutorial

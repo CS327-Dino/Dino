@@ -152,7 +152,9 @@ class Parser:
         methods of all datatypes of Dino are added to the AST as MethodLiteral datatype of Dino
         '''
         self.__consume(TokenType.DOT, "Expected '.' to call methods")
+        # print(self.__tokens[self.__current].ttype)
         __iden = self.__primary()
+        # print(__iden)
         __args = []
         reading_args = False
         if self.__peek_next() and self.__tokens[self.__current].ttype == TokenType.LEFT_PAREN:
@@ -406,10 +408,12 @@ class Parser:
         if (self.__match(TokenType.INTEGER)):
             return IntLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.STRING)):
+            print(self.__prev().literal)
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         
         if (self.__match(TokenType.IDENTIFIER)):
             if self.__tokens[self.__current].ttype == TokenType.DOT:
+                # print(self.__prev().text)
                 return self.__methods(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
             if (self.__tokens[self.__current].ttype == TokenType.LEFT_BRACKET):
                 __iden  = Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)

@@ -33,6 +33,10 @@ class I:
     @dataclass
     class Push:
         value: int
+
+    @dataclass
+    class List:
+        value: int
     
     @dataclass
     class PushFN:
@@ -147,7 +151,11 @@ class Bytecode:
                 self.bytecode_generator(value)   
                 # self.emit(I.Store(name))  
                 self.emit(I.Store(name.uid))
-                self.emit(I.Push(None))    
+                self.emit(I.Push(None))
+            case ListLiteral(elements, length, line):
+                for element in elements:
+                    self.bytecode_generator(element)
+                self.emit(I.List(length))
             case Identifier(_) as iden:
                 # self.emit(I.Load(iden))  
                 self.emit(I.Load(iden.uid))
@@ -193,7 +201,14 @@ class VM:
 
     def run(self):
         while self.ip < len(self.code):
+            # print(self.stack)
             match self.code[self.ip]:  
+                case I.List(length):
+                    temp = []
+                    for _ in range(length):
+                        temp.append(self.stack.pop())
+                    self.stack.append(temp[::-1])
+                    self.ip += 1
                 case I.Push(value):
                     self.stack.append(value)
                     self.ip += 1 
@@ -323,5 +338,5 @@ class VM:
                     self.ip += 1
                 case Op.POP:
                     self.stack.pop()
-                    self.ip += 1    
+                    self.ip += 1
         return self.stack.pop()       

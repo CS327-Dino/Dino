@@ -9,7 +9,9 @@ from evaluation.resolve import *
 from evaluation.typecheck import * 
 from evaluation.bytecode import *
 import time
+sys.setrecursionlimit(10000)
 
+bytecode = Bytecode()
 
 def scan_file(file_name):
     f = open(file_name, "rb")
@@ -32,7 +34,8 @@ def open_prompt():
     while True:
         try:
             run(input(">>> "), error, typeenv, True)
-        except:
+        except Exception as e:
+            print(e)
             print("Please Restart")
             break
         error.triggered = False
@@ -68,17 +71,20 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     # if error.triggered:
     #     return
 
-    output = evaluate(resolved) 
+    output = evaluate(resolved)
 
-    # bytecode = Bytecode()
     # bytecode.bytecode_generator(resolved) 
     # if parsed_args.bytecode:
-    #     print("------------------Resolved Expr----------------")
-    #     print(bytecode.code)
+    #     print("------------------Bytecode --------------------")
+    #     for i,j in enumerate(bytecode.code):
+    #         print(i, end="\t")
+    #         print(j)
+
     #     print("-----------------------------------------------")
     # vm = VM(bytecode.code) 
     # output = vm.run() 
     # print(output)
+
     if prompt:
         print(output)
 
