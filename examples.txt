@@ -264,3 +264,38 @@ end
 
 assign f = fib(15);
 echo(f);
+
+---------
+
+Project Euler Problem 14:
+
+?Brute-Force Euler 14
+
+assign start = 999999;
+assign count = 1;
+assign ans = 1;
+assign max_count = 1;
+
+assign i = 1;
+
+loop(start > 1)
+    count = 1;
+    assign num = start;
+    echo(start);
+    loop(num>1)
+        if(num%2 == 0)
+            num = num//2;
+        end
+        else
+            num = 3*num + 1;
+        end
+        count = count + 1;
+    end
+    if(count > max_count)
+        max_count = count;
+        ans = start;
+    end
+    start = start - 2;
+end
+echo(max_count); ? 525
+echo(ans);       ? 837799
