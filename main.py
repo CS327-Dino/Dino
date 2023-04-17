@@ -20,9 +20,9 @@ def scan_file(file_name):
     if parsed_args.time:
         print("--- %s seconds ---" % (time.time() - start_time))
 
-    # if (error.triggered):
-    #     report_error(error)
-    #     sys.exit()
+    if (error.triggered):
+        report_error(error)
+        # sys.exit()
 
 
 def open_prompt():
@@ -44,20 +44,20 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
         token_list = scanned_code.generate_tokens()
         parser = Parser(token_list, error)
         expression = parser.parse()
-    except:
+    except Exception as e:
+        # print(e)
         error.triggered = True
-
-    if parsed_args.verbose:
-        print("------------------Parsed Expr------------------")
-        print(expression)
 
     if error.triggered:
         if parsed_args.verbose:
             print("-----------------------------------------------")
         return
 
+    if parsed_args.verbose:
+        print("------------------Parsed Expr------------------")
+        print(expression)
+
     resolved = resolution(expression)
-    output = evaluate(resolved)
 
     if parsed_args.verbose:
         print("------------------Resolved Expr----------------")
@@ -68,11 +68,14 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     # if error.triggered:
     #     return
 
-    # output = evaluate(resolved) 
+    output = evaluate(resolved) 
 
     # bytecode = Bytecode()
     # bytecode.bytecode_generator(resolved) 
-    # # print(bytecode.code)
+    # if parsed_args.bytecode:
+    #     print("------------------Resolved Expr----------------")
+    #     print(bytecode.code)
+    #     print("-----------------------------------------------")
     # vm = VM(bytecode.code) 
     # output = vm.run() 
     # print(output)
@@ -83,9 +86,9 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
 args = argparse.ArgumentParser()
 args.add_argument("file", nargs="?", help="file to run")
 args.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
+args.add_argument("-byt", "--bytecode", action="store_true", help="Get Bytecode mode")
 args.add_argument("-t", "--time", action="store_true", help="time mode")
 parsed_args = args.parse_args()
-# print(parsed_args)
 
 if parsed_args.file:
     scan_file(parsed_args.file)

@@ -87,7 +87,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
             method_name = name
             arguments = []
             for arg in args:
-                arguments.append(evaluate(arg))
+                arguments.append(evaluate(arg, environment))
             return method_name, arguments, line
 
         case Lambda(Identifier(name) as iden, e1, e2, line):
@@ -186,8 +186,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
             try:
                 match op:
                     case TokenType.DOT:
-                        val = evaluate(left)
-                        method, arguments, line = evaluate(right)
+                        val = evaluate(left, environment)
+                        method, arguments, line = evaluate(right, environment)
                         # print(left)
                         # print(arguments)
                         # if (type(val) is list):
