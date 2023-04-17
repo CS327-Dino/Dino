@@ -20,9 +20,9 @@ def scan_file(file_name):
     if parsed_args.time:
         print("--- %s seconds ---" % (time.time() - start_time))
 
-    # if (error.triggered):
-    #     report_error(error)
-    #     sys.exit()
+    if (error.triggered):
+        report_error(error)
+        # sys.exit()
 
 
 def open_prompt():
@@ -44,17 +44,18 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
         token_list = scanned_code.generate_tokens()
         parser = Parser(token_list, error)
         expression = parser.parse()
-    except:
+    except Exception as e:
+        # print(e)
         error.triggered = True
-
-    if parsed_args.verbose:
-        print("------------------Parsed Expr------------------")
-        print(expression)
 
     if error.triggered:
         if parsed_args.verbose:
             print("-----------------------------------------------")
         return
+
+    if parsed_args.verbose:
+        print("------------------Parsed Expr------------------")
+        print(expression)
 
     resolved = resolution(expression)
 
@@ -78,7 +79,6 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     # vm = VM(bytecode.code) 
     # output = vm.run() 
     # print(output)
-
     if prompt:
         print(output)
 

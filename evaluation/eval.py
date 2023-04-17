@@ -87,7 +87,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
             method_name = name
             arguments = []
             for arg in args:
-                arguments.append(evaluate(arg))
+                arguments.append(evaluate(arg, environment))
             return method_name, arguments, line
 
         case Lambda(Identifier(name) as iden, e1, e2, line):
@@ -131,7 +131,9 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 match evaled_right:
                     case StrLiteral(value, line):
                         # if ((evaled_right) == StrLiteral):
-                        return evaluate(left, environment).value + evaluate(right, environment).value
+                        # return evaluate(left, environment).value + evaluate(right, environment).value
+                        __concat_str = evaluate(left, environment).value + evaluate(right, environment).value
+                        return StrLiteral(__concat_str, line)
                     case _:
                         report_runtime_error(
                             line, "Error: '+' operation valid only for two strings or two numerical values")
@@ -184,8 +186,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
             try:
                 match op:
                     case TokenType.DOT:
-                        val = evaluate(left)
-                        method, arguments, line = evaluate(right)
+                        val = evaluate(left, environment)
+                        method, arguments, line = evaluate(right, environment)
                         # print(left)
                         # print(arguments)
                         # if (type(val) is list):
@@ -240,11 +242,24 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         except:
                                             report_runtime_error(
                                                 line, "Invalid Index")
+                                    case "copy":
+                                        assert len(arguments) == 0, "No arguments are expected" 
+                                        return ListLiteral(elements[:], length, line) 
+                                    case "update": 
+                                        assert len(arguments) == 2, "Expected 2 arguments" 
+                                        try: 
+                                            elements[arguments[0]] = arguments[1] 
+                                            return None
+                                        except: 
+                                            report_runtime_error(line, "Invalid Expression")
                                     case _:
                                         report_runtime_error(
                                             line, "Invalid method: list does not have any method: {}".format(method))
                             case StrLiteral(value, line):
                                 match method:
+                                    case "length":
+                                        assert len(arguments) == 0, "No arguments are expected" 
+                                        return len(value)
                                     case "slice":
                                         assert len(
                                             arguments) == 2, "Expected 2 arguments"
@@ -333,8 +348,9 @@ def evaluate(program: AST, environment: Scope = Scope()):
             #     print(expr_eval)
             # print(evaluate(expr, environment))
             for elem in print_elem:
-                print(elem, end=" ")
-            return ""
+                print(elem, end="")
+            print()
+            return print_elem
         case Return(expr, line):
             environment.set("return", evaluate(expr, environment), line, True)
             return ""
