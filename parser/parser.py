@@ -408,7 +408,7 @@ class Parser:
         if (self.__match(TokenType.INTEGER)):
             return IntLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.STRING)):
-            print(self.__prev().literal)
+            # print(self.__prev().literal)
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         
         if (self.__match(TokenType.IDENTIFIER)):
