@@ -70,12 +70,16 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
 
     output = evaluate(resolved) 
 
-    # bytecode = Bytecode()
-    # bytecode.bytecode_generator(resolved) 
-    # # print(bytecode.code)
-    # vm = VM(bytecode.code) 
-    # output = vm.run() 
-    # print(output)
+    bytecode = Bytecode()
+    bytecode.bytecode_generator(resolved) 
+    # print(bytecode.code)
+    vm = VM(bytecode.code) 
+    # print(vm.code)
+    for i,op in enumerate(vm.code):
+        print(i,end='\t')
+        print(op)
+    output = vm.run() 
+    print(output)
     if prompt:
         print(output)
 

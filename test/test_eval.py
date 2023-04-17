@@ -91,8 +91,18 @@ class TestEval(unittest.TestCase):
         e8 = Lambda(e6, e5, e7, 0)
         e9 = Lambda(e2, e1, e8, 0)
 
+        #lambda a=true in lambda b=false in a and b end end
+
+        e10 = BoolLiteral(True)
+        e11 = BoolLiteral(False)
+        e12 = BinOp(e2, TokenType.AND, e6)
+        e13 = Lambda(e6, e11, e12, 0)
+        e14 = Lambda(e2, e10, e13, 0)
+
+
         self.assertEqual(evaluate(e4), 4)
         self.assertEqual(evaluate(e9), 10)
+        self.assertFalse(evaluate(e14))
 
     def test_lists(self):
         e1 = ListLiteral([IntLiteral(1), IntLiteral(2), IntLiteral(3)], 3, 1)
@@ -125,3 +135,21 @@ class TestEval(unittest.TestCase):
         self.assertEqual(evaluate(e9).elements, [2, 3, 4])
         self.assertEqual(evaluate(e10).elements, [2, 3])
         self.assertEqual(evaluate(e12), 3)
+    def test_functions(self):
+
+        #func fn(n) if (n == 0) return 1; end else return 0; end end
+        #evaluating fn(0) should return 1
+
+        e1 = Identifier("n")
+        e2 = BinOp(e1, TokenType.EQUAL_EQUAL, IntLiteral(0))
+        e3 = Return(IntLiteral(1))
+        e4 = Return(IntLiteral(0))
+        e5 = If(e2, e3, e4)
+        e6 = Function("fn", [e1], e5,1)
+        evaluate(e6)
+        print(e6)
+        #Function call for fn(0)
+        e7 = Call("fn", [IntLiteral(0)],1)
+        evaluate(e7)
+        # print("evaluated = " , evaluate(e7))
+
