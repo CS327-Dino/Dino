@@ -75,13 +75,13 @@ def evaluate(program: AST, environment: Scope = Scope()):
             return ListLiteral(output, length, line)
 
         case DictLiteral(elements, length, line):
-            # output = {}
-            # for i in elements:
-            #     new_s = StrLiteral(i, line)
-            #     output[evaluate(new_s, environment)] = evaluate(
-            #         elements[i], environment)
+            output = {}
+            for i in elements.keys():
+                # print(type(i))
+                new_s = IntLiteral(i, line)
+                output[evaluate(new_s, environment)] = evaluate(elements[i], environment)
             # return output
-            return DictLiteral(elements, length, line)
+            return DictLiteral(output, length, line)
 
         case MethodLiteral(name, args, line):
             method_name = name
@@ -195,6 +195,10 @@ def evaluate(program: AST, environment: Scope = Scope()):
                             case ListLiteral(elements, length, line):
                                 # method = right.name
                                 match method:
+                                    case "in_list":
+                                        assert len(arguments) == 1, "Expected 1 argument"
+                                        # print(arguments[0])
+                                        return arguments[0] in elements
                                     case "length":
                                         # return len(val)
                                         assert len(
@@ -221,7 +225,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         # return val[int(arguments[0]): int(arguments[1])]
                                         # return elements[arguments[0] : arguments[1]]
                                         try:
-                                            sliced_list = elements[arguments[0]                                                                   : arguments[1]]
+                                            sliced_list = elements[arguments[0]: arguments[1]]
                                         except:
                                             report_runtime_error(
                                                 line, "List index is out of range")
@@ -278,6 +282,10 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                             line, "Invalid method: string does not have any method: {}".format(method))
                             case DictLiteral(elements, length, line):
                                 match method:
+                                    case "in_dict":
+                                        assert len(arguments) == 1, "Expected 1 argument"
+                                        # print(arguments[0])
+                                        return arguments[0] in elements.keys()
                                     case "length":
                                         assert len(
                                             arguments) == 0, "No arguments are expected"
@@ -302,10 +310,18 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         assert len(
                                             arguments) == 1, "Expected 1 argument"
                                         try:
+                                            # print(type(elements[arguments[0]]))
                                             return elements[arguments[0]]
                                         except:
                                             report_runtime_error(
                                                 line, "Invalid key")
+                                    case "update": 
+                                        assert len(arguments) == 2, "Expected 2 arguments" 
+                                        try: 
+                                            elements[arguments[0]] = arguments[1] 
+                                            return None
+                                        except: 
+                                            report_runtime_error(line, "Invalid Expression")
                                     case _:
                                         report_runtime_error(
                                             line, "Invalid method: dict does not have any method: {}".format(method))
