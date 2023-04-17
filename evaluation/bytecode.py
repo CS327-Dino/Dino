@@ -24,6 +24,7 @@ class Op(Enum):
     LESS_EQUAL = 16
     POW = 19
     POP = 23
+    RETURN = 24
 
     def __repr__(self):
         return f"{self.name}"
@@ -35,11 +36,12 @@ class I:
     
     @dataclass
     class PushFN:
+        index: int
         address: int
     
     @dataclass
     class Call:
-        iden: int
+        index: int
     
     @dataclass
     class Load:
@@ -164,13 +166,14 @@ class Bytecode:
                 self.emit(I.Jmp(FEND))
                 self.emit_label(FBEGIN)
                 self.bytecode_generator(body)
+                self.emit(Op.RETURN)
                 self.emit_label(FEND)
-                self.emit(I.PushFN(FBEGIN))
+                self.emit(I.PushFN(name.uid, FBEGIN.address))
                 # self.emit(I.Store(name))   
-                self.emit(I.Store(name.uid))
+                # self.emit(I.Store(name.uid))
                 self.emit(I.Push(None))
             case Call(name, _):
-                self.emit(I.Call(name))
+                self.emit(I.Call(name.uid))
 
 @dataclass
 class Frame:
@@ -194,6 +197,17 @@ class VM:
                 case I.Push(value):
                     self.stack.append(value)
                     self.ip += 1 
+                case I.PushFN(index, address):
+                    self.Frame.locals[index] = address
+                    # self.stack.append(address.address)
+                    self.ip += 1
+                case I.Call(index):
+                    jmpip = self.Frame.locals[index]
+                    self.Frame = Frame(self.ip + 1, self.Frame)
+                    self.ip = jmpip
+                case Op.RETURN:
+                    self.ip = self.Frame.retaddr
+                    self.Frame = self.Frame.parent
                 case I.Load(index):
                     self.stack.append(self.Frame.locals[index])
                     # print("L", self.Frame.locals[index])
