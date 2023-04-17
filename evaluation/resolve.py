@@ -3,6 +3,7 @@ from datatypes.datatypes import *
 from errors.error import *
 from .eval import *
 
+
 def resolution(program: AST, environment: Scope = Scope()):
     if program is None:
         return None

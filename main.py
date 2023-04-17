@@ -6,7 +6,7 @@ from tokenizing.token_scanning import *
 from parser.parser import *
 from evaluation.eval import *
 from evaluation.resolve import *
-from evaluation.typecheck import * 
+from evaluation.typecheck import *
 from evaluation.bytecode import *
 import time
 sys.setrecursionlimit(10000)
@@ -33,11 +33,13 @@ def open_prompt():
     typeenv = Scope()
     while True:
         try:
-            run(input(">>> "), error, typeenv, True)
-        except Exception as e:
-            print(e)
-            print("Please Restart")
-            break
+            code = input(">>> ")
+            if code == "abort();":
+                print("Closing Prompt")
+                break
+            run(code, error, typeenv, True)
+        except:
+            print("Please Enter a valid expression")
         error.triggered = False
 
 
@@ -72,6 +74,7 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     #     return
 
     output = evaluate(resolved)
+    output = evaluate(resolved)
 
     # bytecode.bytecode_generator(resolved) 
     # if parsed_args.bytecode:
@@ -81,8 +84,8 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     #         print(j)
 
     #     print("-----------------------------------------------")
-    # vm = VM(bytecode.code) 
-    # output = vm.run() 
+    # vm = VM(bytecode.code)
+    # output = vm.run()
     # print(output)
 
     if prompt:
@@ -94,7 +97,8 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
 args = argparse.ArgumentParser()
 args.add_argument("file", nargs="?", help="file to run")
 args.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
-args.add_argument("-byt", "--bytecode", action="store_true", help="Get Bytecode mode")
+args.add_argument("-byt", "--bytecode", action="store_true",
+                  help="Get Bytecode mode")
 args.add_argument("-t", "--time", action="store_true", help="time mode")
 parsed_args = args.parse_args()
 
