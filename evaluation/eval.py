@@ -348,8 +348,9 @@ def evaluate(program: AST, environment: Scope = Scope()):
             #     print(expr_eval)
             # print(evaluate(expr, environment))
             for elem in print_elem:
-                print(elem, end=" ")
-            return ""
+                print(elem, end="")
+            print()
+            return print_elem
         case Return(expr, line):
             environment.set("return", evaluate(expr, environment), line, True)
             return ""
