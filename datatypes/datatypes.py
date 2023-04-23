@@ -67,6 +67,12 @@ class Assignment:
     line: int = 0
     declaration: bool = False
 
+@dataclass
+class ParallelAssignment: 
+    var: List['Identifier']
+    value: List['AST']
+    line: int =0 
+    declarartion: bool = False
 
 @dataclass
 class Lambda:
@@ -75,6 +81,12 @@ class Lambda:
     e2: "AST"
     line: int = 0
 
+@dataclass
+class ParallelLambda:
+    var: List[Identifier]
+    e1: List["AST"]
+    e2: "AST"
+    line: int = 0
 
 @dataclass
 class If:
@@ -184,7 +196,7 @@ class Capture:
     line: int = 0
 
 
-AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | Echo | Function | Call | Capture | MethodLiteral | Lambda | Abort | Return | DictLiteral | None
+AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | ParallelAssignment| Echo | Function | Call | Capture | MethodLiteral | Lambda | ParallelLambda | Abort | Return | DictLiteral | None
 
 Value = float | bool | int | str | None | AST
 

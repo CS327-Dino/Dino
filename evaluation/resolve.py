@@ -24,6 +24,18 @@ def resolution(program: AST, environment: Scope = Scope()):
             else:
                 reiden = environment.get(name, line)
                 return Assignment(Identifier(name, iden.line, reiden.isconst, reiden.uid), value, line, declaration)
+        case ParallelAssignment(list_identifiers, list_values, line, declaration):
+            for i in range(len(list_values)):
+                list_values[i] = resolution(list_values[i], environment)
+            if declaration:
+                for i in list_identifiers:
+                    environment.set(i.name, i, line, True)
+            else:
+                for i in list_identifiers:
+                    reiden = environment.get(i.name, line)
+                    environment.set(i.name, Identifier(i.name, i.line, reiden.isconst, reiden.uid), line, True)
+            return ParallelAssignment(list_identifiers, list_values, line, declaration)
+        
         case Identifier(name, line) as iden:
             reiden = environment.get(name, line)
             return Identifier(name, iden.line, reiden.isconst, reiden.uid)
@@ -59,6 +71,21 @@ def resolution(program: AST, environment: Scope = Scope()):
             e2 = resolution(e2, newEnv)
             del newEnv
             return Lambda(newIden, e1, e2, line)
+        case ParallelLambda(list_identifiers, list_expressions, e2, line):
+            
+            for i in range(len(list_expressions)):
+                list_expressions[i] = resolution(list_expressions[i], environment)
+            
+            newEnv = Scope(environment)
+            newIden =[]
+
+            for i in list_identifiers:
+                newIden.append(Identifier(i.name, line, True))
+                newEnv.set(i.name, newIden[-1], line, True)
+            
+            e2 = resolution(e2, newEnv)
+            del newEnv
+            return ParallelLambda(newIden, list_expressions, e2, line)
         case If(e0, e1, e2):
             e0 = resolution(e0, environment)
             newEnv = Scope(environment)
