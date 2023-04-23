@@ -83,7 +83,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     output.append(i)
                 else:
                     output.append(evaluate(i, environment))
-            
+
             return ListLiteral(output, length, line)
 
         case DictLiteral(elements, length, line):
@@ -95,7 +95,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     output[i] = elements[i].value
                 else:
                     output[i] = evaluate(elements[i], environment)
-            
+
             return DictLiteral(output, length, line)
 
         case MethodLiteral(name, args, line):
@@ -157,14 +157,15 @@ def evaluate(program: AST, environment: Scope = Scope()):
             #     evaluate(increment, bodyEnv)
             #     del bodyEnv
             if iterable.declaration:
-                environment.set(iterable.var, evaluate(iterable.value, environment), iterable.line, True)
-                while(evaluate(condition, environment)):
+                environment.set(iterable.var, evaluate(
+                    iterable.value, environment), iterable.line, True)
+                while (evaluate(condition, environment)):
                     bodyEnv = Scope(environment)
                     output = evaluate(body, bodyEnv)
                     evaluate(increment, bodyEnv)
                     del bodyEnv
             else:
-                while(evaluate(condition, environment)):
+                while (evaluate(condition, environment)):
                     bodyEnv = Scope(environment)
                     output = evaluate(body, bodyEnv)
                     evaluate(increment, environment)
@@ -195,10 +196,10 @@ def evaluate(program: AST, environment: Scope = Scope()):
                         # return evaluate(left, environment).value + evaluate(right, environment).value
                         __concat_str = evaluate(
                             left, environment).value + evaluate(right, environment).value
-                        return StrLiteral(__concat_str, line) 
-                    case ListLiteral(value, length, line): 
+                        return StrLiteral(__concat_str, line)
+                    case ListLiteral(value, length, line):
                         __concat_list = evaluate(
-                            left, environment).elements + evaluate(right, environment).elements 
+                            left, environment).elements + evaluate(right, environment).elements
                         return ListLiteral(__concat_list, len(__concat_list), line)
                     case _:
                         report_runtime_error(
@@ -292,8 +293,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         # return val[int(arguments[0]): int(arguments[1])]
                                         # return elements[arguments[0] : arguments[1]]
                                         try:
-                                            sliced_list = elements[arguments[0]
-                                                : arguments[1]]
+                                            sliced_list = elements[arguments[0]                                                                   : arguments[1]]
                                         except:
                                             report_runtime_error(
                                                 line, "List index is out of range")
@@ -325,15 +325,17 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                             arguments) == 0, "No arguments are expected"
                                         return ListLiteral(elements[:], length, line)
                                     case "pop":
-                                        assert len(arguments) == 1, "Expected 1 argument" 
+                                        assert len(
+                                            arguments) == 1, "Expected 1 argument"
                                         try:
-                                            popped = elements.pop(arguments[0]) 
+                                            popped = elements.pop(arguments[0])
                                             match popped:
                                                 case ListLiteral(elements, length, line):
                                                     return ListLiteral(elements[:], length, line)
-                                            return popped 
+                                            return popped
                                         except:
-                                            report_runtime_error(line, "Invalid expression") 
+                                            report_runtime_error(
+                                                line, "Invalid expression")
                                     case "update":
                                         assert len(
                                             arguments) == 2, "Expected 2 arguments"
@@ -356,14 +358,17 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                     case "slice":
                                         assert len(
                                             arguments) == 2, "Expected 2 arguments"
-                                        sliced_str = value[arguments[0]
-                                            : arguments[1]]
+                                        sliced_str = value[arguments[0]                                                           : arguments[1]]
                                         return StrLiteral(sliced_str, line)
                                     case "at":
                                         assert len(
                                             arguments) == 1, "Expected 1 argument"
                                         try:
-                                            # return StrLiteral(value[arguments[0]], line)
+                                            ret = arguments[0]
+                                            if (type(ret) is Identifier):
+                                                arg = evaluate(
+                                                    ret, environment)
+                                                return value[arg]
                                             return value[arguments[0]]
                                         except:
                                             report_runtime_error(
@@ -457,6 +462,13 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                     case _:
                                         report_runtime_error(
                                             line, "Invalid method: dict does not have any method: {}".format(method))
+                        if type(val) == int:
+                            match method:
+                                case "string":
+                                    assert len(
+                                        arguments) == 0, "No arguments are expected"
+                                    return StrLiteral(str(val), line)
+
             except TypeError:
                 report_runtime_error(line, "Invalid syntax")
                 return ""
