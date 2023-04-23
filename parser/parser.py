@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 from evaluation.eval import *
-
+import sys
+sys.setrecursionlimit(10000)
 
 @dataclass
 class Parser:
@@ -28,14 +29,31 @@ class Parser:
         return If(__condition, __ifpart, __elsepart)
 
     def __loop(self):
-        self.__consume(TokenType.LEFT_PAREN, "'(' expected after if")
+        self.__consume(TokenType.LEFT_PAREN, "'(' expected for loop condition")
         __condition = self.__expression()
         self.__consume(TokenType.RIGHT_PAREN,
                        "')' expected after condition end")
         __body = Seq([])
         while (not self.__match(TokenType.END, "")):
             __body.things.append(self.__declare())
+            # print(__body.things)
         return Loop(__condition, __body)
+    
+    def __iterate(self):
+        # iterate(iterable, condition, increment)
+        # eg. iterate(i, i < 10, i++)
+        self.__consume(TokenType.LEFT_PAREN, "'(' expected for iterate statemnet")
+        __iterable = self.__declare()
+        # self.__consume(TokenType.COMMA,"',' expected after iterable")
+        __condition = self.__expression()
+        self.__consume(TokenType.SEMICOLON,"';' expected after condition")
+        __increment = self.__expression()
+        self.__consume(TokenType.RIGHT_PAREN, "')' expected after condition end")
+        __body = Seq([])
+        while (not self.__match(TokenType.END, "")):
+            __body.things.append(self.__declare())
+        __increment_cond = Assignment(__iterable.var, __increment, __iterable.line)
+        return Iterate(__iterable, __condition, __increment_cond, __body)
 
     def __func(self):
         self.__consume(TokenType.IDENTIFIER, "A function name was expected")
@@ -61,7 +79,6 @@ class Parser:
             if var != None:
                 parameters.append(Identifier(var.text, var.line))
         self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
-
         body = Seq([])
         while (not self.__match(TokenType.END, "")):
             body.things.append(self.__declare())
@@ -184,8 +201,10 @@ class Parser:
                     break
                 case _:
                     break
+        # self.__peek().print_token()
         # print(self.__tokens[self.__current].text)
-        __method = MethodLiteral(__iden.name, __args, self.__tokens[self.__current].line)
+        __method = MethodLiteral(
+            __iden.name, __args, self.__tokens[self.__current].line)
         if (__method.name not in all_methods):
             return report_error(DinoError("{} is not a valid method".format(__method.name), self.__tokens[self.__current].line))
         return BinOp(identifier, TokenType.DOT, __method,  self.__tokens[self.__current].line)
@@ -318,9 +337,11 @@ class Parser:
                 case op if op in [TokenType.STAR, TokenType.SLASH, TokenType.MOD, TokenType.SLASH_SLASH]:
                     self.__forward()
                     right_operand = self.__exponential()
-                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                    left_operand = BinOp(
+                        left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
                     break
+        # self.__peek().print_token()
         return left_operand
 
     def __exponential(self):
@@ -384,13 +405,22 @@ class Parser:
         self.__consume(TokenType.SEMICOLON, "Expect ';' after return value.")
         return Return(expr, self.__prev().line)
 
+    def __stop(self):
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after stop statement.")
+        return Stop(self.__prev().line)
+
     def __primary(self):
         # print(self.__current)
         if (self.__match(TokenType.CAPTURE)):
             self.__consume(TokenType.LEFT_PAREN, "'(' expected")
             if (self.__match(TokenType.STRING)):
-                val = Capture(self.__prev().literal, self.__tokens[self.__current - 1].line)
+                val = Capture(self.__prev().literal,
+                              self.__tokens[self.__current - 1].line)
                 self.__consume(TokenType.RIGHT_PAREN, "')' expected")
+                return val
+            elif (self.__match(TokenType.RIGHT_PAREN)):
+                val = Capture("",
+                              self.__tokens[self.__current - 1].line)
                 return val
             else:
                 self.__parseError.message = "Syntax Error: Only string accepted during capture"
@@ -410,27 +440,30 @@ class Parser:
         if (self.__match(TokenType.STRING)):
             # print(self.__prev().literal)
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
-        
+
         if (self.__match(TokenType.IDENTIFIER)):
             if self.__tokens[self.__current].ttype == TokenType.DOT:
                 # print(self.__prev().text)
                 return self.__methods(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
             if (self.__tokens[self.__current].ttype == TokenType.LEFT_BRACKET):
-                __iden  = Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
-                index = self.__primary() 
-                __method = MethodLiteral("at", index.elements, self.__tokens[self.__current - 1].line)
-                
+                __iden = Identifier(self.__prev().text,
+                                    self.__tokens[self.__current - 1].line)
+                index = self.__primary()
+                __method = MethodLiteral(
+                    "at", index.elements, self.__tokens[self.__current - 1].line)
+
                 # return BinOp(__iden ,TokenType.DOT, __method,  self.__tokens[self.__current].line)
-                if (self.__tokens[self.__current].ttype == TokenType.EQUAL): 
+                if (self.__tokens[self.__current].ttype == TokenType.EQUAL):
                     self.__forward()
                     __new_val = self.__expression()
 
-                    __method = MethodLiteral("update", [index.elements[0], __new_val], self.__tokens[self.__current - 1].line)
-                    return BinOp(__iden ,TokenType.DOT, __method,  self.__tokens[self.__current].line)
+                    __method = MethodLiteral(
+                        "update", [index.elements[0], __new_val], self.__tokens[self.__current - 1].line)
+                    return BinOp(__iden, TokenType.DOT, __method,  self.__tokens[self.__current].line)
                 else:
-                    return BinOp(__iden ,TokenType.DOT, __method,  self.__tokens[self.__current].line)
+                    return BinOp(__iden, TokenType.DOT, __method,  self.__tokens[self.__current].line)
             return Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
-        
+
         if (self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
             self.__consume(TokenType.RIGHT_PAREN,
@@ -519,10 +552,14 @@ class Parser:
             return self.__ifstmt()
         if (self.__match(TokenType.LOOP)):
             return self.__loop()
+        if (self.__match(TokenType.ITERATE)):
+            return self.__iterate()
         if (self.__match(TokenType.FUNC)):
             return self.__func()
         if (self.__match(TokenType.RETURN)):
             return self.__return()
+        if (self.__match(TokenType.STOP)):
+            return self.__stop()
         return self.__exprstmt()
 
     def __assign(self, var, isconst=False):
@@ -556,8 +593,8 @@ class Parser:
             elems.append(left)
             while (self.__match(TokenType.COMMA)):
                 left = self.__expression()
-                elems.append(left)     
-                       
+                elems.append(left)
+
             self.__consume(TokenType.RIGHT_PAREN, "')' expected")
             self.__consume(TokenType.SEMICOLON,
                            "';' expected after declaration")
@@ -574,6 +611,9 @@ class Parser:
         __statements = Seq([])
         while (not self.__atEnd()):
             expr = self.__declare()
+            # print(expr)
+            # print("New Line \n")
+            # self.__peek().print_token()
             if (expr):
                 __statements.things.append(expr)
         return __statements

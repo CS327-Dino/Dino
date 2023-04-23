@@ -6,12 +6,14 @@ from tokenizing.token_scanning import *
 from parser.parser import *
 from evaluation.eval import *
 from evaluation.resolve import *
-from evaluation.typecheck import * 
+from evaluation.typecheck import *
 from evaluation.bytecode import *
 import time
 sys.setrecursionlimit(10000)
 
 bytecode = Bytecode()
+bytecode = Bytecode()
+
 
 def scan_file(file_name):
     f = open(file_name, "rb")
@@ -34,11 +36,13 @@ def open_prompt():
     env = Scope()
     while True:
         try:
-            run(input(">>> "), error, env, typeenv, True)
-        except Exception as e:
-            print(e)
-            print("Please Restart")
-            # break
+            code = input(">>> ")
+            if code == "abort();":
+                print("Closing Prompt")
+                break
+            run(code, error, typeenv, True)
+        except:
+            print("Please Enter a valid expression")
         error.triggered = False
 
 
@@ -74,7 +78,7 @@ def run(code: str, error: DinoError, env: Scope = Scope() ,typeenv: Scope = Scop
 
     output = evaluate(resolved, env)
 
-    # bytecode.bytecode_generator(resolved) 
+    # bytecode.bytecode_generator(resolved)
     # if parsed_args.bytecode:
     #     print("------------------Bytecode --------------------")
     #     for i,j in enumerate(bytecode.code):
@@ -94,7 +98,8 @@ def run(code: str, error: DinoError, env: Scope = Scope() ,typeenv: Scope = Scop
 args = argparse.ArgumentParser()
 args.add_argument("file", nargs="?", help="file to run")
 args.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
-args.add_argument("-byt", "--bytecode", action="store_true", help="Get Bytecode mode")
+args.add_argument("-byt", "--bytecode", action="store_true",
+                  help="Get Bytecode mode")
 args.add_argument("-t", "--time", action="store_true", help="time mode")
 parsed_args = args.parse_args()
 

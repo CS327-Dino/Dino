@@ -2,6 +2,9 @@ from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 from errors.error import *
 from .eval import *
+import sys
+sys.setrecursionlimit(10000)
+
 
 def resolution(program: AST, environment: Scope = Scope()):
     if program is None:
@@ -38,6 +41,8 @@ def resolution(program: AST, environment: Scope = Scope()):
             return Echo(elem_resolve, line)
         case Return(expr, line):
             return Return(resolution(expr, environment), line)
+        case Stop(line):
+            return Stop(line)
         case BinOp(left, op, right, line):
             return BinOp(resolution(left, environment), op, resolution(right, environment), line)
         case UnOp(op, right, line):
@@ -75,6 +80,14 @@ def resolution(program: AST, environment: Scope = Scope()):
             body = resolution(body, newEnv)
             del newEnv
             return Loop(condition, body)
+        case Iterate(iterable, condition, increment, body):
+            iterable = resolution(iterable, environment)
+            condition = resolution(condition, environment)
+            increment = resolution(increment, environment)
+            newEnv = Scope(environment)
+            body = resolution(body, newEnv)
+            del newEnv
+            return Iterate(iterable, condition, increment, body)
         case Function(name, args, body, line):
             environment.set(name.name, name, line, True)
             newEnv = Scope(environment)
