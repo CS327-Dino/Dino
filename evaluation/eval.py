@@ -3,6 +3,8 @@ from typing import Mapping
 from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 from errors.error import *
+import sys
+sys.setrecursionlimit(10000)
 
 
 def report_runtime_error(linenum, message):
@@ -109,6 +111,28 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 bodyEnv = Scope(environment)
                 output = evaluate(body, bodyEnv)
                 del bodyEnv
+            return output
+        case Iterate(iterable, condition, increment, body):
+            output = None
+            # environment.set(iterable.var, evaluate(iterable.value, environment), iterable.line, True)
+            # while(evaluate(condition, environment)):
+            #     bodyEnv = Scope(environment)
+            #     output = evaluate(body, bodyEnv)
+            #     evaluate(increment, bodyEnv)
+            #     del bodyEnv
+            if iterable.declaration:
+                environment.set(iterable.var, evaluate(iterable.value, environment), iterable.line, True)
+                while(evaluate(condition, environment)):
+                    bodyEnv = Scope(environment)
+                    output = evaluate(body, bodyEnv)
+                    evaluate(increment, bodyEnv)
+                    del bodyEnv
+            else:
+                while(evaluate(condition, environment)):
+                    bodyEnv = Scope(environment)
+                    output = evaluate(body, bodyEnv)
+                    evaluate(increment, environment)
+                    del bodyEnv
             return output
         case IntLiteral(value, line):
             return value
@@ -366,14 +390,6 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     print_elem.append(expr_eval.elements)
                 else:
                     print_elem.append(expr_eval)
-            # expr_eval = evaluate(expr, environment)
-            # if(isinstance(expr_eval, StrLiteral)):
-            #     print(expr_eval.value)
-            # elif(isinstance(expr_eval, ListLiteral)):
-            #     print(expr_eval.elements)
-            # else:
-            #     print(expr_eval)
-            # print(evaluate(expr, environment))
             for elem in print_elem:
                 print(elem, end="")
             print()

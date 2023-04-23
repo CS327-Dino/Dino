@@ -59,6 +59,7 @@ class TokenType(Enum):
     MOD = 51
     SLASH_SLASH = 52
     COLON = 53
+    ITERATE = 54   
 
 
 class Token():
@@ -106,8 +107,8 @@ class Scanner():
         "capture": TokenType.CAPTURE,
         "const": TokenType.CONST,
         "lambda": TokenType.LAMBDA,
-        "in": TokenType.IN
-
+        "in": TokenType.IN,
+        "iterate": TokenType.ITERATE,
     }
 
     def __init__(self, code, error):
