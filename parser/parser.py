@@ -413,6 +413,10 @@ class Parser:
                               self.__tokens[self.__current - 1].line)
                 self.__consume(TokenType.RIGHT_PAREN, "')' expected")
                 return val
+            elif (self.__match(TokenType.RIGHT_PAREN)):
+                val = Capture("",
+                              self.__tokens[self.__current - 1].line)
+                return val
             else:
                 self.__parseError.message = "Syntax Error: Only string accepted during capture"
                 self.__parseError.line = self.__prev().line
