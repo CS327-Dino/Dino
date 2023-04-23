@@ -183,8 +183,7 @@ class Parser:
                 case _:
                     break
         # print(self.__tokens[self.__current].text)
-        __method = MethodLiteral(
-            __iden.name, __args, self.__tokens[self.__current].line)
+        __method = MethodLiteral(__iden.name, __args, self.__tokens[self.__current].line)
         if (__method.name not in all_methods):
             return report_error(DinoError("{} is not a valid method".format(__method.name), self.__tokens[self.__current].line))
         return BinOp(identifier, TokenType.DOT, __method,  self.__tokens[self.__current].line)

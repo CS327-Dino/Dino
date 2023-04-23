@@ -6,10 +6,12 @@ from tokenizing.token_scanning import *
 from parser.parser import *
 from evaluation.eval import *
 from evaluation.resolve import *
-from evaluation.typecheck import * 
+from evaluation.typecheck import *
 from evaluation.bytecode import *
 import time
+sys.setrecursionlimit(10000)
 
+bytecode = Bytecode()
 
 def scan_file(file_name):
     f = open(file_name, "rb")
@@ -20,9 +22,9 @@ def scan_file(file_name):
     if parsed_args.time:
         print("--- %s seconds ---" % (time.time() - start_time))
 
-    # if (error.triggered):
-    #     report_error(error)
-    #     sys.exit()
+    if (error.triggered):
+        report_error(error)
+        # sys.exit()
 
 
 def open_prompt():
@@ -31,10 +33,13 @@ def open_prompt():
     typeenv = Scope()
     while True:
         try:
-            run(input(">>> "), error, typeenv, True)
+            code = input(">>> ")
+            if code == "abort();":
+                print("Closing Prompt")
+                break
+            run(code, error, typeenv, True)
         except:
-            print("Please Restart")
-            break
+            print("Please Enter a valid expression")
         error.triggered = False
 
 
@@ -44,20 +49,20 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
         token_list = scanned_code.generate_tokens()
         parser = Parser(token_list, error)
         expression = parser.parse()
-    except:
+    except Exception as e:
+        # print(e)
         error.triggered = True
-
-    if parsed_args.verbose:
-        print("------------------Parsed Expr------------------")
-        print(expression)
 
     if error.triggered:
         if parsed_args.verbose:
             print("-----------------------------------------------")
         return
 
+    if parsed_args.verbose:
+        print("------------------Parsed Expr------------------")
+        print(expression)
+
     resolved = resolution(expression)
-    # output = evaluate(resolved)
 
     if parsed_args.verbose:
         print("------------------Resolved Expr----------------")
@@ -68,28 +73,34 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     # if error.triggered:
     #     return
 
-    output = evaluate(resolved) 
+    output = evaluate(resolved)
+    output = evaluate(resolved)
 
-    bytecode = Bytecode()
-    bytecode.bytecode_generator(resolved) 
-    # print(bytecode.code)
-    vm = VM(bytecode.code) 
-    # print(vm.code)
-    for i,op in enumerate(vm.code):
-        print(i,end='\t')
-        print(op)
-    output = vm.run() 
-    print(output)
+    # bytecode.bytecode_generator(resolved) 
+    # if parsed_args.bytecode:
+    #     print("------------------Bytecode --------------------")
+    #     for i,j in enumerate(bytecode.code):
+    #         print(i, end="\t")
+    #         print(j)
+
+    #     print("-----------------------------------------------")
+    # vm = VM(bytecode.code)
+    # output = vm.run()
+    # print(output)
+
     if prompt:
-        print(output)
+        if output is not None:
+            print(output)
+        # print(output)
 
 
 args = argparse.ArgumentParser()
 args.add_argument("file", nargs="?", help="file to run")
 args.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
+args.add_argument("-byt", "--bytecode", action="store_true",
+                  help="Get Bytecode mode")
 args.add_argument("-t", "--time", action="store_true", help="time mode")
 parsed_args = args.parse_args()
-# print(parsed_args)
 
 if parsed_args.file:
     scan_file(parsed_args.file)
