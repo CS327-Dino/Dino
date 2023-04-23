@@ -12,6 +12,7 @@ import time
 sys.setrecursionlimit(10000)
 
 bytecode = Bytecode()
+bytecode = Bytecode()
 
 def scan_file(file_name):
     f = open(file_name, "rb")
@@ -73,7 +74,6 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     # if error.triggered:
     #     return
 
-    output = evaluate(resolved)
     output = evaluate(resolved)
 
     # bytecode.bytecode_generator(resolved) 

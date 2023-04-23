@@ -2,6 +2,8 @@ from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 from errors.error import *
 from .eval import *
+import sys
+sys.setrecursionlimit(10000)
 
 
 def resolution(program: AST, environment: Scope = Scope()):
@@ -74,6 +76,14 @@ def resolution(program: AST, environment: Scope = Scope()):
             body = resolution(body, newEnv)
             del newEnv
             return Loop(condition, body)
+        case Iterate(iterable, condition, increment, body):
+            iterable = resolution(iterable, environment)
+            condition = resolution(condition, environment)
+            increment = resolution(increment, environment)
+            newEnv = Scope(environment)
+            body = resolution(body, newEnv)
+            del newEnv
+            return Iterate(iterable, condition, increment, body)
         case Function(name, args, body, line):
             environment.set(name.name, name, line, True)
             newEnv = Scope(environment)

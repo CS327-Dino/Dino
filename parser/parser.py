@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 from evaluation.eval import *
-
+import sys
+sys.setrecursionlimit(10000)
 
 @dataclass
 class Parser:
@@ -28,7 +29,7 @@ class Parser:
         return If(__condition, __ifpart, __elsepart)
 
     def __loop(self):
-        self.__consume(TokenType.LEFT_PAREN, "'(' expected after if")
+        self.__consume(TokenType.LEFT_PAREN, "'(' expected for loop condition")
         __condition = self.__expression()
         self.__consume(TokenType.RIGHT_PAREN,
                        "')' expected after condition end")
@@ -37,6 +38,21 @@ class Parser:
             __body.things.append(self.__declare())
             # print(__body.things)
         return Loop(__condition, __body)
+    
+    def __iterate(self):
+        # iterate(iterable, condition, increment)
+        # eg. iterate(i, i < 10, i++)
+        self.__consume(TokenType.LEFT_PAREN, "'(' expected for iterate statemnet")
+        __iterable = self.__declare()
+        # self.__consume(TokenType.COMMA,"',' expected after iterable")
+        __condition = self.__expression()
+        self.__consume(TokenType.SEMICOLON,"';' expected after condition")
+        __increment = self.__declare()
+        self.__consume(TokenType.RIGHT_PAREN, "')' expected after condition end")
+        __body = Seq([])
+        while (not self.__match(TokenType.END, "")):
+            __body.things.append(self.__declare())
+        return Iterate(__iterable, __condition, __increment, __body)
 
     def __func(self):
         self.__consume(TokenType.IDENTIFIER, "A function name was expected")
@@ -526,6 +542,8 @@ class Parser:
             return self.__ifstmt()
         if (self.__match(TokenType.LOOP)):
             return self.__loop()
+        if (self.__match(TokenType.ITERATE)):
+            return self.__iterate()
         if (self.__match(TokenType.FUNC)):
             return self.__func()
         if (self.__match(TokenType.RETURN)):
