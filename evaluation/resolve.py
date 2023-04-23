@@ -41,6 +41,8 @@ def resolution(program: AST, environment: Scope = Scope()):
             return Echo(elem_resolve, line)
         case Return(expr, line):
             return Return(resolution(expr, environment), line)
+        case Stop(line):
+            return Stop(line)
         case BinOp(left, op, right, line):
             return BinOp(resolution(left, environment), op, resolution(right, environment), line)
         case UnOp(op, right, line):
