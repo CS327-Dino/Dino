@@ -164,7 +164,44 @@ Output:
 		64
 
 
+=======
+Adding the keyword "stop" will allow users to exit the loop at any point.
 
+Example:
+
+\>>	
+
+	  assign num = 20;
+
+	  loop(num >10)
+
+		 echo(num);
+
+		 num = num - 1;
+
+		 if(num == 15)
+
+			stop;
+
+		 end
+
+	  end
+
+Output:
+
+		20
+
+		19
+
+		18
+
+		17
+
+		16
+
+		15
+    
+    
 ### <a name="_7uzr0bwlygr2"></a>4.3 Defining Functions
 Functions in Dino are code blocks having their own scope that can be used multiple times by calling them anywhere else in the code.
 
