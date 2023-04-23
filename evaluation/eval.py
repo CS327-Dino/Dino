@@ -70,24 +70,36 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case ListLiteral(elements, length, line):
             output = []
             for i in elements:
-                output.append(evaluate(i, environment))
-            # return output
+                if type(i) == Identifier:
+                    output.append(i)
+                else:
+                    output.append(evaluate(i, environment))
+            
             return ListLiteral(output, length, line)
 
         case DictLiteral(elements, length, line):
             output = {}
             for i in elements.keys():
-                # print(type(i))
-                new_s = IntLiteral(i, line)
-                output[evaluate(new_s, environment)] = evaluate(elements[i], environment)
-            # return output
+                if type(elements[i]) == Identifier:
+                    output[i] = elements[i]
+                elif type(elements[i]) == StrLiteral:
+                    output[i] = elements[i].value
+                else:
+                    output[i] = evaluate(elements[i], environment)
+            
             return DictLiteral(output, length, line)
 
         case MethodLiteral(name, args, line):
             method_name = name
             arguments = []
             for arg in args:
-                arguments.append(evaluate(arg, environment))
+                if type(arg) is Identifier:
+                    # print(arg)
+                    arguments.append(arg)
+                elif type(arg) is StrLiteral:
+                    arguments.append(arg.value)
+                else:
+                    arguments.append(evaluate(arg, environment))
             return method_name, arguments, line
 
         case Lambda(Identifier(name) as iden, e1, e2, line):
@@ -115,8 +127,8 @@ def evaluate(program: AST, environment: Scope = Scope()):
             return value
         case BoolLiteral(value, line):
             return value
-        case StrLiteral(value, line) as s:
-            return s
+        case StrLiteral(value, line) as v:
+            return v
         case BinOp(left, TokenType.PLUS, right, line):
             evaled_left = evaluate(left, environment)
             evaled_right = evaluate(right, environment)
@@ -188,7 +200,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.DOT:
                         val = evaluate(left, environment)
                         method, arguments, line = evaluate(right, environment)
-                        # print(left)
+                        # print(val)
                         # print(arguments)
                         # if (type(val) is list):
                         match val:
@@ -242,6 +254,9 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         assert len(
                                             arguments) == 1, "Expected 1 argument"
                                         try:
+                                            ret = elements[arguments[0]]
+                                            if (type(ret) is Identifier):
+                                                return evaluate(ret, environment)
                                             return elements[arguments[0]]
                                         except:
                                             report_runtime_error(
@@ -311,7 +326,10 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                             arguments) == 1, "Expected 1 argument"
                                         try:
                                             # print(type(elements[arguments[0]]))
-                                            return elements[arguments[0]]
+                                            ret = elements[arguments[0]]
+                                            if (type(ret) is Identifier):
+                                                return evaluate(ret, environment)
+                                            return ret
                                         except:
                                             report_runtime_error(
                                                 line, "Invalid key")
@@ -347,8 +365,6 @@ def evaluate(program: AST, environment: Scope = Scope()):
             for thing in things:
                 output = evaluate(thing, environment)
             return output
-        case StrLiteral(value, line):
-            return value
         case Echo(expr, line):
             print_elem = []
             for elem in expr:
