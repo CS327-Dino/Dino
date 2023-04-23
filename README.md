@@ -72,6 +72,7 @@ Results of Euler14 are here: [euler14_Results.md](./docs/euler14_Results.md)
 1. [Control Flow Tool](./docs/control_flow.md)
    1. if Statement…………………………………………………………………………
    1. loop Statement……………………………………………………………………...
+   1. for loop Statement…………………………………………………………………
    1. Defining Functions………………………………………………………………….
    1. Calling Functions…………………………………………………………………...
    1. Lambda Expression…………………………………………………………………
@@ -102,13 +103,13 @@ A - Advanced Goals
 - M: loops.
 - M: Functions
 - M: Lists with operations cons, is-empty?, head, tail.
+- I: for loop to iterate over lists.
+- I: Mutable arrays with indexing, appending, popping, concatenation, element assignment.
 
 List of Goals that are yet to be implemented:
 
 - I: Parallel let (See let..and in Ocaml).
 - A: Disallow mutable variables to change type. With the binding let mut p = True in ..., the variable p should only be assigned boolean values.
-- I: for loop to iterate over lists.
-- I: Mutable arrays with indexing, appending, popping, concatenation, element assignment.
 - I: Allow declaration of type of array. For example let xs: Array[int] = [] in ... should prevent xs[0] ← 5/3.
 - A: Step-by-step debugger for your programming language.
 - A: User-defined types – records.

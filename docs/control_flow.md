@@ -98,6 +98,73 @@ Output:
 		12
 
 		11
+
+### <a name="_1j1x3aor4k"></a>4.3 For Loops
+For loops are just sugared while loops that make iterations easier.
+The usual For loop in most languages is used in the following manner in Dino.
+
+Syntax:
+
+		*iterate (<iterator>;<condition>;<increment>)*
+
+			*<body>*
+
+		*end* 
+
+
+
+Examples:
+
+\>>	
+      
+      assign i = 1;
+
+      iterate(i=2; i<100; i*2)
+
+         echo(i);
+
+      end
+
+Output: 
+
+		2
+
+		4
+
+		8
+
+		16
+
+		32
+
+		64
+
+\>>	
+      
+      iterate(assign i=1; i<100; i*2)
+
+         echo(i);
+
+      end
+
+Output: 
+
+		1
+
+		2
+
+		4
+
+		8
+
+		16
+
+		32
+
+		64
+
+
+
 ### <a name="_7uzr0bwlygr2"></a>4.3 Defining Functions
 Functions in Dino are code blocks having their own scope that can be used multiple times by calling them anywhere else in the code.
 
