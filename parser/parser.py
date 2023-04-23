@@ -47,12 +47,13 @@ class Parser:
         # self.__consume(TokenType.COMMA,"',' expected after iterable")
         __condition = self.__expression()
         self.__consume(TokenType.SEMICOLON,"';' expected after condition")
-        __increment = self.__declare()
+        __increment = self.__expression()
         self.__consume(TokenType.RIGHT_PAREN, "')' expected after condition end")
         __body = Seq([])
         while (not self.__match(TokenType.END, "")):
             __body.things.append(self.__declare())
-        return Iterate(__iterable, __condition, __increment, __body)
+        __increment_cond = Assignment(__iterable.var, __increment, __iterable.line)
+        return Iterate(__iterable, __condition, __increment_cond, __body)
 
     def __func(self):
         self.__consume(TokenType.IDENTIFIER, "A function name was expected")
