@@ -106,6 +106,7 @@ class Loop:
     condition: 'AST'
     body: 'AST'
 
+
 @dataclass
 class Iterate:
     iterable: Identifier
@@ -150,6 +151,7 @@ class Seq:
 class Return:
     return_exp: 'AST'
     line: int = 0
+
 
 @dataclass
 class Stop:
@@ -212,4 +214,4 @@ AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLi
 Value = float | bool | int | str | None | AST
 
 all_methods = ["length", "head", "tail", "slice",
-               "cons", "add", "at", "keys", "values", "copy", "update", "in_list", "in_dict", "pop"]
+               "cons", "add", "at", "keys", "values", "copy", "update", "in_list", "in_dict", "pop", "string"]
