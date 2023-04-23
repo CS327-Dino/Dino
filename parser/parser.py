@@ -92,15 +92,24 @@ class Parser:
         self.__consume(TokenType.EQUAL, "Expected Equal Sign")
         __expression_1 = Seq([])
         __expression_2 = Seq([])
+         #Detect parallel assignment in lambda expression. Eg lambda x=2 and y=3 in x+y end;
+        
         while (not self.__match(TokenType.END)):
             if (self.__peek().ttype == TokenType.IN):
                 self.__consume(TokenType.IN, "invalid in statement")
                 break
+        
             __expression_1.things.append(self.__exprstmt())
+
+            if(self.__peek().ttype==TokenType.COMMA):
+                break
             if (self.__peek().ttype == TokenType.END):
                 self.__consume(
                     TokenType.END, "Expected end after the statement")
                 return Assignment(Identifier(name), __expression_1, self.__tokens[self.__current - 1].line, True)
+        if (self.__peek().ttype == TokenType.COMMA):
+            #call parallel lambda function
+            return self.__parallel_lambda(name, __expression_1)
         while (not self.__match(TokenType.END)):
             if (self.__peek().ttype == TokenType.END):
                 self.__consume(
@@ -108,6 +117,48 @@ class Parser:
                 break
             __expression_2.things.append(self.__exprstmt())
         return Lambda(Identifier(name), __expression_1, __expression_2)
+    
+    def __parallel_lambda(self, name, __expression_1):
+
+        #List of all variables in the parallel assignment
+        __variables=[]
+        #List of all assignment expressions in the parallel assignment
+        __expression= []
+        __variables.append(Identifier(name))
+        __expression.append(__expression_1)
+        __expression_2 = Seq([])
+        
+        in_flag=False
+        while (self.__peek().ttype == TokenType.COMMA):
+
+            self.__consume(TokenType.COMMA, "Expected COMMA")
+            self.__consume(TokenType.IDENTIFIER,
+                           "A variable name was expected")
+            __variables.append(Identifier(self.__prev().text))
+            self.__consume(TokenType.EQUAL, "Expected Equal Sign")
+            __expression.append(Seq([]))
+            while (not self.__match(TokenType.END)):
+                if (self.__peek().ttype == TokenType.IN):
+                    in_flag=True
+                    self.__consume(TokenType.IN, "invalid in statement")
+                    break
+                __expression[-1].things.append(self.__exprstmt())
+                if(self.__peek().ttype == TokenType.COMMA):
+                    break
+                if (self.__peek().ttype == TokenType.END):
+                    self.__consume(
+                        TokenType.END, "Expected end after the statement")
+                    return ParallelAssignment(__variables, __expression, self.__tokens[self.__current - 1].line, True)
+            if(in_flag):
+                break
+        while (not self.__match(TokenType.END)):
+            if (self.__peek().ttype == TokenType.END):
+                self.__consume(
+                    TokenType.END, "Expected end after the statement")
+                break
+            __expression_2.things.append(self.__exprstmt())
+        return ParallelLambda(__variables, __expression, __expression_2)
+
 
     def __list(self):
         '''

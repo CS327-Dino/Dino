@@ -76,7 +76,8 @@ def run(code: str, error: DinoError, env: Scope = Scope() ,typeenv: Scope = Scop
     # if error.triggered:
     #     return
 
-    output = evaluate(resolved, env)
+    output = evaluate(resolved)
+    # output = evaluate(resolved)
 
     # bytecode.bytecode_generator(resolved)
     # if parsed_args.bytecode:

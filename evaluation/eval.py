@@ -66,6 +66,13 @@ def evaluate(program: AST, environment: Scope = Scope()):
             #     report_runtime_error(line, f"Variable {name} is constant")
             environment.set(v, evaluate(value, environment), line, declaration)
             return None
+        case ParallelAssignment(list_identifiers, list_expressions, line, declaration):
+
+            for i in range(len(list_identifiers)):
+
+                environment.set(list_identifiers[i], evaluate(list_expressions[i], environment), line, declaration)
+            return None            
+
         case Identifier(name, line) as v:
             return environment.get(v, line)
 
@@ -105,6 +112,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
             return method_name, arguments, line
 
         case Lambda(Identifier(name) as iden, e1, e2, line):
+    
             v1 = evaluate(e1, environment)
             newEnv = Scope(environment)
             newEnv.set(iden, v1, line, True)
@@ -113,7 +121,21 @@ def evaluate(program: AST, environment: Scope = Scope()):
             v2 = evaluate(e2, newEnv)
             del newEnv
             return v2
-
+        
+        case ParallelLambda(list_identifiers, list_expressions, e2, line):
+            #list_identifiers is a list of identifiers
+            #list_expressions is a list of expressions
+            #For example in case of lambda x=2 and y=3 in x+y, list_identifiers will be [x,y] and list_expressions will be [2,3]
+            newEnv=Scope(environment)
+            for i in range(len(list_identifiers)):
+                v1=evaluate(list_expressions[i],environment)
+                newEnv.set(list_identifiers[i],v1,line,True)
+            if e2 is None:
+                return v1
+            v2=evaluate(e2,newEnv)
+            del newEnv
+            return v2
+        
         case If(e0, e1, e2):
             return evaluate(e1, environment) if evaluate(e0, environment) else evaluate(e2, environment)
         case Loop(condition, body):
