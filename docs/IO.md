@@ -17,15 +17,26 @@ Examples:
 
 \>>	
 
-assign num = capture(“Enter Number ”);
+assign num = capture(“Enter Number: ”);
 
 num = num + 5;
 
 Output: 
 
-		Enter Number
-	  // num store the number entered by the user
+		Enter Number:
+	  // num stores the number entered by the user
       // num = num + 5
+
+\>>	
+
+assign num = capture();
+
+num = num + 5;
+
+Output: 
+
+	  // num stores the number entered by the user
+      // num = num + 5  
 
 
 ### <a name="_iazpu2tlqds6"></a>6.2 Output
