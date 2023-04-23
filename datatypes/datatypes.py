@@ -106,6 +106,13 @@ class Loop:
     condition: 'AST'
     body: 'AST'
 
+@dataclass
+class Iterate:
+    iterable: Identifier
+    condition: 'AST'
+    increment: 'AST'
+    body: 'AST'
+
 
 @dataclass
 class Call:
@@ -142,6 +149,10 @@ class Seq:
 @dataclass
 class Return:
     return_exp: 'AST'
+    line: int = 0
+
+@dataclass
+class Stop:
     line: int = 0
 
 
@@ -196,9 +207,9 @@ class Capture:
     line: int = 0
 
 
-AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | ParallelAssignment| Echo | Function | Call | Capture | MethodLiteral | Lambda | ParallelLambda | Abort | Return | DictLiteral | None
+AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | ParallelAssignment| Echo | Function | Call | Capture | MethodLiteral | Lambda | ParallelLambda | Abort | Return | DictLiteral | Iterate | None
 
 Value = float | bool | int | str | None | AST
 
 all_methods = ["length", "head", "tail", "slice",
-               "cons", "add", "at", "keys", "values", "copy", "update", "in_list", "in_dict"]
+               "cons", "add", "at", "keys", "values", "copy", "update", "in_list", "in_dict", "pop"]

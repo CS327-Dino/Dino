@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from tokenizing.token_scanning import *
 from datatypes.datatypes import *
 from evaluation.eval import *
-
+import sys
+sys.setrecursionlimit(10000)
 
 @dataclass
 class Parser:
@@ -28,7 +29,7 @@ class Parser:
         return If(__condition, __ifpart, __elsepart)
 
     def __loop(self):
-        self.__consume(TokenType.LEFT_PAREN, "'(' expected after if")
+        self.__consume(TokenType.LEFT_PAREN, "'(' expected for loop condition")
         __condition = self.__expression()
         self.__consume(TokenType.RIGHT_PAREN,
                        "')' expected after condition end")
@@ -37,6 +38,22 @@ class Parser:
             __body.things.append(self.__declare())
             # print(__body.things)
         return Loop(__condition, __body)
+    
+    def __iterate(self):
+        # iterate(iterable, condition, increment)
+        # eg. iterate(i, i < 10, i++)
+        self.__consume(TokenType.LEFT_PAREN, "'(' expected for iterate statemnet")
+        __iterable = self.__declare()
+        # self.__consume(TokenType.COMMA,"',' expected after iterable")
+        __condition = self.__expression()
+        self.__consume(TokenType.SEMICOLON,"';' expected after condition")
+        __increment = self.__expression()
+        self.__consume(TokenType.RIGHT_PAREN, "')' expected after condition end")
+        __body = Seq([])
+        while (not self.__match(TokenType.END, "")):
+            __body.things.append(self.__declare())
+        __increment_cond = Assignment(__iterable.var, __increment, __iterable.line)
+        return Iterate(__iterable, __condition, __increment_cond, __body)
 
     def __func(self):
         self.__consume(TokenType.IDENTIFIER, "A function name was expected")
@@ -237,7 +254,8 @@ class Parser:
                     break
         # self.__peek().print_token()
         # print(self.__tokens[self.__current].text)
-        __method = MethodLiteral(__iden.name, __args, self.__tokens[self.__current].line)
+        __method = MethodLiteral(
+            __iden.name, __args, self.__tokens[self.__current].line)
         if (__method.name not in all_methods):
             return report_error(DinoError("{} is not a valid method".format(__method.name), self.__tokens[self.__current].line))
         return BinOp(identifier, TokenType.DOT, __method,  self.__tokens[self.__current].line)
@@ -438,6 +456,10 @@ class Parser:
         self.__consume(TokenType.SEMICOLON, "Expect ';' after return value.")
         return Return(expr, self.__prev().line)
 
+    def __stop(self):
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after stop statement.")
+        return Stop(self.__prev().line)
+
     def __primary(self):
         # print(self.__current)
         if (self.__match(TokenType.CAPTURE)):
@@ -446,6 +468,10 @@ class Parser:
                 val = Capture(self.__prev().literal,
                               self.__tokens[self.__current - 1].line)
                 self.__consume(TokenType.RIGHT_PAREN, "')' expected")
+                return val
+            elif (self.__match(TokenType.RIGHT_PAREN)):
+                val = Capture("",
+                              self.__tokens[self.__current - 1].line)
                 return val
             else:
                 self.__parseError.message = "Syntax Error: Only string accepted during capture"
@@ -577,10 +603,14 @@ class Parser:
             return self.__ifstmt()
         if (self.__match(TokenType.LOOP)):
             return self.__loop()
+        if (self.__match(TokenType.ITERATE)):
+            return self.__iterate()
         if (self.__match(TokenType.FUNC)):
             return self.__func()
         if (self.__match(TokenType.RETURN)):
             return self.__return()
+        if (self.__match(TokenType.STOP)):
+            return self.__stop()
         return self.__exprstmt()
 
     def __assign(self, var, isconst=False):

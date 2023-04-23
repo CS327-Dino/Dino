@@ -12,6 +12,8 @@ import time
 sys.setrecursionlimit(10000)
 
 bytecode = Bytecode()
+bytecode = Bytecode()
+
 
 def scan_file(file_name):
     f = open(file_name, "rb")
@@ -31,6 +33,7 @@ def open_prompt():
     print("Welcome to the Dino Prompt : \n")
     error = DinoError()
     typeenv = Scope()
+    env = Scope()
     while True:
         try:
             code = input(">>> ")
@@ -43,14 +46,14 @@ def open_prompt():
         error.triggered = False
 
 
-def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = False):
+def run(code: str, error: DinoError, env: Scope = Scope() ,typeenv: Scope = Scope(), prompt: bool = False):
     try:
         scanned_code = Scanner(code, error)
         token_list = scanned_code.generate_tokens()
         parser = Parser(token_list, error)
         expression = parser.parse()
     except Exception as e:
-        # print(e)
+        print(e)
         error.triggered = True
 
     if error.triggered:
@@ -76,7 +79,7 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     output = evaluate(resolved)
     # output = evaluate(resolved)
 
-    # bytecode.bytecode_generator(resolved) 
+    # bytecode.bytecode_generator(resolved)
     # if parsed_args.bytecode:
     #     print("------------------Bytecode --------------------")
     #     for i,j in enumerate(bytecode.code):
@@ -84,9 +87,8 @@ def run(code: str, error: DinoError, typeenv: Scope = Scope(), prompt: bool = Fa
     #         print(j)
 
     #     print("-----------------------------------------------")
-    # vm = VM(bytecode.code)
-    # output = vm.run()
-    # print(output)
+    # vm = VM(bytecode.code) 
+    # output = vm.run() 
 
     if prompt:
         if output is not None:

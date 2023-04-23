@@ -135,6 +135,8 @@ class TestEval(unittest.TestCase):
         self.assertEqual(evaluate(e9).elements, [2, 3, 4])
         self.assertEqual(evaluate(e10).elements, [2, 3])
         self.assertEqual(evaluate(e12), 3)
+    
+    
     def test_functions(self):
 
         #func fn(n) if (n == 0) return 1; end else return 0; end end
@@ -145,11 +147,10 @@ class TestEval(unittest.TestCase):
         e3 = Return(IntLiteral(1))
         e4 = Return(IntLiteral(0))
         e5 = If(e2, e3, e4)
-        e6 = Function("fn", [e1], e5,1)
+        e6 = Function("fn", [e1], Seq([e5]),1)
         evaluate(e6)
         print(e6)
         #Function call for fn(0)
         e7 = Call("fn", [IntLiteral(0)],1)
         evaluate(e7)
         # print("evaluated = " , evaluate(e7))
-

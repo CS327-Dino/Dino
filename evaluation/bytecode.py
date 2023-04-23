@@ -38,8 +38,13 @@ class I:
 
     @dataclass
     class List:
-        value: int
+        lenght: int
 
+    @dataclass
+    class Dict:
+        length: int
+        keys: List
+        
     @dataclass
     class PushFN:
         index: int
@@ -161,6 +166,13 @@ class Bytecode:
                 for element in elements:
                     self.bytecode_generator(element)
                 self.emit(I.List(length))
+            case DictLiteral(elements, length, line):
+                for element in elements.values():
+                    if type(element) == Identifier:
+                        self.emit(I.Push(element))
+                    else:
+                        self.bytecode_generator(element)
+                self.emit(I.Dict(length, elements.keys()))
             case Identifier(_) as iden:
                 # self.emit(I.Load(iden))
                 self.emit(I.Load(iden.uid))
@@ -219,13 +231,19 @@ class VM:
 
     def run(self):
         while self.ip < len(self.code):
-            # print(self.stack)
-            match self.code[self.ip]:
+            # print(self.ip)
+            match self.code[self.ip]:  
                 case I.List(length):
                     temp = []
                     for _ in range(length):
                         temp.append(self.stack.pop())
                     self.stack.append(temp[::-1])
+                    self.ip += 1
+                case I.Dict(length, keys):
+                    temp = []
+                    for _ in range(length):
+                        temp.append(self.stack.pop())
+                    self.stack.append(dict(zip(keys, temp[::-1])))
                     self.ip += 1
                 case I.Push(value):
                     self.stack.append(value)
@@ -242,7 +260,17 @@ class VM:
                     self.ip = self.Frame.retaddr
                     self.Frame = self.Frame.parent
                 case I.Load(index):
-                    self.stack.append(self.Frame.locals[index])
+                    stk = self.Frame.locals[index]
+                    if type(stk) == dict:
+                        out = {}
+                        for key, value in stk.items():
+                            if type(value) == Identifier:
+                                out[key] = self.Frame.locals[value.uid]
+                            else:
+                                out[key] = value
+                        self.stack.append(out)
+                    else:
+                        self.stack.append(stk)
                     # print("L", self.Frame.locals[index])
                     self.ip += 1
                 case I.Store(index):
