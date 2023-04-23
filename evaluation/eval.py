@@ -30,7 +30,6 @@ class Scope:
         report_runtime_error(line, f"Variable {name} not found")
 
     def set(self, name, value, line, declaration=False):
-
         if declaration:
             if name in self.variables:
                 report_runtime_error(line, f"Variable '{name}' already exists")
@@ -154,7 +153,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     return evaluate(left, environment) + evaluate(right, environment)
                 else:
                     report_runtime_error(
-                        line, "Error: '+' operation valid only for two strings or two numerical values")
+                        line, "Error: '+' operation valid only for two strings or two numerical values or lists")
             else:
                 # print(evaled_right)
                 match evaled_right:
@@ -163,10 +162,14 @@ def evaluate(program: AST, environment: Scope = Scope()):
                         # return evaluate(left, environment).value + evaluate(right, environment).value
                         __concat_str = evaluate(
                             left, environment).value + evaluate(right, environment).value
-                        return StrLiteral(__concat_str, line)
+                        return StrLiteral(__concat_str, line) 
+                    case ListLiteral(value, length, line): 
+                        __concat_list = evaluate(
+                            left, environment).elements + evaluate(right, environment).elements 
+                        return ListLiteral(__concat_list, len(__concat_list), line)
                     case _:
                         report_runtime_error(
-                            line, "Error: '+' operation valid only for two strings or two numerical values")
+                            line, "Error: '+' operation valid only for two strings or two numerical values or lists")
         case BinOp(left, op, right, line):
             try:
                 match op:
@@ -274,7 +277,11 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         assert len(
                                             arguments) == 1, "Expected 1 argument"
                                         try:
-                                            return elements[arguments[0]]
+                                            e = elements[arguments[0]]
+                                            match e:
+                                                case ListLiteral(elements, length, line):
+                                                    return ListLiteral(elements[:], length, line)
+                                            return e
                                         except:
                                             report_runtime_error(
                                                 line, "Invalid Index")
@@ -282,6 +289,16 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         assert len(
                                             arguments) == 0, "No arguments are expected"
                                         return ListLiteral(elements[:], length, line)
+                                    case "pop":
+                                        assert len(arguments) == 1, "Expected 1 argument" 
+                                        try:
+                                            popped = elements.pop(arguments[0]) 
+                                            match popped:
+                                                case ListLiteral(elements, length, line):
+                                                    return ListLiteral(elements[:], length, line)
+                                            return popped 
+                                        except:
+                                            report_runtime_error(line, "Invalid expression") 
                                     case "update":
                                         assert len(
                                             arguments) == 2, "Expected 2 arguments"
