@@ -53,6 +53,8 @@ def resolution(program: AST, environment: Scope = Scope()):
                 output.append(resolution(i, environment))
             return ListLiteral(output, length, line)
         case DictLiteral(elements, length, line):
+            for i in elements.keys():
+                elements[i] = resolution(elements[i], environment)
             return DictLiteral(elements, length, line)
         case Lambda(Identifier(name), e1, e2, line):
             e1 = resolution(e1, environment)

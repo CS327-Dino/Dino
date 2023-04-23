@@ -165,4 +165,4 @@ class TestFunctions(unittest.TestCase):
         output = evaluate(resolved)
 
         # Should return "Hel?loWo?:r:?ld" as the comments are used in a string and hence they should be ignored
-        self.assertEqual(output, 'Hel?loWo?:r:?ld')
+        self.assertEqual(output.value, 'Hel?loWo?:r:?ld')

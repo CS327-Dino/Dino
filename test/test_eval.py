@@ -147,11 +147,10 @@ class TestEval(unittest.TestCase):
         e3 = Return(IntLiteral(1))
         e4 = Return(IntLiteral(0))
         e5 = If(e2, e3, e4)
-        e6 = Function("fn", [e1], e5,1)
+        e6 = Function("fn", [e1], Seq([e5]),1)
         evaluate(e6)
         print(e6)
         #Function call for fn(0)
         e7 = Call("fn", [IntLiteral(0)],1)
         evaluate(e7)
         # print("evaluated = " , evaluate(e7))
-
