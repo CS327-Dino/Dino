@@ -1,0 +1,33 @@
+assign start = 3;
+assign count = 1;
+assign ans = 1;
+assign max_count = 1;
+assign dp = {1:1};
+
+func collatz(n)
+    ?echo(n);
+    if(dp.in_dict(n))
+        return dp[n];
+    end
+    if(n%2 == 0)
+        dp[n] = collatz(n//2) + 1;
+    end
+    else
+        dp[n] = collatz(3*n + 1) + 1;
+    end
+    return dp[n];
+end
+
+
+loop(start < 100)
+    ? echo(start);
+    count = collatz(start);
+    if(count > max_count)
+        max_count = count;
+        ans = start;
+    end
+    start = start + 2;
+end
+
+echo(max_count);
+echo(ans);

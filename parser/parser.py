@@ -35,6 +35,7 @@ class Parser:
         __body = Seq([])
         while (not self.__match(TokenType.END, "")):
             __body.things.append(self.__declare())
+            # print(__body.things)
         return Loop(__condition, __body)
 
     def __func(self):
@@ -61,7 +62,6 @@ class Parser:
             if var != None:
                 parameters.append(Identifier(var.text, var.line))
         self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
-
         body = Seq([])
         while (not self.__match(TokenType.END, "")):
             body.things.append(self.__declare())
@@ -152,7 +152,9 @@ class Parser:
         methods of all datatypes of Dino are added to the AST as MethodLiteral datatype of Dino
         '''
         self.__consume(TokenType.DOT, "Expected '.' to call methods")
+        # print(self.__tokens[self.__current].ttype)
         __iden = self.__primary()
+        # print(__iden)
         __args = []
         reading_args = False
         if self.__peek_next() and self.__tokens[self.__current].ttype == TokenType.LEFT_PAREN:
@@ -182,6 +184,7 @@ class Parser:
                     break
                 case _:
                     break
+        # self.__peek().print_token()
         # print(self.__tokens[self.__current].text)
         __method = MethodLiteral(__iden.name, __args, self.__tokens[self.__current].line)
         if (__method.name not in all_methods):
@@ -316,9 +319,11 @@ class Parser:
                 case op if op in [TokenType.STAR, TokenType.SLASH, TokenType.MOD, TokenType.SLASH_SLASH]:
                     self.__forward()
                     right_operand = self.__exponential()
-                    left_operand = BinOp(left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
+                    left_operand = BinOp(
+                        left_operand, op, right_operand, self.__tokens[self.__current - 1].line)
                 case _:
                     break
+        # self.__peek().print_token()
         return left_operand
 
     def __exponential(self):
@@ -387,7 +392,8 @@ class Parser:
         if (self.__match(TokenType.CAPTURE)):
             self.__consume(TokenType.LEFT_PAREN, "'(' expected")
             if (self.__match(TokenType.STRING)):
-                val = Capture(self.__prev().literal, self.__tokens[self.__current - 1].line)
+                val = Capture(self.__prev().literal,
+                              self.__tokens[self.__current - 1].line)
                 self.__consume(TokenType.RIGHT_PAREN, "')' expected")
                 return val
             else:
@@ -406,27 +412,32 @@ class Parser:
         if (self.__match(TokenType.INTEGER)):
             return IntLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
         if (self.__match(TokenType.STRING)):
+            # print(self.__prev().literal)
             return StrLiteral(self.__prev().literal, self.__tokens[self.__current - 1].line)
-        
+
         if (self.__match(TokenType.IDENTIFIER)):
             if self.__tokens[self.__current].ttype == TokenType.DOT:
+                # print(self.__prev().text)
                 return self.__methods(Identifier(self.__prev().text, self.__tokens[self.__current - 1].line))
             if (self.__tokens[self.__current].ttype == TokenType.LEFT_BRACKET):
-                __iden  = Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
-                index = self.__primary() 
-                __method = MethodLiteral("at", index.elements, self.__tokens[self.__current - 1].line)
-                
+                __iden = Identifier(self.__prev().text,
+                                    self.__tokens[self.__current - 1].line)
+                index = self.__primary()
+                __method = MethodLiteral(
+                    "at", index.elements, self.__tokens[self.__current - 1].line)
+
                 # return BinOp(__iden ,TokenType.DOT, __method,  self.__tokens[self.__current].line)
-                if (self.__tokens[self.__current].ttype == TokenType.EQUAL): 
+                if (self.__tokens[self.__current].ttype == TokenType.EQUAL):
                     self.__forward()
                     __new_val = self.__expression()
 
-                    __method = MethodLiteral("update", [index.elements[0], __new_val], self.__tokens[self.__current - 1].line)
-                    return BinOp(__iden ,TokenType.DOT, __method,  self.__tokens[self.__current].line)
+                    __method = MethodLiteral(
+                        "update", [index.elements[0], __new_val], self.__tokens[self.__current - 1].line)
+                    return BinOp(__iden, TokenType.DOT, __method,  self.__tokens[self.__current].line)
                 else:
-                    return BinOp(__iden ,TokenType.DOT, __method,  self.__tokens[self.__current].line)
+                    return BinOp(__iden, TokenType.DOT, __method,  self.__tokens[self.__current].line)
             return Identifier(self.__prev().text, self.__tokens[self.__current - 1].line)
-        
+
         if (self.__match(TokenType.LEFT_PAREN)):
             __expr = self.__expression()
             self.__consume(TokenType.RIGHT_PAREN,
@@ -552,8 +563,8 @@ class Parser:
             elems.append(left)
             while (self.__match(TokenType.COMMA)):
                 left = self.__expression()
-                elems.append(left)     
-                       
+                elems.append(left)
+
             self.__consume(TokenType.RIGHT_PAREN, "')' expected")
             self.__consume(TokenType.SEMICOLON,
                            "';' expected after declaration")
@@ -570,6 +581,9 @@ class Parser:
         __statements = Seq([])
         while (not self.__atEnd()):
             expr = self.__declare()
+            # print(expr)
+            # print("New Line \n")
+            # self.__peek().print_token()
             if (expr):
                 __statements.things.append(expr)
         return __statements

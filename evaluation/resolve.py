@@ -3,6 +3,7 @@ from datatypes.datatypes import *
 from errors.error import *
 from .eval import *
 
+
 def resolution(program: AST, environment: Scope = Scope()):
     if program is None:
         return None
@@ -47,6 +48,8 @@ def resolution(program: AST, environment: Scope = Scope()):
             for i in elements:
                 output.append(resolution(i, environment))
             return ListLiteral(output, length, line)
+        case DictLiteral(elements, length, line):
+            return DictLiteral(elements, length, line)
         case Lambda(Identifier(name), e1, e2, line):
             e1 = resolution(e1, environment)
             newEnv = Scope(environment)
