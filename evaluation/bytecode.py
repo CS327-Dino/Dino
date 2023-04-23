@@ -161,6 +161,7 @@ class Bytecode:
                 for element in elements:
                     self.bytecode_generator(element)
                 self.emit(I.List(length))
+            # case MethodLiteral(name, args, line):
             case Identifier(_) as iden:
                 # self.emit(I.Load(iden))
                 self.emit(I.Load(iden.uid))

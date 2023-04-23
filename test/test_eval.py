@@ -125,3 +125,4 @@ class TestEval(unittest.TestCase):
         self.assertEqual(evaluate(e9).elements, [2, 3, 4])
         self.assertEqual(evaluate(e10).elements, [2, 3])
         self.assertEqual(evaluate(e12), 3)
+
