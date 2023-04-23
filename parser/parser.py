@@ -203,7 +203,8 @@ class Parser:
                     break
         # self.__peek().print_token()
         # print(self.__tokens[self.__current].text)
-        __method = MethodLiteral(__iden.name, __args, self.__tokens[self.__current].line)
+        __method = MethodLiteral(
+            __iden.name, __args, self.__tokens[self.__current].line)
         if (__method.name not in all_methods):
             return report_error(DinoError("{} is not a valid method".format(__method.name), self.__tokens[self.__current].line))
         return BinOp(identifier, TokenType.DOT, __method,  self.__tokens[self.__current].line)
@@ -404,6 +405,10 @@ class Parser:
         self.__consume(TokenType.SEMICOLON, "Expect ';' after return value.")
         return Return(expr, self.__prev().line)
 
+    def __stop(self):
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after stop statement.")
+        return Stop(self.__prev().line)
+
     def __primary(self):
         # print(self.__current)
         if (self.__match(TokenType.CAPTURE)):
@@ -553,6 +558,8 @@ class Parser:
             return self.__func()
         if (self.__match(TokenType.RETURN)):
             return self.__return()
+        if (self.__match(TokenType.STOP)):
+            return self.__stop()
         return self.__exprstmt()
 
     def __assign(self, var, isconst=False):
