@@ -212,4 +212,5 @@ AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLi
 Value = float | bool | int | str | None | AST
 
 all_methods = ["length", "head", "tail", "slice",
-               "cons", "add", "at", "keys", "values", "copy", "update", "in_list", "in_dict", "pop"]
+               "cons", "add", "at", "keys", "values", "copy", "update", "in_list", "in_dict", "pop",
+               "to_int","to_float","to_bool"]
