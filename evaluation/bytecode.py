@@ -187,6 +187,18 @@ class Bytecode:
                 self.emit(I.Push(None))
             case Call(name, _):
                 self.emit(I.Call(name.uid))
+            case Lambda(name, expr1,expr2):
+                self.bytecode_generator(expr1)
+                self.emit(I.Store(name.uid))
+                self.emit(I.Push(None))
+                self.bytecode_generator(expr2)
+                
+
+                
+
+                
+
+                
 
 
 @dataclass
