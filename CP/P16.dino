@@ -1,0 +1,20 @@
+?Quick_select
+
+assign s= capture();
+s=s.to_list;
+assign n=[];
+
+assign i=0;
+
+loop(i<s.length)
+    assign temp = s[i];
+    temp = temp.to_int;
+    n.add(temp);
+    i=i+1;
+end
+
+func partition(arr)
+
+    assign k=arr[0];
+
+    

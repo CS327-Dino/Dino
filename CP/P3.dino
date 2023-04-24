@@ -1,0 +1,33 @@
+?Function that takes two numbers and gives their GCD as the output
+
+assign numbers=capture("Enter the two numbers : ");
+
+assign num=numbers.to_list;
+
+assign min=num[0];
+
+if(num[1]<num[0])
+    min=num[1];
+end
+
+assign gcd=1;
+
+assign i=1;
+
+assign n1=num[0];
+n1=n1.to_int;
+
+assign n2=num[1];
+n2=n2.to_int;
+
+loop(i<=min.to_int)
+    if(n1%i==0)
+        if(n2%i==0)
+            gcd=i;
+        end
+    end
+    i=i+1;
+end
+
+echo(gcd);
+
