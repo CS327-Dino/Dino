@@ -373,6 +373,33 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         except:
                                             report_runtime_error(
                                                 line, "Invalid index")
+                                    case "to_int":
+                                        assert len(
+                                            arguments) == 0, "No arguments are expected"
+                                        try:
+                                            return (int(value))
+                                        except:
+                                            report_runtime_error(
+                                                line, "Invalid expression")
+                                    case "to_float":
+                                        assert len(
+                                            arguments) == 0, "No arguments are expected"
+                                        try:
+                                            return (float(value))
+                                        except:
+                                            report_runtime_error(
+                                                line, "Invalid expression")
+                                    case "to_bool":
+                                        assert len(
+                                            arguments) == 0, "No arguments are expected"
+                                        if (value == "true"):
+                                            return True
+                                        elif (value == "false"):
+                                            return (False)
+                                        else:
+                                            report_runtime_error(
+                                                line, "Invalid expression")
+
                                     case _:
                                         report_runtime_error(
                                             line, "Invalid method: string does not have any method: {}".format(method))
