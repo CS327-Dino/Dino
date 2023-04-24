@@ -67,12 +67,14 @@ class Assignment:
     line: int = 0
     declaration: bool = False
 
+
 @dataclass
-class ParallelAssignment: 
+class ParallelAssignment:
     var: List['Identifier']
     value: List['AST']
-    line: int =0 
+    line: int = 0
     declarartion: bool = False
+
 
 @dataclass
 class Lambda:
@@ -81,12 +83,14 @@ class Lambda:
     e2: "AST"
     line: int = 0
 
+
 @dataclass
 class ParallelLambda:
     var: List[Identifier]
     e1: List["AST"]
     e2: "AST"
     line: int = 0
+
 
 @dataclass
 class If:
@@ -209,10 +213,10 @@ class Capture:
     line: int = 0
 
 
-AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | ParallelAssignment| Echo | Function | Call | Capture | MethodLiteral | Lambda | ParallelLambda | Abort | Return | DictLiteral | Iterate | None
+AST = IntLiteral | NumLiteral | NullLiteral | BinOp | UnOp | Identifier | BoolLiteral | ListLiteral | If | Loop | StrLiteral | Expression | Seq | Assignment | ParallelAssignment | Echo | Function | Call | Capture | MethodLiteral | Lambda | ParallelLambda | Abort | Return | DictLiteral | Iterate | None
 
 Value = float | bool | int | str | None | AST
 
 all_methods = ["length", "head", "tail", "slice",
-               "cons", "add", "at", "keys", "values", "copy", "update", "in_list", "in_dict", "pop", "string",
-               "to_int","to_float","to_bool"]
+               "cons", "add", "at", "keys", "values", "copy", "update", "in_list", "in_dict", "pop", "to_string",
+               "to_int", "to_float", "to_bool", "to_list", "sort"]
