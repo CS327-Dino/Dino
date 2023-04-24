@@ -250,8 +250,17 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.LESS_EQUAL: return evaluate(left, environment) <= evaluate(right, environment)
                     case TokenType.GREATER_EQUAL: return evaluate(left, environment) <= evaluate(right, environment)
                     case TokenType.BANG_EQUAL: return evaluate(left, environment) != evaluate(right, environment)
-                    case TokenType.EQUAL_EQUAL: return evaluate(left, environment) == evaluate(right, environment)
-                    # case TokenType.DOT:
+                    case TokenType.EQUAL_EQUAL: 
+                        # print(left)
+                        e_left = evaluate(left, environment)
+                        e_right = evaluate(right, environment)
+                        if type(e_left) == StrLiteral:
+                            e_left = e_left.value
+                        if type(e_right) == StrLiteral:
+                            e_right = e_right.value
+                            
+                        return e_left == e_right
+                    
             except TypeError:
                 report_runtime_error(
                     line, "TypeError: Comparison of numeric and non mumeric types")

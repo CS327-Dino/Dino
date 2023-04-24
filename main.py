@@ -32,15 +32,16 @@ def scan_file(file_name):
 def open_prompt():
     print("Welcome to the Dino Prompt : \n")
     error = DinoError()
-    typeenv = Scope()
-    env = Scope()
     while True:
         try:
             code = input(">>> ")
             if code == "abort();":
                 print("Closing Prompt")
                 break
-            run(code, error, typeenv, True)
+            run(code, error, prompt = True)
+        except KeyboardInterrupt:
+            print("Keyboard Interrupt")
+            break
         except:
             print("Please Enter a valid expression")
         error.triggered = False
@@ -76,8 +77,7 @@ def run(code: str, error: DinoError, env: Scope = Scope() ,typeenv: Scope = Scop
     # if error.triggered:
     #     return
 
-    output = evaluate(resolved)
-    # output = evaluate(resolved)
+    output = evaluate(resolved, env)
 
     # bytecode.bytecode_generator(resolved)
     # if parsed_args.bytecode:
