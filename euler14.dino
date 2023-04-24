@@ -5,7 +5,7 @@ assign max_count = 1;
 assign dp = {1:1};
 
 func collatz(n)
-    ?echo(n);
+    echo(n);
     if(dp.in_dict(n))
         return dp[n];
     end
@@ -20,7 +20,7 @@ end
 
 
 loop(start < 100)
-    ? echo(start);
+    echo(start);
     count = collatz(start);
     if(count > max_count)
         max_count = count;

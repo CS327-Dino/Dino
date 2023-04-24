@@ -1,0 +1,42 @@
+? Kanishk Singhal 20110091
+
+
+
+assign n = [32,5,6,1,12,56,9,8,3];
+
+func partition(arr)
+
+    assign pivot=arr[0];
+
+    assign j=0;
+    assign arr1=[];
+    assign arr2=[];
+    loop(j<arr.length)
+        if(arr[j]<=pivot)
+            arr1.add(arr[j]);
+        end
+        if(arr[j]>pivot)
+            arr2.add(arr[j]);
+        end
+        j=j+1;
+    end
+
+	if(arr1.length==arr.length)
+		echo(pivot);
+		return pivot;
+	end
+	if(arr2.length==arr.length)
+		echo(pivot);
+		return pivot;
+	end
+	if(arr1.length>arr.length)
+		arr1=partition(arr1);
+		return arr1;
+	end
+	if (arr2.length>arr.length)
+		arr2=partition(arr2);
+		return arr2;
+	end
+end
+
+echo(partition(n));

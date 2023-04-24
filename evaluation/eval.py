@@ -84,10 +84,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
         case ListLiteral(elements, length, line):
             output = []
             for i in elements:
-                if type(i) == Identifier:
-                    output.append(i)
-                else:
-                    output.append(evaluate(i, environment))
+                output.append(evaluate(i, environment))
 
             return ListLiteral(output, length, line)
 
@@ -244,23 +241,24 @@ def evaluate(program: AST, environment: Scope = Scope()):
                 report_runtime_error(
                     line, "ZeroDivisionError: Division by Zero is not allowed")
             try:
+                e_left = evaluate(left, environment)
+                e_right = evaluate(right, environment)
+                if type(e_left) == StrLiteral:
+                    e_left = e_left.value
+                if type(e_right) == StrLiteral:
+                    e_right = e_right.value
+                if type(e_left) == Identifier:
+                    e_left = evaluate(e_left, environment)
+                if type(e_right) == Identifier:
+                    e_right = evaluate(e_right, environment)
                 match op:
-                    case TokenType.GREATER: return evaluate(left, environment) > evaluate(right, environment)
-                    case TokenType.LESS: return evaluate(left, environment) < evaluate(right, environment)
-                    case TokenType.LESS_EQUAL: return evaluate(left, environment) <= evaluate(right, environment)
-                    case TokenType.GREATER_EQUAL: return evaluate(left, environment) >= evaluate(right, environment)
-                    case TokenType.BANG_EQUAL: return evaluate(left, environment) != evaluate(right, environment)
-                    case TokenType.EQUAL_EQUAL:
-                        # print(left)
-                        e_left = evaluate(left, environment)
-                        e_right = evaluate(right, environment)
-                        if type(e_left) == StrLiteral:
-                            e_left = e_left.value
-                        if type(e_right) == StrLiteral:
-                            e_right = e_right.value
-
-                        return e_left == e_right
-
+                    case TokenType.GREATER: return e_left > e_right
+                    case TokenType.LESS: return e_left < e_right
+                    case TokenType.LESS_EQUAL: return e_left <= e_right
+                    case TokenType.GREATER_EQUAL: return e_left >= e_right
+                    case TokenType.BANG_EQUAL: return e_left != e_right
+                    case TokenType.EQUAL_EQUAL: return e_left == e_right
+                    
             except TypeError:
                 report_runtime_error(
                     line, "TypeError: Comparison of numeric and non mumeric types")
@@ -368,11 +366,11 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                             arguments) == 2, "Expected 2 arguments"
                                         try:
                                             if (type(arguments[0]) is Identifier):
-                                                elements[evaluate(
-                                                    arguments[0], environment)] = arguments[1]
-                                            else:
-                                                elements[arguments[0]
-                                                         ] = arguments[1]
+                                                arguments[0] = evaluate(arguments[0], environment)
+                                            if (type(arguments[1]) is Identifier):
+                                                arguments[1] = evaluate(arguments[1], environment)
+                                            elements[arguments[0]] = arguments[1]
+                                            
                                             return None
                                         except:
                                             report_runtime_error(
