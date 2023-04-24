@@ -1,0 +1,32 @@
+?Author: Kalash Kankaria
+?:
+Write a program that takes in a list of integers and
+outputs the sum of the numbers.
+
+List -> arr
+:?
+
+assign N = capture("Number of elements: ");
+assign arr = [];
+assign s = capture("Enter elements of array: ");
+assign arr_2 = [];
+assign i=0;
+assign temp = 0;
+if(N != 1)
+    arr = s.to_list;
+    iterate(i=0; i<N; i+1)
+        temp = arr[i];
+        temp = temp.to_int;
+        arr_2.add(temp);
+    end
+end
+else
+    arr_2.add(s);
+end
+
+assign sum_arr = 0;
+iterate(assign j=0; j<N; j+1)
+    sum_arr = sum_arr + arr_2[j];
+end
+
+echo("The sum of array is: ", sum_arr);
