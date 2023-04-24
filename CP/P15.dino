@@ -1,0 +1,9 @@
+? Kanishk Singhal (20110091)
+
+func fact(n)
+	if(n == 0) return 1; end
+	else return n*fact(n-1); end
+end
+
+assign n = capture();
+echo(fact(n));

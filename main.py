@@ -12,7 +12,6 @@ import time
 sys.setrecursionlimit(10000)
 
 bytecode = Bytecode()
-bytecode = Bytecode()
 
 
 def scan_file(file_name):
