@@ -1,0 +1,21 @@
+? Kanishk Singhal (20110091)
+
+assign a = [2, 8, 123, 12, 3];
+
+assign inv = 0;
+
+assign i = 0;
+assign n = a.length;
+loop(i<n)
+	assign j = i+1;
+	loop(j<n)
+		if(a[i]>a[j])
+			inv = inv+1;
+		end
+		
+		j=j+1;
+	end
+	i=i+1;
+end
+
+echo(inv);

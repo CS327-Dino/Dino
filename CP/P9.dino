@@ -1,0 +1,82 @@
+? Author -> Inderjeet
+
+? Input List :
+assign l = [1 , 2 , 5 , 11,  9];
+
+?:
+assign dp = [];
+assign i = 0;
+
+loop(i < l.length)
+    dp.add(0);
+    i = i+1;
+end
+
+dp[l.length - 1] = 1;
+
+i = l.length-2;
+
+loop(i > -1) 
+    dp[i] = 1;
+    assign j = i + 1;
+    loop(j < l.length)
+        if(l[i] < l[j])
+            if(dp[i] < dp[j] + 1)
+                dp[i] = dp[j] + 1;
+            end
+        end
+        j = j + 1;
+    end
+    i = i-1;
+end
+
+assign ans = 0;
+
+i = 0;
+
+loop(i < l.length)
+    if(ans < dp[i])
+        ans = dp[i];
+    end
+    i = i+1;
+end
+
+echo("Longest Increasing Subsequence Length : " , ans);
+:?
+
+assign dp = [];
+assign i = 0;
+
+loop(i < l.length)
+    assign temp = [];
+    dp.add(temp);
+    i = i+1;
+end
+
+assign t = l[0];
+assign t2 = dp[0];
+t2.add(t);
+dp[0] = t2;
+
+i = 1;
+loop(i < l.length)
+    assign j = 0;
+    loop(j < i)
+        if(l[i] > l[j])
+            assign t11 = dp[i];
+            assign t22 = dp[j];            
+            if(t11.length < t22.length + 1)
+                t = dp[j];
+                dp[i] = t;
+            end
+        end
+        j = j + 1;
+    end
+    t = dp[i];
+    t.add(l[i]);
+    dp[i] = t;
+    i = i+1;
+end
+
+assign ans = dp[0];
+echo(ans);

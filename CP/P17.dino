@@ -1,0 +1,6 @@
+?solved by Lipika Rajpal (20110102)
+
+
+assign a = "dino is the best language"; 
+
+echo(a.reverse);

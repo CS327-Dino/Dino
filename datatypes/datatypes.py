@@ -219,4 +219,4 @@ Value = float | bool | int | str | None | AST
 
 all_methods = ["length", "head", "tail", "slice",
                "cons", "add", "at", "keys", "values", "copy", "update", "in_list", "in_dict", "pop", "to_string",
-               "to_int", "to_float", "to_bool", "to_list", "sort"]
+               "to_int", "to_float", "to_bool", "to_list", "sort", "reverse"]

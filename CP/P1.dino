@@ -1,0 +1,24 @@
+?Function that takes in a number and outputs whether its prime or not
+
+assign n = capture();
+
+assign t= 2;
+
+assign flag=false;
+
+loop(t<n)
+
+    if(n%t==0)
+        flag=true;
+        stop;
+    end
+    t=t+1;
+end
+
+
+if(flag==true)
+    echo("Composite");
+end
+else
+    echo("Prime");
+end

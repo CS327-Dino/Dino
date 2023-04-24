@@ -1,0 +1,41 @@
+? Author -> Inderjeet
+
+? Input List
+assign l = ["asca" , "asdd" , "asff" , "basd" , "zzzz"];
+
+func edit(s1 , s2)
+    assign s = s1.length;
+    assign dist = 0;
+    assign i = 0;
+    loop(i < s)
+        if(s1[i] != s2[i])
+            dist = dist + 1;
+        end
+        i = i + 1;
+    end 
+    return dist;
+end
+
+assign n = l.length;
+assign i = 0;
+assign ans = 0;
+assign s1 = "";
+assign s2 = "";
+
+loop(i < n)
+    assign j = i+1;
+    loop(j < n)
+        assign t1 = l[i];
+        assign t2 = l[j];
+        assign d = edit(t1 , t2);
+        if(ans < d)
+            ans = d;
+            s1 = l[i];
+            s2 = l[j];
+        end
+        j = j + 1;
+    end
+    i = i + 1;
+end
+
+echo("The strings that have the maximum edit distance of " , ans , " are: " , s1 , " and " , s2);
