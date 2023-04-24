@@ -1,0 +1,46 @@
+?Function that gives the number of vowels in a given string
+
+assign s= capture();
+
+assign l = s.length;
+
+assign i=0;
+assign count=0;
+
+loop(i<l)
+
+    if(s[i]=="a")
+        count=count+1;
+    end
+    if(s[i]=="e")
+        count=count+1;
+    end
+    if(s[i]=="i")
+        count=count+1;
+    end
+    if(s[i]=="o")
+        count=count+1;
+    end
+    if(s[i]=="u")
+        count=count+1;
+    end
+    if(s[i]=="A")
+        count=count+1;
+    end
+    if(s[i]=="E")
+        count=count+1;
+    end
+    if(s[i]=="I")
+        count=count+1;
+    end
+    if(s[i]=="O")
+        count=count+1;
+    end
+    if(s[i]=="U")
+        count=count+1;
+    end
+
+    i=i+1;
+end
+
+echo(count);
