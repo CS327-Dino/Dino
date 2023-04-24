@@ -1,0 +1,25 @@
+?Author: Kalash Kankaria
+
+assign s = capture("Enter input string: ");
+assign N = 0;
+if(s.length % 2 == 0)
+    N = s.length // 2;
+end
+else
+    N = (s.length + 1) // 2;
+end
+
+assign pallindrome = 1;
+iterate(assign i = 0; i < (N+1); i+1)
+    if(s[i] != s[s.length - i - 1])
+        pallindrome = 0;
+        stop;
+    end
+end
+
+if(pallindrome == 1)
+    echo("The string is a pallindrome");
+end
+else
+    echo("The string is not a pallindrome");
+end
