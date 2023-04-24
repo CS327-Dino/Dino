@@ -107,10 +107,10 @@ def evaluate(program: AST, environment: Scope = Scope()):
             method_name = name
             arguments = []
             for arg in args:
-                if type(arg) is Identifier:
-                    # print(arg)
-                    arguments.append(arg)
-                elif type(arg) is StrLiteral:
+                # if type(arg) is Identifier:
+                # print(arg)
+                # arguments.append(arg)
+                if type(arg) is StrLiteral:
                     arguments.append(arg.value)
                 else:
                     arguments.append(evaluate(arg, environment))
@@ -250,7 +250,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.LESS_EQUAL: return evaluate(left, environment) <= evaluate(right, environment)
                     case TokenType.GREATER_EQUAL: return evaluate(left, environment) >= evaluate(right, environment)
                     case TokenType.BANG_EQUAL: return evaluate(left, environment) != evaluate(right, environment)
-                    case TokenType.EQUAL_EQUAL: 
+                    case TokenType.EQUAL_EQUAL:
                         # print(left)
                         e_left = evaluate(left, environment)
                         e_right = evaluate(right, environment)
@@ -258,9 +258,9 @@ def evaluate(program: AST, environment: Scope = Scope()):
                             e_left = e_left.value
                         if type(e_right) == StrLiteral:
                             e_right = e_right.value
-                            
+
                         return e_left == e_right
-                    
+
             except TypeError:
                 report_runtime_error(
                     line, "TypeError: Comparison of numeric and non mumeric types")
@@ -308,7 +308,13 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         # return val[int(arguments[0]): int(arguments[1])]
                                         # return elements[arguments[0] : arguments[1]]
                                         try:
-                                            sliced_list = elements[arguments[0]: arguments[1]]
+                                            if (type(arguments[0]) is Identifier):
+                                                arguments[0] = evaluate(
+                                                    arguments[0], environment)
+                                            if (type(arguments[1]) is Identifier):
+                                                arguments[1] = evaluate(
+                                                    arguments[1], environment)
+                                            sliced_list = elements[arguments[0]                                                                   : arguments[1]]
                                         except:
                                             report_runtime_error(
                                                 line, "List index is out of range")
@@ -361,8 +367,12 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         assert len(
                                             arguments) == 2, "Expected 2 arguments"
                                         try:
-                                            elements[arguments[0]
-                                                     ] = arguments[1]
+                                            if (type(arguments[0]) is Identifier):
+                                                elements[evaluate(
+                                                    arguments[0], environment)] = arguments[1]
+                                            else:
+                                                elements[arguments[0]
+                                                         ] = arguments[1]
                                             return None
                                         except:
                                             report_runtime_error(
@@ -384,7 +394,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                     case "slice":
                                         assert len(
                                             arguments) == 2, "Expected 2 arguments"
-                                        sliced_str = value[arguments[0]: arguments[1]]
+                                        sliced_str = value[arguments[0]                                                           : arguments[1]]
                                         return StrLiteral(sliced_str, line)
                                     case "at":
                                         assert len(
