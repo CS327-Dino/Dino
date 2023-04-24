@@ -248,7 +248,7 @@ def evaluate(program: AST, environment: Scope = Scope()):
                     case TokenType.GREATER: return evaluate(left, environment) > evaluate(right, environment)
                     case TokenType.LESS: return evaluate(left, environment) < evaluate(right, environment)
                     case TokenType.LESS_EQUAL: return evaluate(left, environment) <= evaluate(right, environment)
-                    case TokenType.GREATER_EQUAL: return evaluate(left, environment) <= evaluate(right, environment)
+                    case TokenType.GREATER_EQUAL: return evaluate(left, environment) >= evaluate(right, environment)
                     case TokenType.BANG_EQUAL: return evaluate(left, environment) != evaluate(right, environment)
                     case TokenType.EQUAL_EQUAL: 
                         # print(left)
@@ -432,6 +432,9 @@ def evaluate(program: AST, environment: Scope = Scope()):
                                         # Split the string at spaces
                                         # and convert it to a list
                                         return ListLiteral(value.split(), len(value.split()), line)
+                                    case "reverse":
+                                        assert (len(arguments) == 0), "No arguments are expected" 
+                                        return StrLiteral(value[::-1], line)
 
                                     case _:
                                         report_runtime_error(
