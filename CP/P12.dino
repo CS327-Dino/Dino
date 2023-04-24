@@ -1,0 +1,44 @@
+? Author -> Inderjeet
+
+? Input String
+assign s = "asdasfasfasfaabbaa";
+
+func check_palindrome(s)
+    assign i = 0;
+    assign j = s.length - 1;
+    assign counter = 0;
+    loop(i < j)
+        if(s[i] != s[j])
+            counter = counter + 1;
+        end
+        i = i + 1;
+        j = j - 1;
+    end
+    if(counter == 0)
+        return true;
+    end
+    else
+        return false;
+    end
+end
+
+assign i = 0;
+assign longest_palin = "";
+assign dist = 0;
+
+loop(i < s.length)
+    assign j = i + 1;
+    loop(j < s.length+1)
+        assign sub = s.slice(i,j);
+        if(check_palindrome(sub))
+            if(j - i > dist)
+                dist = j - i;
+                longest_palin = sub;
+            end
+        end
+        j = j + 1;
+    end
+    i = i + 1;
+end
+
+echo("The longest palindrome substring is " , longest_palin);

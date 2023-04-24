@@ -1,0 +1,11 @@
+? Author -> Inderjeet
+
+? Input Number
+assign n = capture();
+
+if(n%2 == 0)
+    echo("Even Number");
+end
+else
+    echo("Odd Number");
+end
