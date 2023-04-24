@@ -1,0 +1,48 @@
+? solved by Lipika Rajpal (20110102) 
+? We have output only one valid triplet if it exists out of all existing valid triplets.
+
+assign a = [-1, 3, -2, 5, 3];
+assign found_ans = 0;
+
+assign ans = [];
+
+assign size = a.length - 1;
+assign i = 0;
+assign j = 0;
+assign k = 0;
+
+loop (i <= size) 
+    j = i+1;
+    loop (j <= size) 
+        assign temp = a[i] + a[j];
+        k = j+1;
+        loop(k <= size) 
+        if (a[k] == temp) 
+            ans = ans + [a[i] , a[j], a[k]];
+            found_ans = 1;
+            ? echo(ans);
+            stop;
+        end
+        k = k + 1;
+        end 
+     if (found_ans) 
+     stop;
+     end    
+        
+    j = j +1;
+    end
+    if (found_ans) 
+     stop;
+     end 
+    i = i + 1;
+end
+
+if (ans.length == 0) 
+    echo("No such triplet"); 
+end
+else 
+
+echo(ans);
+
+end
+ 

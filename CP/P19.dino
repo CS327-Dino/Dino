@@ -1,0 +1,27 @@
+?solved by Lipika Rajpal (20110102)
+
+assign a = 20; 
+
+assign ans = ""; 
+
+if (a == 0) 
+    echo("0") ;
+end 
+else 
+
+    loop (a > 0) 
+
+    if (a % 2 == 0)
+        ans = ans + "0"; 
+    end
+    else 
+        ans = ans + "1";  
+    end
+	a = a//2;
+    end
+
+    ans = ans.reverse;
+    echo(ans);
+
+end
+

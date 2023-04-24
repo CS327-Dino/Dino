@@ -1,0 +1,66 @@
+?Author: Kalash Kankaria
+?:
+Write a program that takes in a list of integers and out-
+puts the two numbers that add up to a specific target
+number.
+
+Target -> T
+List -> arr
+:?
+
+
+assign T = capture("Target value: ");
+assign N = capture("Number of elements: ");
+assign arr = [];
+assign s = capture("Enter elements of array: ");
+assign arr_2 = [];
+assign i=0;
+assign temp = 0;
+if(N != 1)
+    arr = s.to_list;
+    iterate(i=0; i<N; i+1)
+        temp = arr[i];
+        temp = temp.to_int;
+        arr_2.add(temp);
+    end
+end
+else
+    arr_2.add(s);
+end
+
+
+arr_2.sort;
+
+func find_pair(arr, T)
+    assign i = 0;
+    assign j = N - 1;
+    assign sum = 0;
+    assign pair = [];
+    loop(i < j)
+        sum = arr[i] + arr[j];
+        if(sum == T)
+            pair.add(arr[i]);
+            pair.add(arr[j]);
+            return pair;
+            stop;
+        end
+        else
+            if(sum < T)
+                i = i + 1;
+            end
+            else
+                j = j - 1;
+            end
+        end
+    end
+    return pair;
+end
+
+assign pair = find_pair(arr_2, T);
+if(pair.length == 0)
+    echo("No pair found");
+end
+else
+    echo("Pair found: ");
+    echo(pair);
+end

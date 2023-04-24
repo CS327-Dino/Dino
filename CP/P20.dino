@@ -1,0 +1,30 @@
+? solved by Lipika Rajpal (20110102) 
+
+assign a = [1, -2, 3, 5, -1]; 
+
+assign ans =  -2147483648;
+
+assign size = a.length - 1; 
+
+assign i = 0;
+assign j = 0;
+assign temp = 0;
+loop(i <= size)
+   temp = 0;
+   j = i;
+   loop(j <= size)
+    temp = temp + a[j];
+    if (temp >= ans) 
+        ans = temp;
+    end
+    j = j+1;
+   end 
+  
+    i = i+1;
+    
+
+end
+echo(ans);
+
+
+

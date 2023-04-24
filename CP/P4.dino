@@ -1,0 +1,7 @@
+?Program that takes in sentence as input and gives number of words as output 
+
+assign s = capture();
+
+assign words=s.to_list;
+
+echo(words.length);
